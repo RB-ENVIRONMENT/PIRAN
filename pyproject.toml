@@ -1,0 +1,17 @@
+[project]
+name = "piran"
+version = "0.1.0"
+description = "piran code package"
+readme = "README.md"
+requires-python = ">=3"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "pre-commit",
+    "ruff"
+]
+
+[tool.setuptools.packages.find]
+include = ["piran*"]
+exclude = ["private_docs*"]
