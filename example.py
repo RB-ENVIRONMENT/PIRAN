@@ -1,3 +1,4 @@
+import numpy as np
 from sympy import (
     symbols,
     Sum,
@@ -11,6 +12,10 @@ from sympy import (
     pprint,
     Pow,
     simplify,
+    solve,
+    roots,
+    nroots,
+    Poly,
 )
 
 init_printing(pretty_print=True)
@@ -105,3 +110,71 @@ print("\n\n")
 #
 # pprint(solve(CPDR, omega))
 # pprint(roots(CPDR, omega))
+
+
+# Let's now replace the symbols in CPDR with actual
+# values (randomly selected for now)...
+CPDR2 = CPDR.subs(
+    {
+        psi: 0.1,
+        v_par: 1.5,
+        c: 2.54,
+        gamma: 0.324,
+        X: 1.1,
+        n: 0.98,
+        Omega_Base[0]: 1,
+        Omega_Base[1]: 1,
+        omega_p_base[0]: 1,
+        omega_p_base[1]: 1,
+    }
+)
+pprint(f"CPDR2 = {CPDR2}")
+print("\n\n")
+
+# ...and let's solve it with 4 different methods,
+# solve(), roots() and nroots() from sympy and roots() from numpy.
+# From what I understand only nroots() from sympy and, of course,
+# roots() from numpy compute numerical approximantions.
+# roots() from sympy computes symbolic roots of polynomials and solve()
+# is a general solving functions (it works on non-polynomials too).
+# Also, nroots() is analogous to NumPy's roots() function.
+# Usually the difference between these two is that nroots() is
+# more accurate but slower. nroots() can fail sometimes for polynomials
+# that are numerically ill conditioned, for example Wilkinson’s polynomial.
+# For numpy we need to first convert CPDR into a Poly object
+# because somehow it ends up being of type sympy.core.add.Add.
+# Also numpy roots() needs only the coefficients.
+roots1 = solve(CPDR2, omega)  # returns a list of sympy Float objects
+roots2 = roots(CPDR2, omega)  # returns a dict where keys are sympy Float objects
+roots3 = nroots(CPDR2)  # returns a list of sympy Float objects
+roots4 = np.roots(Poly(CPDR2).all_coeffs())  # returns a numpy ndarray with floats
+
+pprint(roots1)
+pprint(roots2)
+pprint(roots3)
+pprint(roots4)
+print("\n\n")
+
+# Convert sympy Floats into floats and sort the lists and the
+# numpy array to compare the outputs.
+roots1f = sorted([float(x) for x in roots1])
+roots2f = sorted([float(x) for x in roots2.keys()])
+roots3f = sorted([float(x) for x in roots3])
+roots4f = np.sort(roots4)
+
+pprint(f"{roots1f=}")
+pprint(f"{roots2f=}")
+pprint(f"{roots3f=}")
+pprint(f"{roots4f=}")
+print("\n\n")
+
+# This comparison won't necessarily work if a root has a multiplicity greater than 1
+# or we end up with a complex root.
+if (
+    np.allclose(roots1f, roots2f)
+    and np.allclose(roots1f, roots3f)
+    and np.allclose(roots1f, roots4f)
+):
+    print("All four methods return the same roots within a tolerance")
+else:
+    print("The roots from the four methods are not the same")
