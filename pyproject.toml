@@ -7,11 +7,13 @@ requires-python = ">=3"
 
 [project.optional-dependencies]
 dev = [
-    "black",
-    "pre-commit",
-    "ruff"
+    "pre-commit"
+]
+dev-extra = [
+    "ruff",
+    "black"
 ]
 
 [tool.setuptools.packages.find]
 include = ["piran*"]
-exclude = ["private_docs*"]
+exclude = ["private_docs*", "quarto-docs*"]
