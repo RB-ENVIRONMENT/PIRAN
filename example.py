@@ -85,20 +85,20 @@ mu = (c / (v_par * cos(psi))) * (1 - (n * Omega_Base[0] / (gamma * omega)))
 # individually to avoid overloading SymPy.
 CPDR = symbols("CPDR")
 
-CPDR_1 = simplify(A * Pow(mu, 4))
-pprint(f"CPDR_1 = {CPDR_1}")
+CPDR_A = simplify(A * Pow(mu, 4))
+pprint(f"CPDR_A = {CPDR_A}")
 print("\n\n")
 
-CPDR_2 = simplify(-B * Pow(mu, 2))
-pprint(f"CPDR_2 = {CPDR_2}")
+CPDR_B = simplify(-B * Pow(mu, 2))
+pprint(f"CPDR_B = {CPDR_B}")
 print("\n\n")
 
-CPDR_3 = simplify(C)
-pprint(f"CPDR_3 = {CPDR_3}")
+CPDR_C = simplify(C)
+pprint(f"CPDR_C = {CPDR_C}")
 print("\n\n")
 
 # Pull everything together, request polynomial form, and print!
-CPDR = collect(expand(CPDR_1 + CPDR_2 + CPDR_3), omega).as_poly(omega)
+CPDR = collect(expand(CPDR_A + CPDR_B + CPDR_C), omega).as_poly(omega)
 pprint(f"CPDR = {CPDR}")
 print("\n\n")
 
