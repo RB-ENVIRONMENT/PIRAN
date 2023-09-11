@@ -1,3 +1,16 @@
+# Text editor backup files
 *~
-env
-__pycache__
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Distribution / packaging
+build/
+*.egg-info/
