@@ -1,5 +1,6 @@
 import sympy as sym
 import numpy as np
+import math
 
 import timing
 
@@ -182,3 +183,116 @@ def poly_solver(poly):
     roots = np.roots(poly.as_poly().all_coeffs())  # returns a numpy ndarray with floats
 
     return roots
+
+
+def main():
+    # Constants
+    # We can put those in a module or use the constants from astropy
+    # https://docs.astropy.org/en/stable/constants/index.html
+    c = 299_792_458  # m / (s), Speed of light in vacuum
+    # R_earth = 6_378_100  # m,       Nominal Earth equatorial radius
+    m_e = 9.1093837015e-31  # kg,      Electron mass (rest)
+
+    # Conversion factors (multiply)
+    # Again, either put those in a separate module
+    # or a better solution is to use quantities with units
+    # as in astropy.units
+    # https://docs.astropy.org/en/stable/units/
+    # keV_to_J = 1.6021766339999e-16
+    MeV_to_J = 1.6021766339999e-13
+
+    # Trying to reproduce Figure 5a from [Glauer & Horne, 2005]
+    # Define input parameters
+    X_min = 0
+    X_max = 1
+    RKE = 1 * MeV_to_J  # Relativistic kinetic energy, 1 MeV to Joule
+    psi = math.pi * 45 / 180  # wave normal angle, 45 degrees
+    alpha = (
+        math.pi * 5 / 180
+    )  # pitch angle (5 or 10 degrees as described in paragraph 35?)
+    gamma = calc_lorentz_factor(RKE, m_e, c)
+    v = c * math.sqrt(
+        1 - (1 / gamma**2)
+    )  # relative velocity (maybe convert this to a function)
+    v_par = v * math.cos(alpha)  # Is this correct?
+
+    X_min = 0
+    X_max = 1
+    X_range = np.linspace(X_min, X_max, 101)
+
+    # Get the cold plasma dispersion relation as a
+    # polynomial. Everything is still a symbol here.
+    CPDR_omega = get_cpdr_poly_omega()  # in omega
+    CPDR_k = get_cpdr_poly_k()  # in k
+
+    # We can pass a dict of key:value pairs
+    # to the sympy polynomial where
+    # the key is a string with the same name
+    # as the symbol we want to replace with the corresponding
+    # value. For the IndexedBase we need to pass a tuple with
+    # the same number of elements as the number of species.
+    values_dict = {
+        "psi": psi,
+        "v_par": v_par,
+        "c": c,
+        "gamma": gamma,
+        "n": 0,  # FIXME
+        "Omega_Base": (1, 1),  # FIXME
+        "omega_p": (1, 1),  # FIXME
+    }
+    CPDR_omega2 = replace_cpdr_symbols(
+        CPDR_omega, values_dict
+    )  # X and omega are still symbols
+
+    # And here is
+    CPDR_k2 = replace_cpdr_symbols(
+        CPDR_k, values_dict
+    )  # X, k and omega are still symbols
+
+    for X in X_range:
+        # Substitute X into modified CPDR
+        CPDR_omega3 = replace_cpdr_symbols(
+            CPDR_omega2, {"X": X}
+        )  # only omega is a symbol
+        CPDR_k3 = replace_cpdr_symbols(
+            CPDR_k2, {"X": X}
+        )  # only k and omega are symbols
+
+        # Solve modified CPDR to obtain omega roots for given X
+        omega_l = poly_solver(CPDR_omega3)
+
+        # Categorise roots
+        valid_omega_l = get_valid_roots(omega_l)
+
+        # Find values of k for each valid omega root
+        # yielding some kind of nested dict of X, omega, k values
+        # for later use in numerical integration.
+        for valid_omega in valid_omega_l:
+            # Substitute omega into CPDR
+            CPDR_k4 = replace_cpdr_symbols(CPDR_k3, {"omega": valid_omega})
+            print(CPDR_k4.free_symbols)
+            print(CPDR_k4)
+
+            # Solve unmodified CPDR to obtain k roots for given X, omega
+            k_l = poly_solver(CPDR_k4)
+            print(f"{X=}")
+            print(f"{valid_omega=}")
+            print(f"{k_l=}")
+
+    # Tests for get_valid_roots()
+    # test_array_1 = np.array([0.0e+00 + 0.0e+00j,
+    #                          1.24900090e-16 - 1.0e+0j,
+    #                          3.33066907e-16 + 1.0e+0j,
+    #                          1.0e+00 + 3.10894466e-17j])
+    # test_array_2 = np.array([-1 + 0j, 1.1 + 0.00000001j, 100 + 2j])
+    # test_array_3 = np.array([-1, 0, 1])
+    # test_array_4 = np.array([-1.0, 0.0, 0.00001, 1.0])
+
+    # print(get_valid_roots(test_array_1))
+    # print(get_valid_roots(test_array_2))
+    # print(get_valid_roots(test_array_3))  # Works with integers only
+    # print(get_valid_roots(test_array_4))  # Works with floats only too
+
+
+if __name__ == "__main__":
+    main()
