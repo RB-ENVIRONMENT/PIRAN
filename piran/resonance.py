@@ -136,7 +136,6 @@ def replace_cpdr_symbols(CPDR, values):
     # Let's now replace the symbols in CPDR with actual values
     CPDR2 = CPDR.subs(values)
 
-    # return sym.Poly(CPDR2)
     return CPDR2
 
 
@@ -201,7 +200,7 @@ def main():
     # keV_to_J = 1.6021766339999e-16
     MeV_to_J = 1.6021766339999e-13
 
-    # Trying to reproduce Figure 5a from [Glauer & Horne, 2005]
+    # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
     # Define input parameters
     X_min = 0
     X_max = 1
@@ -244,7 +243,6 @@ def main():
         CPDR_omega, values_dict
     )  # X and omega are still symbols
 
-    # And here is
     CPDR_k2 = replace_cpdr_symbols(
         CPDR_k, values_dict
     )  # X, k and omega are still symbols
