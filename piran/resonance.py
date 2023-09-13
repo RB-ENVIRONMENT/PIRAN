@@ -114,6 +114,26 @@ def calc_lorentz_factor(E, m, c):
     return gamma
 
 
+def get_valid_roots(values, tol=1e-8):
+    """
+    Filter roots based on a condition (e.g real and >tol)
+
+    Note: check default tolerance in np.isclose()
+    """
+    real_part = np.real(values)
+    real_part_greater_zero = np.greater(real_part, tol)
+
+    imag_part = np.imag(values)
+    imag_part_almost_zero = np.isclose(imag_part, 0.0)
+
+    vals_where_both_true = values[
+        np.logical_and(real_part_greater_zero, imag_part_almost_zero)
+    ]
+
+    # Return only the real part (the imaginary part is close to zero anyways)
+    return np.real(vals_where_both_true)
+
+
 def poly_solver(poly):
     # roots = sym.nroots(poly)  # returns a list of sympy Float objects
     roots = np.roots(poly.as_poly().all_coeffs())  # returns a numpy ndarray with floats
