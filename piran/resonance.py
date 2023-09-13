@@ -93,3 +93,21 @@ def replace_cpdr_symbols(CPDR, values):
 
     # return sym.Poly(CPDR2)
     return CPDR2
+
+
+def calc_lorentz_factor(E, m, c):
+    """
+    Calculate the Lorentz factor gamma given the relativistic kinetic energy,
+    rest mass and speed of light.
+    Relativistic kinetic energy = Total relativistic energy - Rest mass energy
+    RKE = TRE - RME = (gamma - 1) * m_0 * c^2
+    Inputs:
+        E: Joule (Relativistic kinetic energy)
+        m: kg    (Rest mass)
+        c: m/s   (Speed of light in vacuum)
+    Returns:
+        gamma: unitless (Lorentz factor)
+    """
+    gamma = (E / (m * c**2)) + 1
+
+    return gamma
