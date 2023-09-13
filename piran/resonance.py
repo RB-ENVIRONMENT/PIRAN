@@ -71,3 +71,21 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), omega).as_poly(omega)
 
     return CPDR
+
+
+def replace_cpdr_symbols(CPDR, values):
+    """
+    Input:
+        CPDR: the cold plasma dispersion relation polynomial
+              as a sympy.polys.polytools.Poly object
+        values: a dict of {symbol: value}
+    Returns:
+        CPDR2: a sympy.polys.polytools.Poly object
+               where the symbols defined in the values dict
+               are replaced with their values
+    """
+    # Let's now replace the symbols in CPDR with actual values
+    CPDR2 = CPDR.subs(values)
+
+    # return sym.Poly(CPDR2)
+    return CPDR2
