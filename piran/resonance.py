@@ -4,6 +4,49 @@ import numpy as np
 import timing
 
 
+def get_cpdr_poly_k(PARTICLE_SPECIES=2):
+    # Use this for indexing
+    i = sym.symbols("i", cls=sym.Idx)
+
+    # These are used for convenience
+    PS_INDEX = PARTICLE_SPECIES - 1
+    PS_RANGE = (i, 0, PS_INDEX)
+
+    # Define lots of algebraic symbols
+    A, B, C, X, R, L, P, S, omega = sym.symbols("A, B, C, X, R, L, P, S, omega")
+
+    # Indexed symbols (one per particle species)
+    Omega_Base = sym.IndexedBase("Omega_Base")
+    Omega_i = Omega_Base[i]
+
+    omega_p = sym.IndexedBase("omega_p")
+    omega_p_i = omega_p[i]
+
+    # Stix Parameters
+    R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
+    L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
+    P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
+    S = (R + L) / 2
+
+    # CPDR = A*mu**4 - B*mu**2 + C
+    A = sym.simplify(S * (X**2) + P)
+    B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
+    C = sym.simplify(P * R * L * (1 + (X**2)))
+
+    # More symbols for mu
+    c, k, mu = sym.symbols("c, k, mu")
+    mu = c * k / omega
+
+    CPDR_A = sym.simplify(A * sym.Pow(mu, 4))
+    CPDR_B = sym.simplify(-B * sym.Pow(mu, 2))
+    CPDR_C = sym.simplify(C)
+
+    # Pull everything together, request polynomial form, and return
+    CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), k).as_poly(k)
+
+    return CPDR
+
+
 @timing.timing
 def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     """
