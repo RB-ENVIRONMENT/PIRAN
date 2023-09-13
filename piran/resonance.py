@@ -1,4 +1,5 @@
 import sympy as sym
+import numpy as np
 
 import timing
 
@@ -111,3 +112,10 @@ def calc_lorentz_factor(E, m, c):
     gamma = (E / (m * c**2)) + 1
 
     return gamma
+
+
+def poly_solver(poly):
+    # roots = sym.nroots(poly)  # returns a list of sympy Float objects
+    roots = np.roots(poly.as_poly().all_coeffs())  # returns a numpy ndarray with floats
+
+    return roots
