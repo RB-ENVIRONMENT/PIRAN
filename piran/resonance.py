@@ -1,6 +1,9 @@
 import sympy as sym
 
+import timing
 
+
+@timing.timing
 def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     """
     Input:
@@ -73,6 +76,7 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     return CPDR
 
 
+@timing.timing
 def replace_cpdr_symbols(CPDR, values):
     """
     Input:
