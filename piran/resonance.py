@@ -162,9 +162,7 @@ def calc_lorentz_factor(E, m, c):
     Returns:
         gamma: unitless (Lorentz factor)
     """
-    gamma = (E / (m * c**2)) + 1
-
-    return gamma
+  return (E / (m * c**2)) + 1
 
 
 def get_valid_roots(values, tol=1e-8):
