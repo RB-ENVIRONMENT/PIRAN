@@ -126,7 +126,17 @@ def replace_cpdr_symbols(CPDR, values):
     """
     Input:
         CPDR: the cold plasma dispersion relation polynomial
-              as a sympy.polys.polytools.Poly object
+              as a sympy.polys.polytools.Poly object with symbols:
+                psi:        rad      (Wave normal angle)
+                v_par:      m/s      (Parallel component of particle velocity)
+                c:          m/s      (Speed of light in vacuum)
+                gamma:      unitless (Lorentz factor)
+                n:          ?        (Cyclotron resonance)
+                Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+                omega_p:    (rad/s,) (Tuple of plasma frequencies)
+                k:          ?        (Wavenumber)
+                X:          ?        (?)
+                omega:      rad/s    (Wave resonant frequency)
         values: a dict of {symbol: value}
     Returns:
         CPDR2: a sympy.polys.polytools.Poly object
