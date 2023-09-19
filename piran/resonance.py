@@ -1,6 +1,8 @@
-import sympy as sym
-import numpy as np
 import math
+
+import matplotlib.pyplot as plt
+import numpy as np
+import sympy as sym
 
 import timing
 
@@ -192,6 +194,36 @@ def poly_solver(poly):
     return roots
 
 
+def plot_resonance_conditions(resonance_conditions, energy_mev, psi, alpha):
+    plt.rcParams.update(
+        {
+            "text.usetex": True,
+            "font.size": 14,
+        }
+    )
+
+    for n in resonance_conditions.keys():
+        x = [val[0] for val in resonance_conditions[n]]
+        y = [val[1] for val in resonance_conditions[n]]
+        plt.semilogy(x, y, linestyle="--", label=f"{n=}")
+
+    # Convert radians to degrees and round (for title)
+    psi = round(psi * 180 / math.pi)
+    alpha = round(alpha * 180 / math.pi)
+
+    plt.minorticks_on()
+    plt.xticks(range(0, 21, 5))
+    plt.yticks([0.1, 1.0], ["0.1", "1.0"])
+    plt.yticks(np.arange(0.2, 1.0, 0.1), [], minor=True)
+    plt.xlim(0.0, 20.0)
+    plt.ylim(0.1, 1.0)
+    plt.xlabel(r"$k \frac{c}{| \Omega_e |}$")
+    plt.ylabel(r"$\frac{\omega}{| \Omega_e |}$")
+    plt.legend()
+    plt.title(rf"$E={energy_mev}MeV, \psi={psi}^\circ, \alpha={alpha}^\circ, $")
+    plt.show()
+
+
 def main():
     # Constants
     # We can put those in a module or use the constants from astropy
@@ -210,13 +242,41 @@ def main():
 
     # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
     # Define input parameters
-    RKE = 1 * MeV_to_J  # Relativistic kinetic energy
+    energy_mev = 1  # Relativistic kinetic energy MeV
+    RKE = energy_mev * MeV_to_J  # Relativistic kinetic energy (Joule)
     psi = math.pi * 45 / 180  # wave normal angle
     alpha = math.pi * 5 / 180  # pitch angle
     gamma = calc_lorentz_factor(RKE, m_e, c)
     v = c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
     v_par = v * math.cos(alpha)  # Is this correct?
 
+    # Compute and plot the resonance conditions from Figure 5
+    frequency_ratio = 1.5
+    omega_pe = 2.902e4 * 2 * math.pi  # in rad/s
+    Omega_e = omega_pe / frequency_ratio
+
+    y_min = 0.1
+    y_max = 1.0
+    y_list = np.linspace(y_min, y_max, num=181)
+
+    # Dictionary to hold key:value pairs where key is the cyclotron
+    # resonance n and value is a list of (x, y) tuples,
+    # where x=k*c/Omega_e and y=omega/Omega_e
+    resonance_conditions = {}
+    for n in range(-5, 1):
+        resonance_conditions[n] = []
+
+        for y in y_list:
+            omega = Omega_e * y
+            res_cond_k = (omega - (n * Omega_e / gamma)) / (math.cos(psi) * v_par)
+            x = res_cond_k * c / Omega_e
+            resonance_conditions[n].append((x, y))
+            # print(f"{n=} / {x=} / {y=}")
+
+    plot_resonance_conditions(resonance_conditions, energy_mev, psi, alpha)
+    quit()
+
+    # Define the range over X (tan of wave normal angles)
     X_min = 0
     X_max = 1
     X_range = np.linspace(X_min, X_max, 101)
