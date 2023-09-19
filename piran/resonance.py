@@ -210,17 +210,11 @@ def main():
 
     # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
     # Define input parameters
-    X_min = 0
-    X_max = 1
-    RKE = 1 * MeV_to_J  # Relativistic kinetic energy, 1 MeV to Joule
-    psi = math.pi * 45 / 180  # wave normal angle, 45 degrees
-    alpha = (
-        math.pi * 5 / 180
-    )  # pitch angle (5 or 10 degrees as described in paragraph 35?)
+    RKE = 1 * MeV_to_J  # Relativistic kinetic energy
+    psi = math.pi * 45 / 180  # wave normal angle
+    alpha = math.pi * 5 / 180  # pitch angle
     gamma = calc_lorentz_factor(RKE, m_e, c)
-    v = c * math.sqrt(
-        1 - (1 / gamma**2)
-    )  # relative velocity (maybe convert this to a function)
+    v = c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
     v_par = v * math.cos(alpha)  # Is this correct?
 
     X_min = 0
