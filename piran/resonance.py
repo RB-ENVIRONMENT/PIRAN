@@ -241,22 +241,19 @@ def main():
         "Omega_Base": (1, 1),  # FIXME
         "omega_p": (1, 1),  # FIXME
     }
-    CPDR_omega2 = replace_cpdr_symbols(
-        CPDR_omega, values_dict
-    )  # X and omega are still symbols
 
-    CPDR_k2 = replace_cpdr_symbols(
-        CPDR_k, values_dict
-    )  # X, k and omega are still symbols
+    # X and omega are still symbols after this
+    CPDR_omega2 = replace_cpdr_symbols(CPDR_omega, values_dict)
+
+    # X, k and omega are still symbols after this
+    CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
 
     for X in X_range:
-        # Substitute X into modified CPDR
-        CPDR_omega3 = replace_cpdr_symbols(
-            CPDR_omega2, {"X": X}
-        )  # only omega is a symbol
-        CPDR_k3 = replace_cpdr_symbols(
-            CPDR_k2, {"X": X}
-        )  # only k and omega are symbols
+        # Only omega is a symbol after this
+        CPDR_omega3 = replace_cpdr_symbols(CPDR_omega2, {"X": X})
+
+        # Only k and omega are symbols after this
+        CPDR_k3 = replace_cpdr_symbols(CPDR_k2, {"X": X})
 
         # Solve modified CPDR to obtain omega roots for given X
         omega_l = poly_solver(CPDR_omega3)
