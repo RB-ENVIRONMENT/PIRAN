@@ -8,6 +8,21 @@ import timing
 
 
 def get_cpdr_poly_k(PARTICLE_SPECIES=2):
+    """
+    Input:
+        PARTICLE_SPECIES: defines total number of particle species in plasma
+                          e.g. for proton-electron plasma, PARTICLE_SPECIES=2
+                          TESTED ONLY WITH 2 SPECIES
+    Returns:
+        CPDR: the cold plasma dispersion relation polynomial
+              as a sympy.polys.polytools.Poly object with free symbols:
+              X:          ?        (?)
+              c:          m/s      (Speed of light in vacuum)
+              Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+              omega_p:    (rad/s,) (Tuple of plasma frequencies)
+              omega:      rad/s    (Wave resonant frequency)
+              k:          ?        (Wavenumber)
+    """
     # Use this for indexing
     i = sym.symbols("i", cls=sym.Idx)
 
@@ -59,7 +74,16 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
                           TESTED ONLY WITH 2 SPECIES
     Returns:
         CPDR: the cold plasma dispersion relation polynomial
-              as a sympy.polys.polytools.Poly object
+              as a sympy.polys.polytools.Poly object with free symbols:
+              X:          ?        (?)
+              c:          m/s      (Speed of light in vacuum)
+              Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+              n:          ?        (Cyclotron resonance)
+              omega_p:    (rad/s,) (Tuple of plasma frequencies)
+              omega:      rad/s    (Wave resonant frequency)
+              v_par:      m/s      (Parallel component of particle velocity)
+              gamma:      unitless (Lorentz factor)
+              psi:        rad      (Wave normal angle)
     """
 
     # Use this for indexing
