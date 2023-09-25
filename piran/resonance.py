@@ -194,18 +194,40 @@ def poly_solver(poly):
     return roots
 
 
-def plot_resonance_conditions(resonance_conditions, energy_mev, psi, alpha):
+def plot_figure5(
+    resonance_conditions,
+    dispersion_relation,
+    energy_mev,
+    psi,
+    alpha,
+    omega_lc,
+    omega_uc,
+    Omega_e_abs,
+):
     plt.rcParams.update(
         {
-            "text.usetex": True,
-            "font.size": 14,
+            "text.usetex": False,
+            "font.size": 12,
         }
     )
 
+    # Plot resonance conditions
     for n in resonance_conditions.keys():
         x = [val[0] for val in resonance_conditions[n]]
         y = [val[1] for val in resonance_conditions[n]]
-        plt.semilogy(x, y, linestyle="--", label=f"{n=}")
+        plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
+
+    # Plot dispersion relation
+    disp_x = [val[0] for val in dispersion_relation]
+    disp_y = [val[1] for val in dispersion_relation]
+    plt.semilogy(disp_x, disp_y, "k", label="Dispersion relation")
+
+    # Plot upper and lower
+    lower_upper_x = np.arange(-1, 25, 1)
+    lower_y = [omega_lc / Omega_e_abs for val in lower_upper_x]
+    upper_y = [omega_uc / Omega_e_abs for val in lower_upper_x]
+    plt.semilogy(lower_upper_x, lower_y, "k:")
+    plt.semilogy(lower_upper_x, upper_y, "k:")
 
     # Convert radians to degrees and round (for title)
     psi = round(psi * 180 / math.pi)
@@ -219,8 +241,10 @@ def plot_resonance_conditions(resonance_conditions, energy_mev, psi, alpha):
     plt.ylim(0.1, 1.0)
     plt.xlabel(r"$k \frac{c}{| \Omega_e |}$")
     plt.ylabel(r"$\frac{\omega}{| \Omega_e |}$")
-    plt.legend()
+    plt.legend(loc="lower right")
     plt.title(rf"$E={energy_mev}MeV, \psi={psi}^\circ, \alpha={alpha}^\circ, $")
+    plt.tight_layout()
+    # plt.savefig("figure5a.png", dpi=150)
     plt.show()
 
 
@@ -229,8 +253,13 @@ def main():
     # We can put those in a module or use the constants from astropy
     # https://docs.astropy.org/en/stable/constants/index.html
     c = 299_792_458  # m / (s), Speed of light in vacuum
-    # R_earth = 6_378_100  # m,       Nominal Earth equatorial radius
+    R_earth = 6_370_000  # m,       Mean Earth radius
     m_e = 9.1093837015e-31  # kg,      Electron mass (rest)
+    m_p = 1.67262192369e-27  # kg,      Proton mass (rest)
+    e = 1.60217663e-19  # Coulombs, Elementary charge
+    q_e = -e  # Electron charge
+    q_p = e  # Proton charge
+    # epsilon_0 = 8.8541878128e-12  # ?? F/m, Vaccum permittivity
 
     # Conversion factors (multiply)
     # Again, either put those in a separate module
@@ -245,15 +274,33 @@ def main():
     energy_mev = 1  # Relativistic kinetic energy MeV
     RKE = energy_mev * MeV_to_J  # Relativistic kinetic energy (Joule)
     psi = math.pi * 45 / 180  # wave normal angle
+    X = math.tan(psi)
     alpha = math.pi * 5 / 180  # pitch angle
     gamma = calc_lorentz_factor(RKE, m_e, c)
     v = c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
     v_par = v * math.cos(alpha)  # Is this correct?
 
     # Compute and plot the resonance conditions from Figure 5
+    M = 8.033454e15  # Tm^3
+    lambd = 0
+    L = 4.5
     frequency_ratio = 1.5
-    omega_pe = 2.902e4 * 2 * math.pi  # in rad/s
-    Omega_e = omega_pe / frequency_ratio
+    B = (M * math.sqrt(1 + 3 * math.sin(lambd) ** 2)) / (
+        L**3 * R_earth**3 * math.cos(lambd) ** 6
+    )
+
+    # Convert the following to a function with inputs
+    # electric charge, mass and B
+    Omega_e = (q_e * B) / m_e  # rad/s ??
+    Omega_e_abs = abs(Omega_e)  # rad/s ??
+    omega_pe = Omega_e_abs * frequency_ratio  # rad/s ??
+
+    Omega_p = (q_p * B) / m_p  # rad/s ??
+    Omega_p_abs = abs(Omega_p)  # rad/s ??
+    omega_pp = Omega_p_abs * frequency_ratio  # rad/s ??
+
+    # n_e = omega_pe**2 * epsilon_0 * m_e / e**2
+    # n_p = omega_pp**2 * epsilon_0 * m_p / e**2
 
     y_min = 0.1
     y_max = 1.0
@@ -261,19 +308,71 @@ def main():
 
     # Dictionary to hold key:value pairs where key is the cyclotron
     # resonance n and value is a list of (x, y) tuples,
-    # where x=k*c/Omega_e and y=omega/Omega_e
+    # where x=k*c/Omega_e_abs and y=omega/Omega_e_abs
     resonance_conditions = {}
     for n in range(-5, 1):
         resonance_conditions[n] = []
 
         for y in y_list:
-            omega = Omega_e * y
-            res_cond_k = (omega - (n * Omega_e / gamma)) / (math.cos(psi) * v_par)
-            x = res_cond_k * c / Omega_e
+            omega = Omega_e_abs * y
+            res_cond_k = (omega - (n * Omega_e_abs / gamma)) / (math.cos(psi) * v_par)
+            x = res_cond_k * c / Omega_e_abs
             resonance_conditions[n].append((x, y))
             # print(f"{n=} / {x=} / {y=}")
 
-    plot_resonance_conditions(resonance_conditions, energy_mev, psi, alpha)
+    # Calculate the dispersion relation from Figure 5
+    CPDR_k = get_cpdr_poly_k()  # in k
+
+    dispersion_relation = []
+    for y in y_list:
+        omega = Omega_e_abs * y
+
+        values_dict = {
+            "c": c,
+            "Omega_Base": (Omega_e, Omega_p),  # FIXME is this signed?
+            "omega_p": (omega_pe, omega_pp),  # FIXME maybe omega_pp is wrong
+            "omega": omega,
+            "X": X,
+        }
+        CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
+
+        # Solve for k
+        k_l = poly_solver(CPDR_k2)
+
+        # Keep only real and positive roots
+        valid_k_roots = get_valid_roots(k_l)
+
+        # We expect at most 1 real positive root
+        if len(valid_k_roots) > 1:
+            print(valid_k_roots)
+            print("We have more than 1 valid roots")
+            quit()
+
+        # If valid_k_roots is not empty
+        if valid_k_roots:
+            x = valid_k_roots[0] * c / Omega_e_abs
+            dispersion_relation.append((x, y))
+
+    # Parameters for plotting the horizontal dotted lines in Figure 5,
+    # i.e. lines with constant omega/|Omega_e|
+    omega_m = 0.35 * Omega_e_abs
+    delta_omega = 0.15 * Omega_e_abs
+    omega_lc = omega_m - 1.5 * delta_omega
+    omega_uc = omega_m + 1.5 * delta_omega
+
+    # Plot
+    plot_figure5(
+        resonance_conditions,
+        dispersion_relation,
+        energy_mev,
+        psi,
+        alpha,
+        omega_lc,
+        omega_uc,
+        Omega_e_abs,
+    )
+
+    # Stop here since the following will be needed later
     quit()
 
     # Define the range over X (tan of wave normal angles)
