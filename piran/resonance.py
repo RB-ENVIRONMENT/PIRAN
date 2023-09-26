@@ -7,7 +7,73 @@ import sympy as sym
 import timing
 
 
+@timing.timing
+def get_cpdr(PARTICLE_SPECIES=2):
+    # Use this for indexing
+    i = sym.symbols("i", cls=sym.Idx)
+
+    # This is used for convenience
+    PS_RANGE = (i, 0, PARTICLE_SPECIES - 1)
+
+    # Indexed symbols (one per particle species)
+    Omega = sym.IndexedBase("Omega")
+    Omega_i = Omega[i]
+
+    omega_p = sym.IndexedBase("omega_p")
+    omega_p_i = omega_p[i]
+
+    ### DEFINING THE CPDR
+
+    # Define lots of algebraic symbols
+    omega = sym.symbols("omega")
+    X = sym.symbols("X")
+    mu = sym.symbols("mu")
+
+    cpdr_syms_dict = {
+        cpdr_sym.name: cpdr_sym for cpdr_sym in (omega, X, mu, Omega, omega_p)
+    }
+
+    # Stix Parameters
+    # Use .doit() to force expansion of the sum, so that future use of sympy.cancel and
+    # multiplication by MULTIPLICATION_FACTOR (to be undertaken shortly) properly
+    # removes all traces of omega from the denominator of each term.
+    R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
+    L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
+    P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
+    S = (R + L) / 2
+
+    # CPDR = A*mu**4 - B*mu**2 + C
+    # NOTE: Using sym.factor is vital here for *massively* reducing the time taken by
+    # sym.as_poly further down the line...
+    A = sym.factor(S * (X**2) + P)
+    B = sym.factor(R * L * (X**2) + P * S * (2 + (X**2)))
+    C = sym.factor(P * R * L * (1 + (X**2)))
+
+    # Bundle 'unmodified' components of the cpdr into a tuple
+    # NB. sympy.cancel (or seemingly any sympy function involving expression
+    # manipulation takes *much* longer when used on one large expression.
+    # Assembling the cpdr from individual 'chunks' like this appears to be significantly
+    # faster and produces the same result!
+    return sym.Poly.from_list([A, 0, -B, 0, C], mu), cpdr_syms_dict
+
+
+@timing.timing
 def get_cpdr_poly_k(PARTICLE_SPECIES=2):
+    cpdr, syms_dict = get_cpdr(PARTICLE_SPECIES)
+
+    k = sym.symbols("k")
+    syms_dict["k"] = k
+
+    c = sym.symbols("c")
+    syms_dict["c"] = c
+
+    mu = syms_dict["mu"]
+    omega = syms_dict["omega"]
+    return cpdr.subs(mu, c * k / omega).as_poly(k), syms_dict
+
+
+@timing.timing
+def get_cpdr_poly_k2(PARTICLE_SPECIES=2):
     # Use this for indexing
     i = sym.symbols("i", cls=sym.Idx)
 
@@ -19,8 +85,8 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     A, B, C, X, R, L, P, S, omega = sym.symbols("A, B, C, X, R, L, P, S, omega")
 
     # Indexed symbols (one per particle species)
-    Omega_Base = sym.IndexedBase("Omega_Base")
-    Omega_i = Omega_Base[i]
+    Omega = sym.IndexedBase("Omega")
+    Omega_i = Omega[i]
 
     omega_p = sym.IndexedBase("omega_p")
     omega_p_i = omega_p[i]
@@ -32,26 +98,51 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     S = (R + L) / 2
 
     # CPDR = A*mu**4 - B*mu**2 + C
-    A = sym.simplify(S * (X**2) + P)
-    B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
-    C = sym.simplify(P * R * L * (1 + (X**2)))
+    A = sym.factor(S * (X**2) + P)
+    B = sym.factor(R * L * (X**2) + P * S * (2 + (X**2)))
+    C = sym.factor(P * R * L * (1 + (X**2)))
 
     # More symbols for mu
     c, k, mu = sym.symbols("c, k, mu")
     mu = c * k / omega
 
-    CPDR_A = sym.simplify(A * sym.Pow(mu, 4))
-    CPDR_B = sym.simplify(-B * sym.Pow(mu, 2))
-    CPDR_C = sym.simplify(C)
+    CPDR_A = A * sym.Pow(mu, 4)
+    CPDR_B = -B * sym.Pow(mu, 2)
+    CPDR_C = C
 
     # Pull everything together, request polynomial form, and return
-    CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), k).as_poly(k)
+    CPDR = (CPDR_A + CPDR_B + CPDR_C).as_poly(k)
 
     return CPDR
 
 
 @timing.timing
 def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
+    cpdr, syms_dict = get_cpdr(PARTICLE_SPECIES)
+
+    mu = syms_dict["mu"]
+    omega = syms_dict["omega"]
+    Omega = syms_dict["Omega"]
+
+    i = sym.symbols("i", cls=sym.Idx)
+
+    MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
+        (omega + Omega[i]) * (omega - Omega[i]), (i, 0, PARTICLE_SPECIES - 1)
+    )
+
+    # NB. In a 'real' example, only mu would be a symbol here;
+    # everything else would have numeric input values.
+    c, v_par, psi, n, gamma = sym.symbols("c, v_par, psi, n, gamma")
+    mu_sub = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega[0] / (gamma * omega)))
+
+    return (
+        sym.cancel((MULTIPLICATION_FACTOR * cpdr).subs(mu, mu_sub)).as_poly(omega),
+        syms_dict,
+    )
+
+
+@timing.timing
+def get_cpdr_poly_omega2(PARTICLE_SPECIES=2):
     """
     Input:
         PARTICLE_SPECIES: defines total number of particle species in plasma
@@ -73,8 +164,8 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     A, B, C, X, R, L, P, S, omega = sym.symbols("A, B, C, X, R, L, P, S, omega")
 
     # Indexed symbols (one per particle species)
-    Omega_Base = sym.IndexedBase("Omega_Base")
-    Omega_i = Omega_Base[i]
+    Omega = sym.IndexedBase("Omega")
+    Omega_i = Omega[i]
 
     omega_p = sym.IndexedBase("omega_p")
     omega_p_i = omega_p[i]
@@ -101,24 +192,21 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     # to remove omega from the denominator of each term.
     # NB. 'simplify' is a very non-targeted way of doing this; it 'works', but I'd
     # be much more comfortable if we were using something more specific!
-    A = sym.simplify(MULTIPLICATION_FACTOR * (S * (X**2) + P))
-    B = sym.simplify(
-        MULTIPLICATION_FACTOR * (R * L * (X**2) + P * S * (2 + (X**2)))
-    )
-    C = sym.simplify(MULTIPLICATION_FACTOR * (P * R * L * (1 + (X**2))))
+    A = sym.factor(MULTIPLICATION_FACTOR * (S * (X**2) + P))
+    B = sym.factor(MULTIPLICATION_FACTOR * (R * L * (X**2) + P * S * (2 + (X**2))))
+    C = sym.factor(MULTIPLICATION_FACTOR * (P * R * L * (1 + (X**2))))
 
-    # More symbols for mu
-    # NB. mu has *another* instance of omega in the denominator, so we're going to
-    # need to ask SymPy to simplify our expression again...
+    # NB. In a 'real' example, only mu would be a symbol here;
+    # everything else would have numeric input values.
     c, v_par, psi, n, gamma, mu = sym.symbols("c, v_par, psi, n, gamma, mu")
-    mu = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega_Base[0] / (gamma * omega)))
+    mu = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega[0] / (gamma * omega)))
 
-    CPDR_A = sym.simplify(A * sym.Pow(mu, 4))
-    CPDR_B = sym.simplify(-B * sym.Pow(mu, 2))
-    CPDR_C = sym.simplify(C)
+    CPDR_A = A * sym.Pow(mu, 4)
+    CPDR_B = -B * sym.Pow(mu, 2)
+    CPDR_C = C
 
     # Pull everything together, request polynomial form, and return
-    CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), omega).as_poly(omega)
+    CPDR = sym.cancel(CPDR_A + CPDR_B + CPDR_C).as_poly(omega)
 
     return CPDR
 
@@ -134,7 +222,7 @@ def replace_cpdr_symbols(CPDR, values):
                 c:          m/s      (Speed of light in vacuum)
                 gamma:      unitless (Lorentz factor)
                 n:          ?        (Cyclotron resonance)
-                Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+                Omega: (rad/s,) (Tuple of gyrofrequencies)
                 omega_p:    (rad/s,) (Tuple of plasma frequencies)
                 k:          ?        (Wavenumber)
                 X:          ?        (?)
@@ -298,7 +386,7 @@ def main():
         "c": c,
         "gamma": gamma,
         "n": 0,  # FIXME
-        "Omega_Base": (1, 1),  # FIXME
+        "Omega": (1, 1),  # FIXME
         "omega_p": (1, 1),  # FIXME
     }
 
