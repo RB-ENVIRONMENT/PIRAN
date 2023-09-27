@@ -9,6 +9,40 @@ import timing
 
 @timing.timing
 def get_cpdr(PARTICLE_SPECIES=2):
+    """
+    A function for obtaining the cold plasma dispersion relation in the form
+    `A*mu**4 - B*mu**2 + C`.
+
+    That is, as a biquadratic polynomial in the wave-refractive-index `mu`.
+
+    Note that the coefficients `A`, `B`, and `C` are themselves composed of several
+    symbolic variables.
+
+    Parameters
+    ----------
+    PARTICLE_SPECIES : integer
+      The total number of particle species in the plasma being considered.
+      e.g. for proton-electron plasma, PARTICLE_SPECIES=2.
+      TESTED ONLY WITH 2 SPECIES
+
+    Returns
+    -------
+    cpdr : the cold plasma dispersion relation polynomial as a
+      sympy.polys.polytools.Poly object.
+
+    cpdr_syms: a dict of `key : value` pairs, in which:
+      - each `value` corresponds to a symbol used somewhere in `cpdr`, and
+      - the `key` is given by the name/label for that symbol.
+      A 'symbol' in this case refers to either a sympy.core.symbol.Symbol object or
+      a sympy.tensor.indexed.Indexed object (for objects with indices, e.g. arrays).
+      The symbols stored in `cpdr_syms` are:
+        X:          ?        (?)
+        Omega[i]:   (rad/s,) (Particle gyrofrequencies)
+        omega_p[i]: (rad/s,) (Particle plasma frequencies)
+        omega:      rad/s    (Wave frequency)
+        mu:         ?        (Wave refractive index)
+
+    """
     ### SYMBOL DEFINITIONS
 
     # Use this for indexing w.r.t. particle species
