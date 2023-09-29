@@ -295,9 +295,9 @@ def plot_figure5(
     )
 
     # Plot resonance conditions
-    for n in resonance_conditions.keys():
-        x = [val[0] for val in resonance_conditions[n]]
-        y = [val[1] for val in resonance_conditions[n]]
+    for n, values in resonance_conditions.items():
+        x = [val[0] for val in values]
+        y = [val[1] for val in values]
         plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
 
     # Plot dispersion relation
