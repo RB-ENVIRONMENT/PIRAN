@@ -365,11 +365,11 @@ def main():
 
     # Compute and plot the resonance conditions from Figure 5
     M = 8.033454e15  # Tm^3
-    lambd = 0
+    mlat = 0
     L = 4.5
     frequency_ratio = 1.5
-    B = (M * math.sqrt(1 + 3 * math.sin(lambd) ** 2)) / (
-        L**3 * R_earth**3 * math.cos(lambd) ** 6
+    B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
+        L**3 * R_earth**3 * math.cos(mlat) ** 6
     )
 
     # Convert the following to a function with inputs
