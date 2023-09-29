@@ -412,7 +412,7 @@ def main():
 
         values_dict = {
             "c": c,
-            "Omega_Base": (Omega_e, Omega_p),  # FIXME is this signed?
+            "Omega": (Omega_e, Omega_p),  # FIXME is this signed?
             "omega_p": (omega_pe, omega_pp),  # FIXME maybe omega_pp is wrong
             "omega": omega,
             "X": X,
