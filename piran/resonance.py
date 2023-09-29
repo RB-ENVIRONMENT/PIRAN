@@ -404,7 +404,7 @@ def main():
             # print(f"{n=} / {x=} / {y=}")
 
     # Calculate the dispersion relation from Figure 5
-    CPDR_k = get_cpdr_poly_k()  # in k
+    CPDR_k, _ = get_cpdr_poly_k()  # in k
 
     dispersion_relation = []
     for y in y_list:
