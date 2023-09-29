@@ -295,9 +295,9 @@ def plot_figure5(
     )
 
     # Plot resonance conditions
-    for n in resonance_conditions.keys():
-        x = [val[0] for val in resonance_conditions[n]]
-        y = [val[1] for val in resonance_conditions[n]]
+    for n, values in resonance_conditions.items():
+        x = [val[0] for val in values]
+        y = [val[1] for val in values]
         plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
 
     # Plot dispersion relation
@@ -365,11 +365,11 @@ def main():
 
     # Compute and plot the resonance conditions from Figure 5
     M = 8.033454e15  # Tm^3
-    lambd = 0
+    mlat = 0
     L = 4.5
     frequency_ratio = 1.5
-    B = (M * math.sqrt(1 + 3 * math.sin(lambd) ** 2)) / (
-        L**3 * R_earth**3 * math.cos(lambd) ** 6
+    B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
+        L**3 * R_earth**3 * math.cos(mlat) ** 6
     )
 
     # Convert the following to a function with inputs
@@ -404,7 +404,7 @@ def main():
             # print(f"{n=} / {x=} / {y=}")
 
     # Calculate the dispersion relation from Figure 5
-    CPDR_k = get_cpdr_poly_k()  # in k
+    CPDR_k, _ = get_cpdr_poly_k()  # in k
 
     dispersion_relation = []
     for y in y_list:
@@ -412,7 +412,7 @@ def main():
 
         values_dict = {
             "c": c,
-            "Omega_Base": (Omega_e, Omega_p),  # FIXME is this signed?
+            "Omega": (Omega_e, Omega_p),  # FIXME is this signed?
             "omega_p": (omega_pe, omega_pp),  # FIXME maybe omega_pp is wrong
             "omega": omega,
             "X": X,
