@@ -102,9 +102,9 @@ def get_cpdr(PARTICLE_SPECIES=2):
     # CPDR = A*mu**4 - B*mu**2 + C
     # Using sym.factor appears vital for *massively* reducing the time taken by
     # some operations (e.g. sym.as_poly) outside of this func.
-    A = sym.factor(S * (X**2) + P)
-    B = sym.factor(R * L * (X**2) + P * S * (2 + (X**2)))
-    C = sym.factor(P * R * L * (1 + (X**2)))
+    A = sym.simplify(S * (X**2) + P)
+    B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
+    C = sym.simplify(P * R * L * (1 + (X**2)))
 
     # Return both a polynomial in mu and a dict of the 'top-level' symbols defined
     # by this function.
@@ -425,14 +425,13 @@ def main():
         # Keep only real and positive roots
         valid_k_roots = get_valid_roots(k_l)
 
-        # We expect at most 1 real positive root
-        if len(valid_k_roots) > 1:
-            print(valid_k_roots)
-            print("We have more than 1 valid roots")
-            quit()
-
         # If valid_k_roots is not empty
-        if valid_k_roots:
+        if valid_k_roots.size > 0:
+            # We expect at most 1 real positive root
+            if valid_k_roots.size > 1:
+                print(valid_k_roots)
+                print("We have more than 1 valid roots")
+                quit()
             x = valid_k_roots[0] * c / Omega_e_abs
             dispersion_relation.append((x, y))
 
