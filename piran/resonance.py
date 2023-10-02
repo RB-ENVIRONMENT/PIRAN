@@ -81,8 +81,6 @@ def get_cpdr(PARTICLE_SPECIES=2):
     # Add all newly-defined symbols to a dictionary to be returned by this function.
     cpdr_syms = {s.name: s for s in (omega, X, mu, Omega_i, omega_p_i)}
 
-    print(cpdr_syms)
-
     ### SYMBOLIC STIX PARAMETERS
 
     # Use .doit() to force expansion of the sum.
@@ -217,7 +215,7 @@ def replace_cpdr_symbols(CPDR, values):
                 c:          m/s      (Speed of light in vacuum)
                 gamma:      unitless (Lorentz factor)
                 n:          ?        (Cyclotron resonance)
-                Omega: (rad/s,) (Tuple of gyrofrequencies)
+                Omega:      (rad/s,) (Tuple of gyrofrequencies)
                 omega_p:    (rad/s,) (Tuple of plasma frequencies)
                 k:          ?        (Wavenumber)
                 X:          ?        (?)
