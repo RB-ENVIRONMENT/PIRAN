@@ -100,6 +100,13 @@ def get_cpdr(PARTICLE_SPECIES=2):
     # CPDR = A*mu**4 - B*mu**2 + C
     # Using sym.factor appears vital for *massively* reducing the time taken by
     # some operations (e.g. sym.as_poly) outside of this func.
+    #
+    # I've tried using other more 'concrete' funcs for this purpose
+    # (e.g. sym.factor, sym.powsimp) but none of them seem to produce a result
+    # that is compact as sym.simplify.
+    #
+    # sym.simplify *can* be very slow in other cases... but it does the job here
+    # so we'll stick with it for now.
     A = sym.simplify(S * (X**2) + P)
     B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
     C = sym.simplify(P * R * L * (1 + (X**2)))
