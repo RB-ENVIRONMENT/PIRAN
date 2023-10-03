@@ -7,6 +7,116 @@ import sympy as sym
 import timing
 
 
+@timing.timing
+def get_cpdr(PARTICLE_SPECIES=2):
+    """
+    A function for obtaining the cold plasma dispersion relation in the form
+    `A*mu**4 - B*mu**2 + C`.
+
+    That is, as a biquadratic polynomial in the wave-refractive-index `mu`.
+
+    Note that the coefficients `A`, `B`, and `C` are themselves composed of several
+    symbolic variables.
+
+    Parameters
+    ----------
+    PARTICLE_SPECIES : integer
+      The total number of particle species in the plasma being considered.
+      e.g. for proton-electron plasma, PARTICLE_SPECIES=2.
+      TESTED ONLY WITH 2 SPECIES
+
+    Returns
+    -------
+    cpdr : the cold plasma dispersion relation polynomial as a
+      sympy.polys.polytools.Poly object.
+
+    cpdr_syms: a dict of `key : value` pairs, in which:
+      - each `value` corresponds to a symbol used somewhere in `cpdr`, and
+      - the `key` is given by the name/label for that symbol.
+      A 'symbol' in this case refers to either a sympy.core.symbol.Symbol object or
+      a sympy.tensor.indexed.Indexed object (for objects with indices, e.g. arrays).
+      The symbols stored in `cpdr_syms` are:
+        X:          ?        (?)
+        Omega[i]:   (rad/s,) (Particle gyrofrequencies)
+        omega_p[i]: (rad/s,) (Particle plasma frequencies)
+        omega:      rad/s    (Wave frequency)
+        mu:         ?        (Wave refractive index)
+
+    """
+    ### SYMBOL DEFINITIONS
+
+    # Use this for indexing w.r.t. particle species
+    i = sym.Idx("i", PARTICLE_SPECIES)
+    PS_RANGE = (i, i.lower, i.upper)
+
+    # Particle gyrofrequency
+    Omega = sym.IndexedBase("Omega")
+    Omega_i = Omega[i]
+
+    # Particle plasma frequency
+    omega_p = sym.IndexedBase("omega_p")
+    omega_p_i = omega_p[i]
+
+    # These are our remaining 'top-level' symbols
+    omega, X, mu = sym.symbols("omega, X, mu")
+
+    # A quick note on indexed objects in sympy.
+    # https://docs.sympy.org/latest/modules/tensor/indexed.html
+    #
+    # sympy offers three classes for working with an indexed object:
+    #
+    # - Idx         : an integer index
+    # - IndexedBase : the base or stem of an indexed object
+    # - Indexed     : a mathematical object with indices
+    #
+    # Perhaps counterintuitively, it is the combination of an Idx and and IndexedBase
+    # that are used to create the 'larger' Indexed object.
+    #
+    # The `.base` and `.indices` methods can be used to access the IndexedBase and Idx
+    # associated with an Indexed object.
+    #
+    # When propagating symbols outside of this function, we will keep track of the
+    # Indexed object only since this contains the 'totality' of the information.
+
+    # Add all newly-defined symbols to a dictionary to be returned by this function.
+    cpdr_syms = {s.name: s for s in (omega, X, mu, Omega_i, omega_p_i)}
+
+    ### SYMBOLIC STIX PARAMETERS
+
+    # Use .doit() to force expansion of the sum.
+    # Doing this early seems to make later code run faster.
+    #
+    # Strictly necessary when trying to obtain a polynomial in omega?
+    # In this case, future use of sympy.cancel and multiplication by
+    # MULTIPLICATION_FACTOR should remove all traces of omega from the denominator
+    # of each term.
+    R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
+    L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
+    P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
+    S = (R + L) / 2
+
+    ### SYMBOLIC COMPONENTS OF BIQUADRATIC POLYNOMIAL IN MU
+
+    # CPDR = A*mu**4 - B*mu**2 + C
+    # Using sym.factor appears vital for *massively* reducing the time taken by
+    # some operations (e.g. sym.as_poly) outside of this func.
+    #
+    # I've tried using other more 'concrete' funcs for this purpose
+    # (e.g. sym.factor, sym.powsimp) but none of them seem to produce a result
+    # that is compact as sym.simplify.
+    #
+    # sym.simplify *can* be very slow in other cases... but it does the job here
+    # so we'll stick with it for now.
+    A = sym.simplify(S * (X**2) + P)
+    B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
+    C = sym.simplify(P * R * L * (1 + (X**2)))
+
+    # Return both a polynomial in mu and a dict of the 'top-level' symbols defined
+    # by this function.
+    return sym.Poly.from_list([A, 0, -B, 0, C], mu), cpdr_syms
+
+
+@timing.timing
 def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     """
     Input:
@@ -23,46 +133,23 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
               omega:      rad/s    (Wave resonant frequency)
               k:          ?        (Wavenumber)
     """
-    # Use this for indexing
-    i = sym.symbols("i", cls=sym.Idx)
+    ## Call common func to retrieve cpdr as a biquadratic function in mu
+    cpdr, cpdr_syms = get_cpdr(PARTICLE_SPECIES)
 
-    # These are used for convenience
-    PS_INDEX = PARTICLE_SPECIES - 1
-    PS_RANGE = (i, 0, PS_INDEX)
+    # To retrieve cpdr as a biquadratic function in k, we need to sub mu = c*k/omega
+    # mu and omega should already be in cpdr_syms so we just grab them.
+    # k is new and will need to be added to cpdr_syms.
+    # TODO: Replace symbolic c with constant c from astropy.
 
-    # Define lots of algebraic symbols
-    A, B, C, X, R, L, P, S, omega = sym.symbols("A, B, C, X, R, L, P, S, omega")
+    mu = cpdr_syms["mu"]
+    omega = cpdr_syms["omega"]
 
-    # Indexed symbols (one per particle species)
-    Omega_Base = sym.IndexedBase("Omega_Base")
-    Omega_i = Omega_Base[i]
+    k = sym.symbols("k")
+    cpdr_syms["k"] = k
 
-    omega_p = sym.IndexedBase("omega_p")
-    omega_p_i = omega_p[i]
+    c = sym.symbols("c")
 
-    # Stix Parameters
-    R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
-    L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
-    P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
-    S = (R + L) / 2
-
-    # CPDR = A*mu**4 - B*mu**2 + C
-    A = sym.simplify(S * (X**2) + P)
-    B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
-    C = sym.simplify(P * R * L * (1 + (X**2)))
-
-    # More symbols for mu
-    c, k, mu = sym.symbols("c, k, mu")
-    mu = c * k / omega
-
-    CPDR_A = sym.simplify(A * sym.Pow(mu, 4))
-    CPDR_B = sym.simplify(-B * sym.Pow(mu, 2))
-    CPDR_C = sym.simplify(C)
-
-    # Pull everything together, request polynomial form, and return
-    CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), k).as_poly(k)
-
-    return CPDR
+    return cpdr.subs(mu, c * k / omega).as_poly(k), cpdr_syms
 
 
 @timing.timing
@@ -86,65 +173,42 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
               psi:        rad      (Wave normal angle)
     """
 
-    # Use this for indexing
-    i = sym.symbols("i", cls=sym.Idx)
+    # Call common func to retrieve cpdr as a biquadratic function in mu
+    cpdr, cpdr_syms = get_cpdr(PARTICLE_SPECIES)
 
-    # These are used for convenience
-    PS_INDEX = PARTICLE_SPECIES - 1
-    PS_RANGE = (i, 0, PS_INDEX)
+    # To retrieve cpdr as a polynomial function in omega, we need to:
+    # - Rewrite mu in terms of omega only (not k) by using the resonance condition
+    # - Multiply by MULTIPLICATION_FACTOR to remove all traces of omega from the
+    #   denominator of any coefficients.
 
-    # Define lots of algebraic symbols
-    A, B, C, X, R, L, P, S, omega = sym.symbols("A, B, C, X, R, L, P, S, omega")
+    # Start by grabbing our symbolic variables.
+    # mu, omega, and Omega_i are already defined in cpdr_syms.
+    mu = cpdr_syms["mu"]
+    omega = cpdr_syms["omega"]
+    Omega_i = cpdr_syms["Omega[i]"]
 
-    # Indexed symbols (one per particle species)
-    Omega_Base = sym.IndexedBase("Omega_Base")
-    Omega_i = Omega_Base[i]
+    # Grab the base and index associated with our Indexed object Omega_i
+    Omega = Omega_i.base
+    i = Omega_i.indices[0]
 
-    omega_p = sym.IndexedBase("omega_p")
-    omega_p_i = omega_p[i]
+    # We're also going to need some additional symbols for the timebeing.
+    # TODO: Replace all of these with constant values / input params?
+    c, v_par, psi, n, gamma = sym.symbols("c, v_par, psi, n, gamma")
 
-    # Substitution of the resonance condition into the CPDR yields an expression
-    # in negative powers of omega.
-    # Multiply by this thing to remove omega from the denominator of all terms
-    # in our expression.
+    # Substitute resonance condition into mu to obtain a new expression for mu,
+    # stored in new symbolic variable mu_sub
+    mu_sub = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega[0] / (gamma * omega)))
+
+    # Define our MULTIPLICATION_FACTOR
     MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
-        (omega + Omega_i) * (omega - Omega_i), PS_RANGE
+        (omega + Omega_i) * (omega - Omega_i), (i, i.lower, i.upper)
     )
 
-    # Stix Parameters
-    # Use .doit() to force expansion of the sum, so that multiplication by
-    # MULTIPLICATION_FACTOR (to be completed shortly) properly removes all
-    # traces of omega from the denominator of each term
-    R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
-    L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
-    P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
-    S = (R + L) / 2
-
-    # CPDR = A*mu**4 - B*mu**2 + C
-    # Use MULTIPLICATION_FACTOR pre-emptively here with 'simplify' to force SymPy
-    # to remove omega from the denominator of each term.
-    # NB. 'simplify' is a very non-targeted way of doing this; it 'works', but I'd
-    # be much more comfortable if we were using something more specific!
-    A = sym.simplify(MULTIPLICATION_FACTOR * (S * (X**2) + P))
-    B = sym.simplify(
-        MULTIPLICATION_FACTOR * (R * L * (X**2) + P * S * (2 + (X**2)))
+    # Replace mu with mu_sub and multiply by MULTIPLICATION_FACTOR
+    return (
+        sym.cancel((MULTIPLICATION_FACTOR * cpdr).subs(mu, mu_sub)).as_poly(omega),
+        cpdr_syms,
     )
-    C = sym.simplify(MULTIPLICATION_FACTOR * (P * R * L * (1 + (X**2))))
-
-    # More symbols for mu
-    # NB. mu has *another* instance of omega in the denominator, so we're going to
-    # need to ask SymPy to simplify our expression again...
-    c, v_par, psi, n, gamma, mu = sym.symbols("c, v_par, psi, n, gamma, mu")
-    mu = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega_Base[0] / (gamma * omega)))
-
-    CPDR_A = sym.simplify(A * sym.Pow(mu, 4))
-    CPDR_B = sym.simplify(-B * sym.Pow(mu, 2))
-    CPDR_C = sym.simplify(C)
-
-    # Pull everything together, request polynomial form, and return
-    CPDR = sym.collect(sym.expand(CPDR_A + CPDR_B + CPDR_C), omega).as_poly(omega)
-
-    return CPDR
 
 
 @timing.timing
@@ -158,7 +222,7 @@ def replace_cpdr_symbols(CPDR, values):
                 c:          m/s      (Speed of light in vacuum)
                 gamma:      unitless (Lorentz factor)
                 n:          ?        (Cyclotron resonance)
-                Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+                Omega:      (rad/s,) (Tuple of gyrofrequencies)
                 omega_p:    (rad/s,) (Tuple of plasma frequencies)
                 k:          ?        (Wavenumber)
                 X:          ?        (?)
@@ -236,9 +300,9 @@ def plot_figure5(
     )
 
     # Plot resonance conditions
-    for n in resonance_conditions.keys():
-        x = [val[0] for val in resonance_conditions[n]]
-        y = [val[1] for val in resonance_conditions[n]]
+    for n, values in resonance_conditions.items():
+        x = [val[0] for val in values]
+        y = [val[1] for val in values]
         plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
 
     # Plot dispersion relation
@@ -306,11 +370,11 @@ def main():
 
     # Compute and plot the resonance conditions from Figure 5
     M = 8.033454e15  # Tm^3
-    lambd = 0
+    mlat = 0
     L = 4.5
     frequency_ratio = 1.5
-    B = (M * math.sqrt(1 + 3 * math.sin(lambd) ** 2)) / (
-        L**3 * R_earth**3 * math.cos(lambd) ** 6
+    B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
+        L**3 * R_earth**3 * math.cos(mlat) ** 6
     )
 
     # Convert the following to a function with inputs
@@ -345,7 +409,7 @@ def main():
             # print(f"{n=} / {x=} / {y=}")
 
     # Calculate the dispersion relation from Figure 5
-    CPDR_k = get_cpdr_poly_k()  # in k
+    CPDR_k, _ = get_cpdr_poly_k()  # in k
 
     dispersion_relation = []
     for y in y_list:
@@ -353,7 +417,7 @@ def main():
 
         values_dict = {
             "c": c,
-            "Omega_Base": (Omega_e, Omega_p),  # FIXME is this signed?
+            "Omega": (Omega_e, Omega_p),  # FIXME is this signed?
             "omega_p": (omega_pe, omega_pp),  # FIXME maybe omega_pp is wrong
             "omega": omega,
             "X": X,
@@ -366,14 +430,13 @@ def main():
         # Keep only real and positive roots
         valid_k_roots = get_valid_roots(k_l)
 
-        # We expect at most 1 real positive root
-        if len(valid_k_roots) > 1:
-            print(valid_k_roots)
-            print("We have more than 1 valid roots")
-            quit()
-
         # If valid_k_roots is not empty
-        if valid_k_roots:
+        if valid_k_roots.size > 0:
+            # We expect at most 1 real positive root
+            if valid_k_roots.size > 1:
+                print(valid_k_roots)
+                print("We have more than 1 valid roots")
+                quit()
             x = valid_k_roots[0] * c / Omega_e_abs
             dispersion_relation.append((x, y))
 
@@ -406,8 +469,8 @@ def main():
 
     # Get the cold plasma dispersion relation as a
     # polynomial. Everything is still a symbol here.
-    CPDR_omega = get_cpdr_poly_omega()  # in omega
-    CPDR_k = get_cpdr_poly_k()  # in k
+    CPDR_omega, _ = get_cpdr_poly_omega()  # in omega
+    CPDR_k, _ = get_cpdr_poly_k()  # in k
 
     # We can pass a dict of key:value pairs
     # to the sympy polynomial where
@@ -421,7 +484,7 @@ def main():
         "c": c,
         "gamma": gamma,
         "n": 0,  # FIXME
-        "Omega_Base": (1, 1),  # FIXME
+        "Omega": (1, 1),  # FIXME
         "omega_p": (1, 1),  # FIXME
     }
 
