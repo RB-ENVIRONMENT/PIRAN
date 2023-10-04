@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
 
+from astropy import constants as const
+from astropy import units as u
+
 import timing
 
 
@@ -127,7 +130,6 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
         CPDR: the cold plasma dispersion relation polynomial
               as a sympy.polys.polytools.Poly object with free symbols:
               X:          ?        (?)
-              c:          m/s      (Speed of light in vacuum)
               Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
               omega_p:    (rad/s,) (Tuple of plasma frequencies)
               omega:      rad/s    (Wave resonant frequency)
@@ -139,7 +141,6 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     # To retrieve cpdr as a biquadratic function in k, we need to sub mu = c*k/omega
     # mu and omega should already be in cpdr_syms so we just grab them.
     # k is new and will need to be added to cpdr_syms.
-    # TODO: Replace symbolic c with constant c from astropy.
 
     mu = cpdr_syms["mu"]
     omega = cpdr_syms["omega"]
@@ -147,9 +148,7 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     k = sym.symbols("k")
     cpdr_syms["k"] = k
 
-    c = sym.symbols("c")
-
-    return cpdr.subs(mu, c * k / omega).as_poly(k), cpdr_syms
+    return cpdr.subs(mu, const.c.value * k / omega).as_poly(k), cpdr_syms
 
 
 @timing.timing
@@ -163,7 +162,6 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
         CPDR: the cold plasma dispersion relation polynomial
               as a sympy.polys.polytools.Poly object with free symbols:
               X:          ?        (?)
-              c:          m/s      (Speed of light in vacuum)
               Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
               n:          ?        (Cyclotron resonance)
               omega_p:    (rad/s,) (Tuple of plasma frequencies)
@@ -193,11 +191,13 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
 
     # We're also going to need some additional symbols for the timebeing.
     # TODO: Replace all of these with constant values / input params?
-    c, v_par, psi, n, gamma = sym.symbols("c, v_par, psi, n, gamma")
+    v_par, psi, n, gamma = sym.symbols("v_par, psi, n, gamma")
 
     # Substitute resonance condition into mu to obtain a new expression for mu,
     # stored in new symbolic variable mu_sub
-    mu_sub = (c / (v_par * sym.cos(psi))) * (1 - (n * Omega[0] / (gamma * omega)))
+    mu_sub = (const.c.value / (v_par * sym.cos(psi))) * (
+        1 - (n * Omega[0] / (gamma * omega))
+    )
 
     # Define our MULTIPLICATION_FACTOR
     MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
@@ -239,20 +239,22 @@ def replace_cpdr_symbols(CPDR, values):
     return CPDR2
 
 
-def calc_lorentz_factor(E, m, c):
+def calc_lorentz_factor(E, m):
     """
-    Calculate the Lorentz factor gamma given the relativistic kinetic energy,
-    rest mass and speed of light.
+    Calculate the Lorentz factor gamma for a given particle species given the
+    relativistic kinetic energy and rest mass.
     Relativistic kinetic energy = Total relativistic energy - Rest mass energy
     RKE = TRE - RME = (gamma - 1) * m_0 * c^2
     Inputs:
         E: Joule (Relativistic kinetic energy)
         m: kg    (Rest mass)
-        c: m/s   (Speed of light in vacuum)
     Returns:
         gamma: unitless (Lorentz factor)
+
+    Note that this is different from plasmapy's `Lorentz_factor` which provides the
+    'standard' way of calculating the Lorentz factor using the relative velocity `v`.
     """
-    return (E / (m * c**2)) + 1
+    return (E / (m * const.c**2)) + 1
 
 
 def get_valid_roots(values, tol=1e-8):
@@ -306,14 +308,14 @@ def plot_figure5(
         plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
 
     # Plot dispersion relation
-    disp_x = [val[0] for val in dispersion_relation]
+    disp_x = [val[0].value for val in dispersion_relation]
     disp_y = [val[1] for val in dispersion_relation]
     plt.semilogy(disp_x, disp_y, "k", label="Dispersion relation")
 
     # Plot upper and lower
     lower_upper_x = np.arange(-1, 25, 1)
-    lower_y = [omega_lc / Omega_e_abs for val in lower_upper_x]
-    upper_y = [omega_uc / Omega_e_abs for val in lower_upper_x]
+    lower_y = [(omega_lc / Omega_e_abs).value for val in lower_upper_x]
+    upper_y = [(omega_uc / Omega_e_abs).value for val in lower_upper_x]
     plt.semilogy(lower_upper_x, lower_y, "k:")
     plt.semilogy(lower_upper_x, upper_y, "k:")
 
@@ -337,35 +339,32 @@ def plot_figure5(
 
 
 def main():
-    # Constants
-    # We can put those in a module or use the constants from astropy
-    # https://docs.astropy.org/en/stable/constants/index.html
-    c = 299_792_458  # m / (s), Speed of light in vacuum
-    R_earth = 6_370_000  # m,       Mean Earth radius
-    m_e = 9.1093837015e-31  # kg,      Electron mass (rest)
-    m_p = 1.67262192369e-27  # kg,      Proton mass (rest)
-    e = 1.60217663e-19  # Coulombs, Elementary charge
-    q_e = -e  # Electron charge
-    q_p = e  # Proton charge
-    # epsilon_0 = 8.8541878128e-12  # ?? F/m, Vaccum permittivity
+    ### CONSTANTS
 
-    # Conversion factors (multiply)
-    # Again, either put those in a separate module
-    # or a better solution is to use quantities with units
-    # as in astropy.units
-    # https://docs.astropy.org/en/stable/units/
-    # keV_to_J = 1.6021766339999e-16
-    MeV_to_J = 1.6021766339999e-13
+    # We use the following from astropy.constants in various places below:
+    # https://docs.astropy.org/en/stable/constants/index.html
+    #
+    # | Name    | Value          | Unit    | Description                     |
+    # | ------- | -------------- | ------- | ------------------------------- |
+    # | c       | 299_792_458    | m / (s) | Speed of light in vacuum        |
+    # | m_e     | 9.1093837e-31  | kg      | Electron mass                   |
+    # | m_p     | 1.67262192e-27 | kg      | Proton mass                     |
+    # | e       | 1.60217663e-19 | C       | Electron charge                 |
+    # | R_earth | 6378100        | m       | Nominal Earth equatorial radius |
+
+    q_e = -const.e.si  # Signed electron charge
+    q_p = const.e.si  # Signed proton charge
+    # epsilon_0 = 8.8541878128e-12  # ?? F/m, Vaccum permittivity
 
     # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
     # Define input parameters
-    energy_mev = 1  # Relativistic kinetic energy MeV
-    RKE = energy_mev * MeV_to_J  # Relativistic kinetic energy (Joule)
+    energy_mev = 1.0
+    RKE = energy_mev * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
     psi = math.pi * 45 / 180  # wave normal angle
     X = math.tan(psi)
     alpha = math.pi * 5 / 180  # pitch angle
-    gamma = calc_lorentz_factor(RKE, m_e, c)
-    v = c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
+    gamma = calc_lorentz_factor(RKE, const.m_e)
+    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
     v_par = v * math.cos(alpha)  # Is this correct?
 
     # Compute and plot the resonance conditions from Figure 5
@@ -374,16 +373,16 @@ def main():
     L = 4.5
     frequency_ratio = 1.5
     B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
-        L**3 * R_earth**3 * math.cos(mlat) ** 6
+        L**3 * const.R_earth**3 * math.cos(mlat) ** 6
     )
 
     # Convert the following to a function with inputs
     # electric charge, mass and B
-    Omega_e = (q_e * B) / m_e  # rad/s ??
+    Omega_e = (q_e * B) / const.m_e  # rad/s ??
     Omega_e_abs = abs(Omega_e)  # rad/s ??
     omega_pe = Omega_e_abs * frequency_ratio  # rad/s ??
 
-    Omega_p = (q_p * B) / m_p  # rad/s ??
+    Omega_p = (q_p * B) / const.m_p  # rad/s ??
     Omega_p_abs = abs(Omega_p)  # rad/s ??
     omega_pp = Omega_p_abs * frequency_ratio  # rad/s ??
 
@@ -404,7 +403,7 @@ def main():
         for y in y_list:
             omega = Omega_e_abs * y
             res_cond_k = (omega - (n * Omega_e_abs / gamma)) / (math.cos(psi) * v_par)
-            x = res_cond_k * c / Omega_e_abs
+            x = res_cond_k * const.c / Omega_e_abs
             resonance_conditions[n].append((x, y))
             # print(f"{n=} / {x=} / {y=}")
 
@@ -416,10 +415,12 @@ def main():
         omega = Omega_e_abs * y
 
         values_dict = {
-            "c": c,
-            "Omega": (Omega_e, Omega_p),  # FIXME is this signed?
-            "omega_p": (omega_pe, omega_pp),  # FIXME maybe omega_pp is wrong
-            "omega": omega,
+            "Omega": (Omega_e.value, Omega_p.value),  # FIXME is this signed?
+            "omega_p": (
+                omega_pe.value,
+                omega_pp.value,
+            ),  # FIXME maybe omega_pp is wrong
+            "omega": omega.value,
             "X": X,
         }
         CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
@@ -437,7 +438,7 @@ def main():
                 print(valid_k_roots)
                 print("We have more than 1 valid roots")
                 quit()
-            x = valid_k_roots[0] * c / Omega_e_abs
+            x = valid_k_roots[0] * const.c / Omega_e_abs
             dispersion_relation.append((x, y))
 
     # Parameters for plotting the horizontal dotted lines in Figure 5,
@@ -480,9 +481,8 @@ def main():
     # the same number of elements as the number of species.
     values_dict = {
         "psi": psi,
-        "v_par": v_par,
-        "c": c,
-        "gamma": gamma,
+        "v_par": v_par.value,
+        "gamma": gamma.value,
         "n": 0,  # FIXME
         "Omega": (1, 1),  # FIXME
         "omega_p": (1, 1),  # FIXME
