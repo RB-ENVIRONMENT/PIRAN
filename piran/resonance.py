@@ -6,6 +6,7 @@ import sympy as sym
 
 from astropy import constants as const
 from astropy import units as u
+from astropy.coordinates import Angle
 
 import timing
 
@@ -319,10 +320,6 @@ def plot_figure5(
     plt.semilogy(lower_upper_x, lower_y, "k:")
     plt.semilogy(lower_upper_x, upper_y, "k:")
 
-    # Convert radians to degrees and round (for title)
-    psi = round(psi * 180 / math.pi)
-    alpha = round(alpha * 180 / math.pi)
-
     plt.minorticks_on()
     plt.xticks(range(0, 21, 5))
     plt.yticks([0.1, 1.0], ["0.1", "1.0"])
@@ -332,7 +329,7 @@ def plot_figure5(
     plt.xlabel(r"$k \frac{c}{| \Omega_e |}$")
     plt.ylabel(r"$\frac{\omega}{| \Omega_e |}$")
     plt.legend(loc="lower right")
-    plt.title(rf"$E={energy_mev}MeV, \psi={psi}^\circ, \alpha={alpha}^\circ, $")
+    plt.title(rf"$E={energy_mev}MeV, \psi={psi.deg}^\circ, \alpha={alpha.deg}^\circ, $")
     plt.tight_layout()
     # plt.savefig("figure5a.png", dpi=150)
     plt.show()
@@ -356,28 +353,40 @@ def main():
     q_p = const.e.si  # Signed proton charge
     # epsilon_0 = 8.8541878128e-12  # ?? F/m, Vaccum permittivity
 
-    # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
-    # Define input parameters
+    ### INPUT PARAMETERS
+
+    # Energy
     energy_mev = 1.0
     RKE = energy_mev * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
-    psi = math.pi * 45 / 180  # wave normal angle
-    X = math.tan(psi)
-    alpha = math.pi * 5 / 180  # pitch angle
-    gamma = calc_lorentz_factor(RKE, const.m_e)
-    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
-    v_par = v * math.cos(alpha)  # Is this correct?
 
-    # Compute and plot the resonance conditions from Figure 5
+    # Angles
+    psi = Angle(45, u.deg)  # wave normal
+    X = math.tan(psi.rad)  # tan(wave normal)
+    alpha = Angle(5, u.deg)  # pitch
+
+    # Magnetic field
     M = 8.033454e15  # Tm^3
     mlat = 0
     L = 4.5
-    frequency_ratio = 1.5
     B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
         L**3 * const.R_earth**3 * math.cos(mlat) ** 6
     )
 
+    # Particle number densities
+    #
+    # These will be inputs used to determine plasma frequencies,
+    # likely replacing the use of the frequency ratio.
+    # Or perhaps we can produce code to support both input types?
+    #
+    # n_e = omega_pe**2 * epsilon_0 * m_e / e**2
+    # n_p = omega_pp**2 * epsilon_0 * m_p / e**2
+
+    # Gyro- and plasma-frequencies
+    #
     # Convert the following to a function with inputs
     # electric charge, mass and B
+    frequency_ratio = 1.5
+
     Omega_e = (q_e * B) / const.m_e  # rad/s ??
     Omega_e_abs = abs(Omega_e)  # rad/s ??
     omega_pe = Omega_e_abs * frequency_ratio  # rad/s ??
@@ -386,12 +395,20 @@ def main():
     Omega_p_abs = abs(Omega_p)  # rad/s ??
     omega_pp = Omega_p_abs * frequency_ratio  # rad/s ??
 
-    # n_e = omega_pe**2 * epsilon_0 * m_e / e**2
-    # n_p = omega_pp**2 * epsilon_0 * m_p / e**2
-
+    # Dimensionless frequency range
+    # (scaled by 1/Omega_e)
     y_min = 0.1
     y_max = 1.0
     y_list = np.linspace(y_min, y_max, num=181)
+
+    ### PROCEDURE
+
+    # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
+
+    # Calculate the Lorentz factor and particle velocity using input params
+    gamma = calc_lorentz_factor(RKE, const.m_e)
+    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
+    v_par = v * math.cos(alpha.rad)  # Is this correct?
 
     # Dictionary to hold key:value pairs where key is the cyclotron
     # resonance n and value is a list of (x, y) tuples,
@@ -402,7 +419,9 @@ def main():
 
         for y in y_list:
             omega = Omega_e_abs * y
-            res_cond_k = (omega - (n * Omega_e_abs / gamma)) / (math.cos(psi) * v_par)
+            res_cond_k = (omega - (n * Omega_e_abs / gamma)) / (
+                math.cos(psi.rad) * v_par
+            )
             x = res_cond_k * const.c / Omega_e_abs
             resonance_conditions[n].append((x, y))
             # print(f"{n=} / {x=} / {y=}")
@@ -480,7 +499,7 @@ def main():
     # value. For the IndexedBase we need to pass a tuple with
     # the same number of elements as the number of species.
     values_dict = {
-        "psi": psi,
+        "psi": psi.rad,
         "v_par": v_par.value,
         "gamma": gamma.value,
         "n": 0,  # FIXME
