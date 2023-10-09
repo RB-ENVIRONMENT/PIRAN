@@ -1,12 +1,10 @@
 import math
-import secrets
 
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
 
 import timing
-
 
 
 @timing.timing
