@@ -304,13 +304,13 @@ def plot_figure5(
 
     # Plot resonance conditions
     for n, values in resonance_conditions.items():
-        x = [val[0] for val in values]
-        y = [val[1] for val in values]
+        x = [val[0].value for val in values]
+        y = [val[1].value for val in values]
         plt.semilogy(x, y, linestyle="--", label=f"Resonance condition n={n}")
 
     # Plot dispersion relation
     disp_x = [val[0].value for val in dispersion_relation]
-    disp_y = [val[1] for val in dispersion_relation]
+    disp_y = [val[1].value for val in dispersion_relation]
     plt.semilogy(disp_x, disp_y, "k", label="Dispersion relation")
 
     # Plot upper and lower
@@ -365,11 +365,11 @@ def main():
     alpha = Angle(5, u.deg)  # pitch
 
     # Magnetic field
-    M = 8.033454e15  # Tm^3
-    mlat = 0
-    L = 4.5
-    B = (M * math.sqrt(1 + 3 * math.sin(mlat) ** 2)) / (
-        L**3 * const.R_earth**3 * math.cos(mlat) ** 6
+    M = 8.033454e15 * (u.tesla * u.m**3)
+    mlat = Angle(0, u.deg)
+    l_shell = 4.5 * u.dimensionless_unscaled  # Could absorb const.R_earth into this?
+    B = (M * math.sqrt(1 + 3 * math.sin(mlat.rad) ** 2)) / (
+        l_shell**3 * const.R_earth**3 * math.cos(mlat.rad) ** 6
     )
 
     # Particle number densities
@@ -385,20 +385,24 @@ def main():
     #
     # Convert the following to a function with inputs
     # electric charge, mass and B
-    frequency_ratio = 1.5
+    frequency_ratio = 1.5 * u.dimensionless_unscaled
 
-    Omega_e = (q_e * B) / const.m_e  # rad/s ??
-    Omega_e_abs = abs(Omega_e)  # rad/s ??
-    omega_pe = Omega_e_abs * frequency_ratio  # rad/s ??
+    # All in units rad/s (or equivalently 1/s)
+    Omega_e = (q_e * B) / const.m_e
+    Omega_e_abs = abs(Omega_e)
+    omega_pe = Omega_e_abs * frequency_ratio
 
-    Omega_p = (q_p * B) / const.m_p  # rad/s ??
-    Omega_p_abs = abs(Omega_p)  # rad/s ??
-    omega_pp = Omega_p_abs * frequency_ratio  # rad/s ??
+    Omega_p = (q_p * B) / const.m_p
+    Omega_p_abs = abs(Omega_p)
+    omega_pp = Omega_p_abs * frequency_ratio
 
     # Dimensionless frequency range
-    # (scaled by 1/Omega_e)
-    y_min = 0.1
-    y_max = 1.0
+    # To be scaled up by Omega_e_abs when used.
+    # We could just use u.Unit(Omega_e_abs) directly here, but:
+    # - This isn't an SI unit
+    # - It mostly overcomplicates things (particularly debugging) in my experience.
+    y_min = 0.1 * u.dimensionless_unscaled
+    y_max = 1.0 * u.dimensionless_unscaled
     y_list = np.linspace(y_min, y_max, num=181)
 
     ### PROCEDURE
