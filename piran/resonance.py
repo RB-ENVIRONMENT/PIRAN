@@ -131,7 +131,7 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
         CPDR: the cold plasma dispersion relation polynomial
               as a sympy.polys.polytools.Poly object with free symbols:
               X:          ?        (?)
-              Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+              Omega:      (rad/s,) (Tuple of gyrofrequencies)
               omega_p:    (rad/s,) (Tuple of plasma frequencies)
               omega:      rad/s    (Wave resonant frequency)
               k:          ?        (Wavenumber)
@@ -163,7 +163,7 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
         CPDR: the cold plasma dispersion relation polynomial
               as a sympy.polys.polytools.Poly object with free symbols:
               X:          ?        (?)
-              Omega_Base: (rad/s,) (Tuple of gyrofrequencies)
+              Omega:      (rad/s,) (Tuple of gyrofrequencies)
               n:          ?        (Cyclotron resonance)
               omega_p:    (rad/s,) (Tuple of plasma frequencies)
               omega:      rad/s    (Wave resonant frequency)
