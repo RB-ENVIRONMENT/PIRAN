@@ -372,29 +372,29 @@ def main():
         l_shell**3 * const.R_earth**3 * math.cos(mlat.rad) ** 6
     )
 
-    # Particle number densities
-    #
-    # These will be inputs used to determine plasma frequencies,
-    # likely replacing the use of the frequency ratio.
-    # Or perhaps we can produce code to support both input types?
-    #
-    # n_e = omega_pe**2 * epsilon_0 * m_e / e**2
-    # n_p = omega_pp**2 * epsilon_0 * m_p / e**2
+    # ELectron gyro- and plasma- frequencies
 
-    # Gyro- and plasma-frequencies
-    #
-    # Convert the following to a function with inputs
-    # electric charge, mass and B
+    # Glauert provides the following frequency ratio for
+    # electron 'plasma-:gyro-' frequency
     frequency_ratio = 1.5 * u.dimensionless_unscaled
 
-    # All in units rad/s (or equivalently 1/s)
+    # Gyrofrequency can be calculated directly using electron charge, mass, and
+    # the magnetic field.
     Omega_e = (q_e * B) / const.m_e
+
+    # Application of the frequency ratio yields the electron plasma frequency.
     Omega_e_abs = abs(Omega_e)
     omega_pe = Omega_e_abs * frequency_ratio
 
+    # Proton gyro- and plasma- frequencies
+    # (including particle number densities)
+
+    # We assume that the number density of electrons and protons are equal.
+    # These can be derived from the electron plasma frequency.
+    n_ = omega_pe**2 * const.eps0 * const.m_e / abs(q_e) ** 2
+
     Omega_p = (q_p * B) / const.m_p
-    Omega_p_abs = abs(Omega_p)
-    omega_pp = Omega_p_abs * frequency_ratio
+    omega_pp = np.sqrt((n_ * q_p**2) / (const.eps0 * const.m_p))
 
     # Dimensionless frequency range
     # To be scaled up by Omega_e_abs when used.
