@@ -288,7 +288,7 @@ def poly_solver(poly):
 def plot_figure5(
     resonance_conditions,
     dispersion_relation,
-    energy_mev,
+    RKE,
     psi,
     alpha,
     omega_lc,
@@ -329,7 +329,7 @@ def plot_figure5(
     plt.xlabel(r"$k \frac{c}{| \Omega_e |}$")
     plt.ylabel(r"$\frac{\omega}{| \Omega_e |}$")
     plt.legend(loc="lower right")
-    plt.title(rf"$E={energy_mev}MeV, \psi={psi.deg}^\circ, \alpha={alpha.deg}^\circ, $")
+    plt.title(rf"$E={RKE}, \psi={psi.deg}^\circ, \alpha={alpha.deg}^\circ, $")
     plt.tight_layout()
     # plt.savefig("figure5a.png", dpi=150)
     plt.show()
@@ -356,8 +356,7 @@ def main():
     ### INPUT PARAMETERS
 
     # Energy
-    energy_mev = 1.0
-    RKE = energy_mev * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
+    RKE = 1.0 * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
 
     # Angles
     psi = Angle(45, u.deg)  # wave normal
@@ -475,7 +474,7 @@ def main():
     plot_figure5(
         resonance_conditions,
         dispersion_relation,
-        energy_mev,
+        RKE,
         psi,
         alpha,
         omega_lc,
