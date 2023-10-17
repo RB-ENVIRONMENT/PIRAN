@@ -389,6 +389,20 @@ def main():
     Omega_p = (q_p * B) / const.m_p
     omega_pp = np.sqrt((n_ * q_p**2) / (const.eps0 * const.m_p))
 
+    # Calculate the Lorentz factor and particle velocity using input params
+    gamma = calc_lorentz_factor(RKE, const.m_e)
+    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
+    v_par = v * math.cos(alpha.rad)  # Is this correct?
+
+    # Lower and upper cut-off frequencies
+    omega_m = 0.35 * Omega_e_abs
+    delta_omega = 0.15 * Omega_e_abs
+    omega_lc = omega_m - 1.5 * delta_omega
+    omega_uc = omega_m + 1.5 * delta_omega
+
+    ### PROCEDURE
+    # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
+
     # Dimensionless frequency range
     # To be scaled up by Omega_e_abs when used.
     # We could just use u.Unit(Omega_e_abs) directly here, but:
@@ -397,15 +411,6 @@ def main():
     y_min = 0.1 * u.dimensionless_unscaled
     y_max = 1.0 * u.dimensionless_unscaled
     y_list = np.linspace(y_min, y_max, num=181)
-
-    ### PROCEDURE
-
-    # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
-
-    # Calculate the Lorentz factor and particle velocity using input params
-    gamma = calc_lorentz_factor(RKE, const.m_e)
-    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
-    v_par = v * math.cos(alpha.rad)  # Is this correct?
 
     # Dictionary to hold key:value pairs where key is the cyclotron
     # resonance n and value is a list of (x, y) tuples,
@@ -453,13 +458,6 @@ def main():
                 quit()
             x = valid_k_roots[0] * const.c / Omega_e_abs
             dispersion_relation.append((x, y))
-
-    # Parameters for plotting the horizontal dotted lines in Figure 5,
-    # i.e. lines with constant omega/|Omega_e|
-    omega_m = 0.35 * Omega_e_abs
-    delta_omega = 0.15 * Omega_e_abs
-    omega_lc = omega_m - 1.5 * delta_omega
-    omega_uc = omega_m + 1.5 * delta_omega
 
     # Plot
     plot_figure5(
