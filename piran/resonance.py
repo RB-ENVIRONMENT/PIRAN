@@ -1,4 +1,5 @@
 import math
+import json
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +8,8 @@ import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
+
+import timing
 
 
 def get_cpdr(PARTICLE_SPECIES=2):
@@ -279,6 +282,7 @@ def poly_solver(poly):
     return roots
 
 
+@timing.timing
 def compute_root_pairs(
     n_range,
     X_range,
@@ -516,6 +520,37 @@ def main():
     delta_omega = 0.15 * Omega_e_abs
     omega_lc = omega_m - 1.5 * delta_omega
     omega_uc = omega_m + 1.5 * delta_omega
+
+    # Resonances
+    n_min = -5
+    n_max = 5
+    n_range = u.Quantity(
+        range(n_min, n_max + 1), unit=u.dimensionless_unscaled, dtype=np.int32
+    )
+
+    # Tangent of wave normal angles psi (X = tan(psi))
+    X_min = 0.0
+    X_max = 1.0
+    X_npoints = 11
+    X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
+
+    # For each resonance n and tangent of wave number psi
+    # Solve simultaneously the dispersion relation and the
+    # resonance condition to get valid root pairs for omega and k.
+    root_pairs = compute_root_pairs(
+        n_range,
+        X_range,
+        v_par,
+        gamma,
+        Omega_e,
+        Omega_p,
+        omega_pe,
+        omega_pp,
+        omega_lc,
+        omega_uc,
+    )
+
+    print(json.dumps(root_pairs, indent=4))
 
     ### PROCEDURE
     # Trying to reproduce Figure 5a from [Glauert & Horne, 2005]
