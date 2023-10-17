@@ -9,6 +9,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 import timing
+import cpdr
 
 
 @timing.timing
@@ -430,7 +431,8 @@ def main():
             # print(f"{n=} / {x=} / {y=}")
 
     # Calculate the dispersion relation from Figure 5
-    CPDR_k, _ = get_cpdr_poly_k()  # in k
+    dispersion = cpdr.Cpdr(2)
+    CPDR_k, _ = dispersion.as_poly_in_k()
 
     dispersion_relation = []
     for y in y_list:
@@ -492,8 +494,8 @@ def main():
 
     # Get the cold plasma dispersion relation as a
     # polynomial. Everything is still a symbol here.
-    CPDR_omega, _ = get_cpdr_poly_omega()  # in omega
-    CPDR_k, _ = get_cpdr_poly_k()  # in k
+    CPDR_omega, _ = dispersion.as_resonant_poly_in_omega()  # in omega
+    CPDR_k, _ = dispersion.as_poly_in_k()  # in k
 
     # We can pass a dict of key:value pairs
     # to the sympy polynomial where
