@@ -8,10 +8,7 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-import timing
 
-
-@timing.timing
 def get_cpdr(PARTICLE_SPECIES=2):
     """
     A function for obtaining the cold plasma dispersion relation in the form
@@ -120,7 +117,6 @@ def get_cpdr(PARTICLE_SPECIES=2):
     return sym.Poly.from_list([A, 0, -B, 0, C], mu), cpdr_syms
 
 
-@timing.timing
 def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     """
     Input:
@@ -152,7 +148,6 @@ def get_cpdr_poly_k(PARTICLE_SPECIES=2):
     return cpdr.subs(mu, const.c.value * k / omega).as_poly(k), cpdr_syms
 
 
-@timing.timing
 def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     """
     Input:
@@ -212,7 +207,6 @@ def get_cpdr_poly_omega(PARTICLE_SPECIES=2):
     )
 
 
-@timing.timing
 def replace_cpdr_symbols(CPDR, values):
     """
     Input:
