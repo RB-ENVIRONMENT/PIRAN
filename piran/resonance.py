@@ -348,10 +348,10 @@ def main():
     # | m_p     | 1.67262192e-27 | kg      | Proton mass                     |
     # | e       | 1.60217663e-19 | C       | Electron charge                 |
     # | R_earth | 6378100        | m       | Nominal Earth equatorial radius |
+    # | eps0    | 8.85418781e-12 | F/m     | Vacuum electric permittivity    |
 
     q_e = -const.e.si  # Signed electron charge
     q_p = const.e.si  # Signed proton charge
-    # epsilon_0 = 8.8541878128e-12  # ?? F/m, Vaccum permittivity
 
     ### INPUT PARAMETERS
 
@@ -439,10 +439,7 @@ def main():
 
         values_dict = {
             "Omega": (Omega_e.value, Omega_p.value),  # FIXME is this signed?
-            "omega_p": (
-                omega_pe.value,
-                omega_pp.value,
-            ),  # FIXME maybe omega_pp is wrong
+            "omega_p": (omega_pe.value, omega_pp.value),
             "omega": omega.value,
             "X": X,
         }
