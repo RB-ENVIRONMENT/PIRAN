@@ -279,6 +279,123 @@ def poly_solver(poly):
     return roots
 
 
+def compute_root_pairs(
+    n_range,
+    X_range,
+    v_par,
+    gamma,
+    Omega_e,
+    Omega_p,
+    omega_pe,
+    omega_pp,
+    omega_lc,
+    omega_uc,
+):
+    """
+    Simultaneously solve the resonance condition and the dispersion relation
+    to get root pairs of wave frequency omega and wave number k for each
+    resonance n and tangent of wave normal angle X=tan(psi).
+
+    Returns
+    -------
+    root_pairs : Dictionary where keys are resonances n and
+      values are lists that contains tuples of (X, omega, k)
+    """
+
+    # Get the cold plasma dispersion relation as a
+    # polynomial. Everything is still a symbol here.
+    CPDR_omega, _ = get_cpdr_poly_omega()  # in omega
+    CPDR_k, _ = get_cpdr_poly_k()  # in k
+
+    # We can pass a dict of key:value pairs
+    # to the sympy expression where
+    # the key is a string with the same name
+    # as the symbol we want to replace with the corresponding
+    # value. For the IndexedBase we need to pass a tuple with
+    # the same number of elements as the number of species.
+    values_dict = {
+        "v_par": v_par.value,
+        "gamma": gamma.value,
+        "Omega": (Omega_e.value, Omega_p.value),
+        "omega_p": (omega_pe.value, omega_pp.value),
+    }
+
+    # X, psi, omega and n are still symbols after this
+    CPDR_omega2 = replace_cpdr_symbols(CPDR_omega, values_dict)
+
+    # X, k and omega are still symbols after this
+    CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
+
+    root_pairs = {}
+    for n in n_range:
+        root_pairs[int(n.value)] = []  # initialize list
+
+        for X in X_range:
+            psi = math.atan(X) * u.rad
+
+            values_dict2 = {
+                "X": X.value,
+                "psi": psi.value,
+                "n": n.value,
+            }
+
+            # Only omega is a symbol after this
+            CPDR_omega3 = replace_cpdr_symbols(CPDR_omega2, values_dict2)
+
+            # Only k and omega are symbols after this
+            CPDR_k3 = replace_cpdr_symbols(CPDR_k2, values_dict2)
+
+            # Solve modified CPDR to obtain omega roots for given X
+            omega_l = poly_solver(CPDR_omega3)
+
+            # Categorise roots
+            # Keep only real, positive and within bounds
+            valid_omega_l = get_valid_roots(omega_l)
+            valid_omega_l = [
+                x for x in valid_omega_l if omega_lc.value <= x <= omega_uc.value
+            ]
+
+            # If valid_omega_l is empty continue
+            if len(valid_omega_l) == 0:
+                continue
+
+            # We expect at most 1 real positive root
+            if len(valid_omega_l) > 1:
+                msg = "We got more than one real positive root for omega"
+                raise ValueError(msg)
+
+            # Find values of k for each valid omega root
+            # yielding some kind of nested dict of X, omega, k values
+            # for later use in numerical integration.
+            # Note: At this point valid_omega_l will contain only one element
+            for valid_omega in valid_omega_l:
+                # Substitute omega into CPDR
+                CPDR_k4 = replace_cpdr_symbols(CPDR_k3, {"omega": valid_omega})
+
+                # Solve unmodified CPDR to obtain k roots for given X, omega
+                k_l = poly_solver(CPDR_k4)
+
+                # Keep only real and positive roots
+                valid_k_l = get_valid_roots(k_l)
+
+                # If valid_k_l is empty continue
+                if valid_k_l.size == 0:
+                    continue
+
+                # We expect at most 1 real positive root
+                if valid_k_l.size > 1:
+                    msg = "We got more than one real positive root for k"
+                    raise ValueError(msg)
+
+                # Note: At this point valid_k_l will contain only one element
+                valid_k = valid_k_l[0]
+
+                # Store a tuple into the dictionary
+                root_pairs[int(n.value)].append((X.value, valid_omega, valid_k))
+
+    return root_pairs
+
+
 def plot_figure5(
     resonance_conditions,
     dispersion_relation,
