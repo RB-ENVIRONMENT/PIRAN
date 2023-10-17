@@ -479,68 +479,6 @@ def main():
         Omega_e_abs,
     )
 
-    # Stop here since the following will be needed later
-    quit()
-
-    # Define the range over X (tan of wave normal angles)
-    X_min = 0
-    X_max = 1
-    X_range = np.linspace(X_min, X_max, 101)
-
-    # Get the cold plasma dispersion relation as a
-    # polynomial. Everything is still a symbol here.
-    CPDR_omega, _ = get_cpdr_poly_omega()  # in omega
-    CPDR_k, _ = get_cpdr_poly_k()  # in k
-
-    # We can pass a dict of key:value pairs
-    # to the sympy polynomial where
-    # the key is a string with the same name
-    # as the symbol we want to replace with the corresponding
-    # value. For the IndexedBase we need to pass a tuple with
-    # the same number of elements as the number of species.
-    values_dict = {
-        "psi": psi.rad,
-        "v_par": v_par.value,
-        "gamma": gamma.value,
-        "n": 0,  # FIXME
-        "Omega": (1, 1),  # FIXME
-        "omega_p": (1, 1),  # FIXME
-    }
-
-    # X and omega are still symbols after this
-    CPDR_omega2 = replace_cpdr_symbols(CPDR_omega, values_dict)
-
-    # X, k and omega are still symbols after this
-    CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
-
-    for X in X_range:
-        # Only omega is a symbol after this
-        CPDR_omega3 = replace_cpdr_symbols(CPDR_omega2, {"X": X})
-
-        # Only k and omega are symbols after this
-        CPDR_k3 = replace_cpdr_symbols(CPDR_k2, {"X": X})
-
-        # Solve modified CPDR to obtain omega roots for given X
-        omega_l = poly_solver(CPDR_omega3)
-
-        # Categorise roots
-        valid_omega_l = get_valid_roots(omega_l)
-
-        # Find values of k for each valid omega root
-        # yielding some kind of nested dict of X, omega, k values
-        # for later use in numerical integration.
-        for valid_omega in valid_omega_l:
-            # Substitute omega into CPDR
-            CPDR_k4 = replace_cpdr_symbols(CPDR_k3, {"omega": valid_omega})
-            print(CPDR_k4.free_symbols)
-            print(CPDR_k4)
-
-            # Solve unmodified CPDR to obtain k roots for given X, omega
-            k_l = poly_solver(CPDR_k4)
-            print(f"{X=}")
-            print(f"{valid_omega=}")
-            print(f"{k_l=}")
-
     # Tests for get_valid_roots()
     # test_array_1 = np.array([0.0e+00 + 0.0e+00j,
     #                          1.24900090e-16 - 1.0e+0j,
