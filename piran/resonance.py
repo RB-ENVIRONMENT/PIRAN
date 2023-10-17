@@ -534,8 +534,8 @@ def main():
     X_npoints = 11
     X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
 
-    # For each resonance n and tangent of wave number psi
-    # Solve simultaneously the dispersion relation and the
+    # For each resonance n and tangent of wave normal angle psi,
+    # solve simultaneously the dispersion relation and the
     # resonance condition to get valid root pairs for omega and k.
     root_pairs = compute_root_pairs(
         n_range,
