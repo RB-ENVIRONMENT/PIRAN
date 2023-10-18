@@ -285,6 +285,7 @@ def poly_solver(poly):
 
 @timing.timing
 def compute_root_pairs(
+    dispersion,
     n_range,
     X_range,
     v_par,
@@ -309,8 +310,8 @@ def compute_root_pairs(
 
     # Get the cold plasma dispersion relation as a
     # polynomial. Everything is still a symbol here.
-    CPDR_omega, _ = get_cpdr_poly_omega()  # in omega
-    CPDR_k, _ = get_cpdr_poly_k()  # in k
+    CPDR_omega, _ = dispersion.as_resonant_poly_in_omega()
+    CPDR_k, _ = dispersion.as_poly_in_k()
 
     # We can pass a dict of key:value pairs
     # to the sympy expression where
@@ -404,6 +405,7 @@ def compute_root_pairs(
 def plot_figure5(
     resonance_conditions,
     dispersion_relation,
+    root_pairs,
     RKE,
     psi,
     alpha,
@@ -428,6 +430,13 @@ def plot_figure5(
     disp_x = [val[0].value for val in dispersion_relation]
     disp_y = [val[1].value for val in dispersion_relation]
     plt.semilogy(disp_x, disp_y, "k", label="Dispersion relation")
+
+    for values in root_pairs.values():
+        if values is []:
+            continue
+        x = [val[2] * (const.c.value / Omega_e_abs.value) for val in values]
+        y = [val[1] / Omega_e_abs.value for val in values]
+        plt.semilogy(x, y, "ro")
 
     # Plot upper and lower
     lower_upper_x = np.arange(-1, 25, 1)
@@ -530,15 +539,19 @@ def main():
     )
 
     # Tangent of wave normal angles psi (X = tan(psi))
-    X_min = 0.0
-    X_max = 1.0
-    X_npoints = 11
-    X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
+    #   X_min = 0.0
+    #   X_max = 1.0
+    #   X_npoints = 11
+    #   X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
+    X_range = [1.0] * u.dimensionless_unscaled
+
+    dispersion = cpdr.Cpdr(2)
 
     # For each resonance n and tangent of wave normal angle psi,
     # solve simultaneously the dispersion relation and the
     # resonance condition to get valid root pairs for omega and k.
     root_pairs = compute_root_pairs(
+        dispersion,
         n_range,
         X_range,
         v_par,
@@ -569,20 +582,17 @@ def main():
     # resonance n and value is a list of (x, y) tuples,
     # where x=k*c/Omega_e_abs and y=omega/Omega_e_abs
     resonance_conditions = {}
-    for n in range(-5, 1):
+    for n in range(-5, 6):
         resonance_conditions[n] = []
 
         for y in y_list:
             omega = Omega_e_abs * y
-            res_cond_k = (omega - (n * Omega_e_abs / gamma)) / (
-                math.cos(psi.rad) * v_par
-            )
+            res_cond_k = (omega - (n * Omega_e / gamma)) / (math.cos(psi.rad) * v_par)
             x = res_cond_k * const.c / Omega_e_abs
             resonance_conditions[n].append((x, y))
             # print(f"{n=} / {x=} / {y=}")
 
     # Calculate the dispersion relation from Figure 5
-    dispersion = cpdr.Cpdr(2)
     CPDR_k, _ = dispersion.as_poly_in_k()
 
     dispersion_relation = []
@@ -617,6 +627,7 @@ def main():
     plot_figure5(
         resonance_conditions,
         dispersion_relation,
+        root_pairs,
         RKE,
         psi,
         alpha,

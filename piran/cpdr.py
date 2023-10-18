@@ -1,15 +1,26 @@
 import sympy as sym
 import astropy.constants as const
 
+import timing
+
 
 class Cpdr:
     """cold plasma dispersion relation"""
 
+    @timing.timing
     def __init__(self, num_particles):
+        # TODO: Replace 'num_particles' param with a tuple of Plasmapy Particles
+        # (including charge, mass, etc.)
         self._num_particles = num_particles
-        self._poly_mu, self._syms = self._generate()
 
-    def _generate(self):
+        # Our 'baseline' representation of the cpdr is as a biquadratic polynomial in k,
+        # which we generate immediately here.
+        self._poly_k, self._syms = self._generate_poly_in_k()
+
+        # cpdr x resonant condition as a polynomial in omega, generated on request.
+        self._resonant_poly_omega = None
+
+    def _generate_poly_in_k(self):
         """
         A function for obtaining the cold plasma dispersion relation in the form
         `A*mu**4 - B*mu**2 + C`.
@@ -59,7 +70,7 @@ class Cpdr:
         omega_p_i = omega_p[i]
 
         # These are our remaining 'top-level' symbols
-        omega, X, mu = sym.symbols("omega, X, mu")
+        omega, X, k = sym.symbols("omega, X, k")
 
         # A quick note on indexed objects in sympy.
         # https://docs.sympy.org/latest/modules/tensor/indexed.html
@@ -80,7 +91,7 @@ class Cpdr:
         # Indexed object only since this contains the 'totality' of the information.
 
         # Add all newly-defined symbols to a dictionary to be returned by this function.
-        cpdr_syms = {s.name: s for s in (omega, X, mu, Omega_i, omega_p_i)}
+        _syms = {s.name: s for s in (omega, X, k, Omega_i, omega_p_i)}
 
         ### SYMBOLIC STIX PARAMETERS
 
@@ -112,9 +123,13 @@ class Cpdr:
         B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
         C = sym.simplify(P * R * L * (1 + (X**2)))
 
-        # Return both a polynomial in mu and a dict of the 'top-level' symbols defined
-        # by this function.
-        return sym.Poly.from_list([A, 0, -B, 0, C], mu), cpdr_syms
+        # TODO: I don't like using `.value` here - too many symbols still present.
+        # Can we move the substitution of c to somewhere further along?...
+        # It's a shame we can't provide units for symbols to check consistency.
+        mu = const.c.value * k / omega
+
+        # Return cpdr as a biquadratic polynomial in k
+        return (A * mu**4 - B * mu**2 + C).as_poly(k), _syms
 
     def as_poly_in_k(self):
         """
@@ -131,19 +146,15 @@ class Cpdr:
                   omega:      rad/s    (Wave resonant frequency)
                   k:          ?        (Wavenumber)
         """
-        # To retrieve cpdr as a biquadratic function in k, we need to sub mu = c*k/omega
-        # mu and omega should already be in cpdr_syms so we just grab them.
-        # k is new and will need to be added to cpdr_syms.
-
-        mu = self._syms["mu"]
-        omega = self._syms["omega"]
-
-        k = sym.symbols("k")
-        self._syms["k"] = k
-
-        return self._poly_mu.subs(mu, const.c.value * k / omega).as_poly(k), self._syms
+        return self._poly_k, self._syms
 
     def as_resonant_poly_in_omega(self):
+        if self._resonant_poly_omega is None:
+            self._generate_resonant_poly_in_omega()
+
+        return self._resonant_poly_omega, self._syms
+
+    def _generate_resonant_poly_in_omega(self):
         """
         Input:
             PARTICLE_SPECIES: defines total number of particle species in plasma
@@ -168,7 +179,7 @@ class Cpdr:
 
         # Start by grabbing our symbolic variables.
         # mu, omega, and Omega_i are already defined in cpdr_syms.
-        mu = self._syms["mu"]
+        k = self._syms["k"]
         omega = self._syms["omega"]
         Omega_i = self._syms["Omega[i]"]
 
@@ -180,11 +191,12 @@ class Cpdr:
         # TODO: Replace all of these with constant values / input params?
         v_par, psi, n, gamma = sym.symbols("v_par, psi, n, gamma")
 
-        # Substitute resonance condition into mu to obtain a new expression for mu,
-        # stored in new symbolic variable mu_sub
-        mu_sub = (const.c.value / (v_par * sym.cos(psi))) * (
-            1 - (n * Omega[0] / (gamma * omega))
-        )
+        # Substitute k for the resonance condition, as given by Eq 5 in Lyons 1974b.
+        # Note that we are also using `k = k_par * cos(psi)` here, 'losing' the sign
+        # of `k_par` in the process since `k` >= 0 by defn and `cos(psi)` >= 0 for
+        # `psi` in [0, 90]. If we need to determine the sign of `k_par` again at any
+        # point in the future, we can do so by (re)checking the resonance condition.
+        k_sub = (omega - n * Omega[0] / gamma) / (v_par * sym.cos(psi))
 
         # Define our MULTIPLICATION_FACTOR
         MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
@@ -192,9 +204,6 @@ class Cpdr:
         )
 
         # Replace mu with mu_sub and multiply by MULTIPLICATION_FACTOR
-        return (
-            sym.cancel(
-                (MULTIPLICATION_FACTOR * self._poly_mu).subs(mu, mu_sub)
-            ).as_poly(omega),
-            self._syms,
-        )
+        self._resonant_poly_omega = sym.cancel(
+            (MULTIPLICATION_FACTOR * self._poly_k).subs(k, k_sub)
+        ).as_poly(omega)
