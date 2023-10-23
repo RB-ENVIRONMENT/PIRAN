@@ -20,6 +20,9 @@ dev-extra = [
     "black",
     "numpydoc",
 ]
+docs = [
+    "sphinx",
+]
 
 [tool.setuptools.packages.find]
 include = ["piran*"]
@@ -35,4 +38,5 @@ checks = [
 exclude = [  # don't report on objects that match any of these regex
 '^timing',
 '^resonance',
+'^conf$',
 ]
