@@ -13,8 +13,8 @@ class Cpdr:
     A class for manipulation of the cold plasma dispersion relation.
 
     Creating an instance of this class will immediately generate a symbolic
-    representation for the cpdr as a biquadratic function in the wave number `k`,
-    which can take some time!
+    representation for the cpdr as a function in the wave number `k` and
+    the wave frequency `omega`, which can take some time!
 
     Parameters
     ----------
@@ -29,29 +29,52 @@ class Cpdr:
         # (including charge, mass, etc.)
         self._num_particles = num_particles
 
-        # Our 'baseline' representation of the cpdr is as a biquadratic polynomial in k,
+        # Our 'baseline' representation of the cpdr,
         # which we generate immediately here.
-        self._poly_k, self._syms = self._generate_poly_in_k()
+        self._cpdr, self._syms = self._generate_expression()
+
+        # cpdr as a biquadratic polynomial in k, generated on request
+        self._poly_k = None
 
         # cpdr x resonant condition as a polynomial in omega, generated on request.
         self._resonant_poly_omega = None
 
-    def _generate_poly_in_k(self):
+    def _generate_expression(self):
         """
-        Generate baseline cpdr as a biquadratic polynomial in k.
+        Generate baseline cpdr.
+
+        As a function in the wave refractive index `mu = c*k/omega`, the cpdr has the
+        form `A*mu**4 - B*mu**2 + C` in which `A`, `B`, and `C` are themselves composed
+        of several symbolic variables.
+
+        We skip the intermediary representation in `mu` and return this as a sympy
+        expression in `k` and `omega` for convenience.
+
+        This baseline cpdr is generated when the `Cpdr` object is first created and is
+        stored in memory.
 
         Returns
         -------
-        symp.polys.polytools.Poly
-            A biquadratic polynomial in `k`.
+        sympy.core.add.Add
+            An expression in `k` and `omega`.
 
         dict
-            A dict of `key : value` pairs containing symbol information for the
-            polynomial.
-
-        See Also
-        --------
-        as_poly_in_k : For further details.
+            A dict of `key : value` pairs, in which:
+            - each `value` corresponds to a symbol used somewhere in our polynomial, and
+            - the `key` is given by the name/label for that symbol.
+            A 'symbol' in this case refers to either a sympy.core.symbol.Symbol object
+            or a sympy.tensor.indexed.Indexed object (for objects with indices).
+            The symbols stored in this dict are:
+            ========== ===== ===============================
+            Symbol     Units Description
+            ========== ===== ===============================
+            X          -     `tan(psi)` for wave angle `psi`
+            Omega[i]   rad/s Particle gyrofrequencies
+            omega_p[i] rad/s Particle plasma frequencies
+            omega      rad/s Wave frequency
+            k          -     Wave number
+            ========== ===== ===============================
+            .
         """
         ### SYMBOL DEFINITIONS
 
@@ -126,22 +149,12 @@ class Cpdr:
         # It's a shame we can't provide units for symbols to check consistency.
         mu = const.c.value * k / omega
 
-        # Return cpdr as a biquadratic polynomial in k
-        return (A * mu**4 - B * mu**2 + C).as_poly(k), _syms
+        # Return cpdr
+        return (A * mu**4 - B * mu**2 + C).as_expr(), _syms
 
     def as_poly_in_k(self):
         """
-        Retrieve baseline cpdr as a biquadratic polynomial in `k`.
-
-        As a function in the wave refractive index `mu = c*k/omega`, the cpdr has the
-        form `A*mu**4 - B*mu**2 + C` in which `A`, `B`, and `C` are themselves composed
-        of several symbolic variables.
-
-        We skip the intermediary representation in `mu` and return this as a sympy
-        Polynomial in `k` for convenience.
-
-        This baseline cpdr is generated when the `Cpdr` object is first created and is
-        stored in memory.
+        Retrieve cpdr as a biquadratic polynomial in `k`.
 
         Returns
         -------
@@ -166,7 +179,31 @@ class Cpdr:
             ========== ===== ===============================
             .
         """
+        if self._poly_k is None:
+            self._generate_poly_in_k()
+
         return self._poly_k, self._syms
+
+    def _generate_poly_in_k(self):
+        """
+        Generate cpdr as a a polynomial in k.
+
+        Returns
+        -------
+        symp.polys.polytools.Poly
+            A biquadratic polynomial in `k`.
+
+        dict
+            A dict of `key : value` pairs containing symbol information for the
+            polynomial.
+
+        See Also
+        --------
+        as_poly_in_k : For further details.
+        """
+        k = self._syms["k"]
+
+        self._poly_k = self._cpdr.as_poly(k)
 
     def as_resonant_poly_in_omega(self):
         """
@@ -258,6 +295,9 @@ class Cpdr:
         MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
             (omega + Omega_i) * (omega - Omega_i), (i, i.lower, i.upper)
         )
+
+        # Retrieve CPDR as a polynomial in k
+        self._generate_poly_in_k()
 
         # Replace mu with mu_sub and multiply by MULTIPLICATION_FACTOR
         self._resonant_poly_omega = sym.cancel(
