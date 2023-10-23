@@ -582,7 +582,7 @@ def main():
     # resonance n and value is a list of (x, y) tuples,
     # where x=k*c/Omega_e_abs and y=omega/Omega_e_abs
     resonance_conditions = {}
-    for n in range(-5, 6):
+    for n in range(n_min, n_max + 1):
         resonance_conditions[n] = []
 
         for y in y_list:
