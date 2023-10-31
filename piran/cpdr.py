@@ -93,41 +93,46 @@ class Cpdr:
 
         ### SYMBOLIC STIX PARAMETERS
 
-        # Use .doit() to force expansion of the sum.
-        # Doing this early seems to make later code run faster.
-        #
-        # Strictly necessary when trying to obtain a polynomial in omega?
-        # In this case, future use of sympy.cancel and multiplication by
-        # MULTIPLICATION_FACTOR should remove all traces of omega from the denominator
-        # of each term.
-        R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
-        L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
-        P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
+        # Use sym.summation (rather than sym.Sum) to force expansion of the sum.
+        # We could delay this until later (beyond the scope of this function, even)
+        # using a combination of sym.Sum and .doit() but would need to be careful.
+        # e.g. if self._poly_k contains unevaluated sums, calling .doit() on each coeff
+        # individually works fine, but self._poly_k.as_expr().doit() can get stuck.
+        # Why? Dunno...
+        R = 1 - sym.summation((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE)
+        L = 1 - sym.summation((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE)
+        P = 1 - sym.summation((omega_p_i**2) / (omega**2), PS_RANGE)
         S = (R + L) / 2
 
-        ### SYMBOLIC COMPONENTS OF BIQUADRATIC POLYNOMIAL IN MU
+        ### SYMBOLIC COMPONENTS OF BIQUADRATIC POLYNOMIAL IN k
 
-        # CPDR = A*mu**4 - B*mu**2 + C
-        # Using sym.factor appears vital for *massively* reducing the time taken by
-        # some operations (e.g. sym.as_poly) outside of this func.
+        # CPDR = A*mu**4 - B*mu**2 + C where mu = c*k/omega
         #
-        # I've tried using other more 'concrete' funcs for this purpose
-        # (e.g. sym.factor, sym.powsimp) but none of them seem to produce a result
-        # that is compact as sym.simplify.
+        # We previously used sym.simplify here which made later calls to sym.as_poly
+        # much more efficient. We are no longer doing this because:
+        # - sym.simplify can be a little slow.
+        # - sym.as_poly can be *really* slow in any case (e.g. never returning?)
         #
-        # sym.simplify *can* be very slow in other cases... but it does the job here
-        # so we'll stick with it for now.
-        A = sym.simplify(S * (X**2) + P)
-        B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
-        C = sym.simplify(P * R * L * (1 + (X**2)))
-
+        # We also tried useing other more 'concrete' funcs (e.g. factor, powsimp)
+        # instead of simplify, but none seemed to produce a result as compact as
+        # simplify (which, as per the source code, does a lot more than just calling
+        # other public Sympy funcs in sequence).
+        #
+        # So, rather than using sym.simplify and sym.as_poly we now:
+        # - Leave things unsimplified where possible
+        # - Rely on sym.Poly.from_list, which is a bit more restrictive but much
+        #   more reliable than sym.as_poly.
+        #
         # TODO: I don't like using `.value` here - too many symbols still present.
         # Can we move the substitution of c to somewhere further along?...
         # It's a shame we can't provide units for symbols to check consistency.
-        mu = const.c.value * k / omega
+        A = (S * (X**2) + P) * ((const.c.value / omega) ** 4)
+        B = (R * L * (X**2) + P * S * (2 + (X**2))) * ((const.c.value / omega) ** 2)
+        C = P * R * L * (1 + (X**2))
 
-        # Return cpdr as a biquadratic polynomial in k
-        return (A * mu**4 - B * mu**2 + C).as_poly(k), _syms
+        # Return cpdr as a biquadratic polynomial in k.
+
+        return sym.Poly.from_list([A, 0, -B, 0, C], k), _syms
 
     def as_poly_in_k(self):
         """
