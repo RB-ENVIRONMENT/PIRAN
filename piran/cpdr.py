@@ -29,35 +29,18 @@ class Cpdr:
         # (including charge, mass, etc.)
         self._num_particles = num_particles
 
-        # Our 'baseline' representation of the cpdr is as a biquadratic polynomial in k,
-        # which we generate immediately here.
-        self._poly_k, self._syms = self._generate_poly_in_k()
+        # Dict of symbols used throughout these funcs
+        self._syms = self._generate_syms()
+
+        # cpdr as a biquadratic polynomial in k, generated on request.
+        self._poly_k = None
 
         # cpdr x resonant condition as a polynomial in omega, generated on request.
         self._resonant_poly_omega = None
 
-    def _generate_poly_in_k(self):
-        """
-        Generate baseline cpdr as a biquadratic polynomial in k.
-
-        Returns
-        -------
-        symp.polys.polytools.Poly
-            A biquadratic polynomial in `k`.
-
-        dict
-            A dict of `key : value` pairs containing symbol information for the
-            polynomial.
-
-        See Also
-        --------
-        as_poly_in_k : For further details.
-        """
-        ### SYMBOL DEFINITIONS
-
+    def _generate_syms(self):  # numpydoc ignore=GL08
         # Use this for indexing w.r.t. particle species
         i = sym.Idx("i", self._num_particles)
-        PS_RANGE = (i, i.lower, i.upper)
 
         # Particle gyrofrequency
         Omega = sym.IndexedBase("Omega")
@@ -66,6 +49,10 @@ class Cpdr:
         # Particle plasma frequency
         omega_p = sym.IndexedBase("omega_p")
         omega_p_i = omega_p[i]
+
+        # We're also going to need some additional symbols for the timebeing.
+        # TODO: Replace all of these with constant values / input params?
+        v_par, psi, n, gamma = sym.symbols("v_par, psi, n, gamma")
 
         # These are our remaining 'top-level' symbols
         omega, X, k = sym.symbols("omega, X, k")
@@ -89,45 +76,88 @@ class Cpdr:
         # Indexed object only since this contains the 'totality' of the information.
 
         # Add all newly-defined symbols to a dictionary to be returned by this function.
-        _syms = {s.name: s for s in (omega, X, k, Omega_i, omega_p_i)}
+        return {
+            s.name: s for s in (omega, X, k, Omega_i, omega_p_i, v_par, psi, n, gamma)
+        }
+
+    def _generate_poly_in_k(self):
+        """
+        Generate baseline cpdr as a biquadratic polynomial in k.
+
+        Returns
+        -------
+        symp.polys.polytools.Poly
+            A biquadratic polynomial in `k`.
+
+        dict
+            A dict of `key : value` pairs containing symbol information for the
+            polynomial.
+
+        See Also
+        --------
+        as_poly_in_k : For further details.
+        """
+        ### SYMBOL RETRIEVAL
+
+        # CPDR variables
+        omega = self._syms["omega"]
+        X = self._syms["X"]
+        k = self._syms["k"]
+
+        # Gyrofrequencies
+        Omega_i = self._syms["Omega[i]"]
+
+        # Plasma frequencies
+        omega_p_i = self._syms["omega_p[i]"]
+
+        # Grab the index associated with our Indexed object Omega_i
+        # NOTE: This is the same as is used by omega_p_i
+        idx = Omega_i.indices[0]
+
+        # Define this for convenient use with Sympy products / summations
+        PS_RANGE = (idx, idx.lower, idx.upper)
 
         ### SYMBOLIC STIX PARAMETERS
 
-        # Use .doit() to force expansion of the sum.
-        # Doing this early seems to make later code run faster.
-        #
-        # Strictly necessary when trying to obtain a polynomial in omega?
-        # In this case, future use of sympy.cancel and multiplication by
-        # MULTIPLICATION_FACTOR should remove all traces of omega from the denominator
-        # of each term.
-        R = 1 - sym.Sum((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE).doit()
-        L = 1 - sym.Sum((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE).doit()
-        P = 1 - sym.Sum((omega_p_i**2) / (omega**2), PS_RANGE).doit()
+        # Use sym.summation (rather than sym.Sum) to force expansion of the sum.
+        # We could delay this until later (beyond the scope of this function, even)
+        # using a combination of sym.Sum and .doit() but would need to be careful.
+        # e.g. if self._poly_k contains unevaluated sums, calling .doit() on each coeff
+        # individually works fine, but self._poly_k.as_expr().doit() can get stuck.
+        # Why? Dunno...
+        R = 1 - sym.summation((omega_p_i**2) / (omega * (omega + Omega_i)), PS_RANGE)
+        L = 1 - sym.summation((omega_p_i**2) / (omega * (omega - Omega_i)), PS_RANGE)
+        P = 1 - sym.summation((omega_p_i**2) / (omega**2), PS_RANGE)
         S = (R + L) / 2
 
-        ### SYMBOLIC COMPONENTS OF BIQUADRATIC POLYNOMIAL IN MU
+        ### SYMBOLIC COMPONENTS OF BIQUADRATIC POLYNOMIAL IN k
 
-        # CPDR = A*mu**4 - B*mu**2 + C
-        # Using sym.factor appears vital for *massively* reducing the time taken by
-        # some operations (e.g. sym.as_poly) outside of this func.
+        # CPDR = A*mu**4 - B*mu**2 + C where mu = c*k/omega
         #
-        # I've tried using other more 'concrete' funcs for this purpose
-        # (e.g. sym.factor, sym.powsimp) but none of them seem to produce a result
-        # that is compact as sym.simplify.
+        # We previously used sym.simplify here which made later calls to sym.as_poly
+        # much more efficient. We are no longer doing this because:
+        # - sym.simplify can be a little slow.
+        # - sym.as_poly can be *really* slow in any case (e.g. never returning?)
         #
-        # sym.simplify *can* be very slow in other cases... but it does the job here
-        # so we'll stick with it for now.
-        A = sym.simplify(S * (X**2) + P)
-        B = sym.simplify(R * L * (X**2) + P * S * (2 + (X**2)))
-        C = sym.simplify(P * R * L * (1 + (X**2)))
-
+        # We also tried using other more 'concrete' funcs (e.g. factor, powsimp)
+        # instead of simplify, but none seemed to produce a result as compact as
+        # simplify (which, as per the source code, does a lot more than just calling
+        # other public Sympy funcs in sequence).
+        #
+        # So, rather than using sym.simplify and sym.as_poly we now:
+        # - Leave things unsimplified where possible
+        # - Rely on sym.Poly.from_list, which is a bit more restrictive but much
+        #   more reliable than sym.as_poly.
+        #
         # TODO: I don't like using `.value` here - too many symbols still present.
         # Can we move the substitution of c to somewhere further along?...
         # It's a shame we can't provide units for symbols to check consistency.
-        mu = const.c.value * k / omega
+        A = (S * (X**2) + P) * ((const.c.value / omega) ** 4)
+        B = (R * L * (X**2) + P * S * (2 + (X**2))) * ((const.c.value / omega) ** 2)
+        C = P * R * L * (1 + (X**2))
 
-        # Return cpdr as a biquadratic polynomial in k
-        return (A * mu**4 - B * mu**2 + C).as_poly(k), _syms
+        # Return cpdr as a biquadratic polynomial in k.
+        return sym.Poly.from_list([A, 0, -B, 0, C], k)
 
     def as_poly_in_k(self):
         """
@@ -166,6 +196,9 @@ class Cpdr:
             ========== ===== ===============================
             .
         """
+        if self._poly_k is None:
+            self._poly_k = self._generate_poly_in_k()
+
         return self._poly_k, self._syms
 
     def as_resonant_poly_in_omega(self):
@@ -216,13 +249,18 @@ class Cpdr:
             .
         """
         if self._resonant_poly_omega is None:
-            self._generate_resonant_poly_in_omega()
+            self._resonant_poly_omega = self._generate_resonant_poly_in_omega()
 
         return self._resonant_poly_omega, self._syms
 
     def _generate_resonant_poly_in_omega(self):
         """
         Generate resonant cpdr as a polynomial in `omega`.
+
+        Returns
+        -------
+        symp.polys.polytools.Poly
+            A polynomial in ``omega``.
 
         See Also
         --------
@@ -233,33 +271,101 @@ class Cpdr:
         # - Multiply by MULTIPLICATION_FACTOR to remove all traces of omega from the
         #   denominator of any coefficients.
 
-        # Start by grabbing our symbolic variables.
-        # mu, omega, and Omega_i are already defined in cpdr_syms.
-        k = self._syms["k"]
+        ### SYMBOL RETRIEVAL
+
+        # CPDR variables (minus k, which gets subbed out)
         omega = self._syms["omega"]
+        X = self._syms["X"]
+
+        # Gyrofrequencies
         Omega_i = self._syms["Omega[i]"]
-
-        # Grab the base and index associated with our Indexed object Omega_i
         Omega = Omega_i.base
-        i = Omega_i.indices[0]
 
-        # We're also going to need some additional symbols for the timebeing.
-        # TODO: Replace all of these with constant values / input params?
-        v_par, psi, n, gamma = sym.symbols("v_par, psi, n, gamma")
+        # Plasma frequencies
+        omega_p_i = self._syms["omega_p[i]"]
+        omega_p = omega_p_i.base
+
+        # Grab the index associated with our Indexed object Omega_i
+        # NOTE: This is the same as is used by omega_p_i
+        idx = Omega_i.indices[0]
+
+        # We're also going to need the following for the resonance condition
+        n = self._syms["n"]
+        v_par = self._syms["v_par"]
+        psi = self._syms["psi"]
+        gamma = self._syms["gamma"]
+
+        ### PROCEDURE
+
+        # Define this for convenient use with Sympy products / summations
+        PS_RANGE = (idx, idx.lower, idx.upper)
+
+        # To obtain a polynomial in `omega`, we need to remove `omega` from the
+        # denominator of each term in the Stix parameters.
+        # We do this by multiplying each Stix param by the lowest common multiple of
+        # all the denominators used in the parameter.
+
+        # For P this is easy: we just multiply by `omega**2`
+        P = omega**2 - sym.summation(omega_p_i**2, PS_RANGE)
+
+        # For S, R, and L we multiply by the following...
+        #
+        # NOTE: these correspond to the 'constant' (1) part of the parameter prior
+        # to multiplication; we add on the 'summation' part of the parameter below.
+        S = sym.product((omega + Omega_i) * (omega - Omega_i), PS_RANGE)
+        R = omega * sym.product(omega + Omega_i, PS_RANGE)
+        L = omega * sym.product(omega - Omega_i, PS_RANGE)
+
+        # ...which results in a product nested within the summation part of the
+        # parameter. The indices for the summation and the product both run over all
+        # particles within the plasma, *except that* the index on the product skips the
+        # current index being used in the summation. Sympy isn't designed to handle this
+        # kind of complexity, so we need to implement this ourselves.
+        #
+        # NOTE: Sympy expressions are immutable so updates to S, S_i etc. in the below
+        # do not actually modify variables 'in-place'. Hopefully this isn't costly.
+        for j in range(idx.lower, idx.upper + 1):
+            S_i = 1
+            R_i = 1
+            L_i = 1
+            for i in range(idx.lower, idx.upper + 1):
+                if i == j:
+                    continue
+                S_i *= (omega + Omega[i]) * (omega - Omega[i])
+                R_i *= omega + Omega[i]
+                L_i *= omega - Omega[i]
+            S -= (omega_p[j] ** 2) * S_i
+            R -= (omega_p[j] ** 2) * R_i
+            L -= (omega_p[j] ** 2) * L_i
+
+        # Ultimately, all terms in the cpdr need to be multiplied by a common factor.
+        # That common factor is the lowest common multiple of all of the above,
+        # multiplied further by `omega**4` to account for the `omega` in the denominator
+        # of `mu`. That is:
+        #
+        # (omega ** 6) * sym.Product(
+        #     (omega + Omega_i) * (omega - Omega_i), (idx, idx.lower, idx.upper)
+        # )
+        #
+        # Each term in A, B, C needs to be adjusted to account for this, giving...
+
+        A = (omega**2) * S * (X**2) + sym.product(
+            (omega + Omega_i) * (omega - Omega_i), PS_RANGE
+        ) * P
+        B = (omega**2) * (R * L * (X**2) + P * S * (2 + (X**2)))
+        C = (omega**2) * (P * R * L * (1 + (X**2)))
 
         # Substitute k for the resonance condition, as given by Eq 5 in Lyons 1974b.
         # Note that we are also using `k = k_par * cos(psi)` here, 'losing' the sign
         # of `k_par` in the process since `k` >= 0 by defn and `cos(psi)` >= 0 for
         # `psi` in [0, 90]. If we need to determine the sign of `k_par` again at any
         # point in the future, we can do so by (re)checking the resonance condition.
-        k_sub = (omega - n * Omega[0] / gamma) / (v_par * sym.cos(psi))
+        k_res = (omega - n * Omega[0] / gamma) / (v_par * sym.cos(psi))
+        ck = const.c.value * k_res
 
-        # Define our MULTIPLICATION_FACTOR
-        MULTIPLICATION_FACTOR = sym.Pow(omega, 6) * sym.product(
-            (omega + Omega_i) * (omega - Omega_i), (i, i.lower, i.upper)
-        )
+        # Return a polynomial in omega.
+        # NOTE: This uses .as_poly which can be painfully slow for large expressions.
+        # The hope is that the procedure above will result in an expression that is
+        # almost already in polynomial form, allowing this Sympy func to perform well.
 
-        # Replace mu with mu_sub and multiply by MULTIPLICATION_FACTOR
-        self._resonant_poly_omega = sym.cancel(
-            (MULTIPLICATION_FACTOR * self._poly_k).subs(k, k_sub)
-        ).as_poly(omega)
+        return (A * ck**4 - B * ck**2 + C).as_poly(omega)
