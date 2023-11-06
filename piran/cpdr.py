@@ -139,7 +139,7 @@ class Cpdr:
         # - sym.simplify can be a little slow.
         # - sym.as_poly can be *really* slow in any case (e.g. never returning?)
         #
-        # We also tried useing other more 'concrete' funcs (e.g. factor, powsimp)
+        # We also tried using other more 'concrete' funcs (e.g. factor, powsimp)
         # instead of simplify, but none seemed to produce a result as compact as
         # simplify (which, as per the source code, does a lot more than just calling
         # other public Sympy funcs in sequence).
