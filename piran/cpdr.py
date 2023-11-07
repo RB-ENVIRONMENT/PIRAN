@@ -4,9 +4,12 @@ Defines the Cpdr class.
 
 import sympy as sym
 import astropy.constants as const
-import plasmapy
 
 import timing
+
+from particles import Particles
+from waves import Waves
+from mag_field import MagField
 
 
 class Cpdr:
@@ -18,11 +21,19 @@ class Cpdr:
     particles : ParticleListLike
         A sequence of physical particles comprising our plasma.
         See: [ParticleListLike](https://docs.plasmapy.org/en/stable/api/plasmapy.particles.particle_collections.ParticleListLike.html#particlelistlike).
+    waves : Waves
+        Waves.
+    mag_field : MagField
+        Magnetic field.
     """
 
     @timing.timing
-    def __init__(self, particles):  # numpydoc ignore=GL08
-        self._particles = plasmapy.particles.ParticleList(particles)
+    def __init__(
+        self, particles: Particles, waves: Waves, mag_field: MagField
+    ):  # numpydoc ignore=GL08
+        self._particles = particles
+        self._waves = waves
+        self._mag_field = mag_field
 
         # Dict of symbols used throughout these funcs
         self._syms = self._generate_syms()
@@ -35,7 +46,7 @@ class Cpdr:
 
     def _generate_syms(self):  # numpydoc ignore=GL08
         # Use this for indexing w.r.t. particle species
-        i = sym.Idx("i", len(self._particles))
+        i = sym.Idx("i", len(self._particles.all))
 
         # Particle gyrofrequency
         Omega = sym.IndexedBase("Omega")
