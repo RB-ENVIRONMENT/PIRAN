@@ -7,6 +7,7 @@ import astropy.constants as const
 
 import timing
 
+from typing import Sequence
 from particles import Particles
 from waves import Waves
 from mag_field import MagField
@@ -29,11 +30,16 @@ class Cpdr:
 
     @timing.timing
     def __init__(
-        self, particles: Particles, waves: Waves, mag_field: MagField
+        self,
+        particles: Particles,
+        waves: Waves,
+        mag_field: MagField,
+        resonances: Sequence[int],
     ):  # numpydoc ignore=GL08
         self._particles = particles
         self._waves = waves
         self._mag_field = mag_field
+        self._resonances = resonances
 
         # Dict of symbols used throughout these funcs
         self._syms = self._generate_syms()

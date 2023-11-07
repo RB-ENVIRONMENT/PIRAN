@@ -11,9 +11,9 @@ from astropy.coordinates import Angle
 import timing
 import cpdr
 
-import mag_field
-import particles
-import waves
+from mag_field import MagField
+from particles import Particles
+from waves import GaussParams, Waves
 
 
 def replace_cpdr_symbols(CPDR, values):
@@ -350,13 +350,13 @@ def main():
     #   X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
     X_range = [1.0] * u.dimensionless_unscaled
 
-    cpdr_particles = particles.Particles(("e", "H+"), (n_, n_), RKE, alpha)
+    cpdr_particles = Particles(("e", "H+"), (n_, n_), RKE, alpha)
 
-    wave_angles = waves.GaussParams((0, 1), 0, 0.577)
-    wave_freqs = waves.GaussParams((omega_lc, omega_uc), omega_m, delta_omega)
-    cpdr_waves = waves.Waves(wave_angles, wave_freqs)
+    wave_angles = GaussParams((0, 1), 0, 0.577)
+    wave_freqs = GaussParams((omega_lc, omega_uc), omega_m, delta_omega)
+    cpdr_waves = Waves(wave_angles, wave_freqs)
 
-    cpdr_mag_field = mag_field.MagField(mlat, l_shell)
+    cpdr_mag_field = MagField(mlat, l_shell)
 
     dispersion = cpdr.Cpdr(cpdr_particles, cpdr_waves, cpdr_mag_field)
 

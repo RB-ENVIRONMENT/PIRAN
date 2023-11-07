@@ -1,8 +1,15 @@
 import plasmapy
+from typing import Sequence
 
 
 class Particles:
-    def __init__(self, particles, densities, energies, pitch_angles):
+    def __init__(
+        self,
+        particles: Sequence[str],
+        densities: Sequence[float],
+        energies: Sequence[float],
+        pitch_angles: Sequence[float],
+    ):
         if len(particles) != len(densities):
             raise Exception("Arguments lists should be of equal length.")
 
