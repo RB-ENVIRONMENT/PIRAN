@@ -346,7 +346,7 @@ def main():
     #   X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
     X_range = [1.0] * u.dimensionless_unscaled
 
-    dispersion = cpdr.Cpdr(2)
+    dispersion = cpdr.Cpdr(("e", "H+"))
 
     # For each resonance n and tangent of wave normal angle psi,
     # solve simultaneously the dispersion relation and the

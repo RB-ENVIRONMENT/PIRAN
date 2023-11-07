@@ -4,6 +4,7 @@ Defines the Cpdr class.
 
 import sympy as sym
 import astropy.constants as const
+import plasmapy
 
 import timing
 
@@ -12,22 +13,16 @@ class Cpdr:
     """
     A class for manipulation of the cold plasma dispersion relation.
 
-    Creating an instance of this class will immediately generate a symbolic
-    representation for the cpdr as a biquadratic function in the wave number `k`,
-    which can take some time!
-
     Parameters
     ----------
-    num_particles : int
-        The total number of particle species in the plasma being considered.
-        e.g. for proton-electron plasma, `num_particles`=2.
+    particles : ParticleListLike
+        A sequence of physical particles comprising our plasma.
+        See: [ParticleListLike](https://docs.plasmapy.org/en/stable/api/plasmapy.particles.particle_collections.ParticleListLike.html#particlelistlike).
     """
 
     @timing.timing
-    def __init__(self, num_particles):  # numpydoc ignore=GL08
-        # TODO: Replace 'num_particles' param with a tuple of Plasmapy Particles
-        # (including charge, mass, etc.)
-        self._num_particles = num_particles
+    def __init__(self, particles):  # numpydoc ignore=GL08
+        self._particles = plasmapy.particles.ParticleList(particles)
 
         # Dict of symbols used throughout these funcs
         self._syms = self._generate_syms()
@@ -40,7 +35,7 @@ class Cpdr:
 
     def _generate_syms(self):  # numpydoc ignore=GL08
         # Use this for indexing w.r.t. particle species
-        i = sym.Idx("i", self._num_particles)
+        i = sym.Idx("i", len(self._particles))
 
         # Particle gyrofrequency
         Omega = sym.IndexedBase("Omega")
