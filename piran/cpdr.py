@@ -223,7 +223,8 @@ class Cpdr:
 
         .. [1] Glauert, S. A., and R. B. Horne (2005),
            Calculation of pitch angle and energy diffusion coefficients with the PADIE
-           code, J. Geophys. Res., 110, A04206, doi:10.1029/2004JA010851.
+           code, J. Geophys. Res., 110, A04206, `doi:10.1029/2004JA010851
+           <https://doi.org/10.1029/2004JA010851>`_.
 
         Returns
         -------
