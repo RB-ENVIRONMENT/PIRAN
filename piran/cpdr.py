@@ -5,11 +5,9 @@ Defines the Cpdr class.
 import sympy as sym
 import astropy.constants as const
 
-import timing
-
 from typing import Sequence
 from particles import Particles
-from waves import Waves
+from gauss import Gaussian
 from mag_field import MagField
 
 
@@ -22,22 +20,27 @@ class Cpdr:
     particles : ParticleListLike
         A sequence of physical particles comprising our plasma.
         See: [ParticleListLike](https://docs.plasmapy.org/en/stable/api/plasmapy.particles.particle_collections.ParticleListLike.html#particlelistlike).
-    waves : Waves
-        Waves.
+    wave_angles : Gaussian
+        Wave normal angles.
+    wave_freqs : Gaussian
+        Wave frequencies.
     mag_field : MagField
         Magnetic field.
+    resonances : Sequence[int]
+        Resonances.
     """
 
-    @timing.timing
     def __init__(
         self,
         particles: Particles,
-        waves: Waves,
+        wave_angles: Gaussian,
+        wave_freqs: Gaussian,
         mag_field: MagField,
         resonances: Sequence[int],
-    ):  # numpydoc ignore=GL08
+    ) -> None:
         self._particles = particles
-        self._waves = waves
+        self._wave_angles = wave_angles
+        self._wave_freqs = wave_freqs
         self._mag_field = mag_field
         self._resonances = resonances
 
