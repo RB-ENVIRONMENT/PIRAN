@@ -5,7 +5,7 @@ Defines the Cpdr class.
 import sympy as sym
 import astropy.constants as const
 
-import timing
+import piran.timing as timing
 
 
 class Cpdr:
@@ -13,14 +13,14 @@ class Cpdr:
     A class for manipulation of the cold plasma dispersion relation.
 
     Creating an instance of this class will immediately generate a symbolic
-    representation for the cpdr as a biquadratic function in the wave number `k`,
+    representation for the cpdr as a biquadratic function in the wave number ``k``,
     which can take some time!
 
     Parameters
     ----------
     num_particles : int
         The total number of particle species in the plasma being considered.
-        e.g. for proton-electron plasma, `num_particles`=2.
+        e.g. for proton-electron plasma, ``num_particles=2``.
     """
 
     @timing.timing
@@ -159,94 +159,103 @@ class Cpdr:
         # Return cpdr as a biquadratic polynomial in k.
         return sym.Poly.from_list([A, 0, -B, 0, C], k)
 
-    def as_poly_in_k(self):
+    def as_poly_in_k(self):  # numpydoc ignore=RT05
         """
-        Retrieve baseline cpdr as a biquadratic polynomial in `k`.
+        Retrieve baseline cpdr as a biquadratic polynomial in ``k``.
 
-        As a function in the wave refractive index `mu = c*k/omega`, the cpdr has the
-        form `A*mu**4 - B*mu**2 + C` in which `A`, `B`, and `C` are themselves composed
-        of several symbolic variables.
+        As a function in the wave refractive index ``mu = c*k/omega``, the cpdr has the
+        form ``A*mu**4 - B*mu**2 + C`` in which ``A``, ``B``, and ``C`` are themselves
+        composed of several symbolic variables.
 
-        We skip the intermediary representation in `mu` and return this as a sympy
-        Polynomial in `k` for convenience.
+        We skip the intermediary representation in ``mu`` and return this as a sympy
+        Polynomial in ``k`` for convenience.
 
-        This baseline cpdr is generated when the `Cpdr` object is first created and is
+        This baseline cpdr is generated when the ``Cpdr`` object is first created and is
         stored in memory.
 
         Returns
         -------
         symp.polys.polytools.Poly
-            A biquadratic polynomial in `k`.
+            A biquadratic polynomial in ``k``.
 
         dict
-            A dict of `key : value` pairs, in which:
-            - each `value` corresponds to a symbol used somewhere in our polynomial, and
-            - the `key` is given by the name/label for that symbol.
-            A 'symbol' in this case refers to either a sympy.core.symbol.Symbol object
-            or a sympy.tensor.indexed.Indexed object (for objects with indices).
+            A dict of ``key : value`` pairs, in which:
+
+            - each ``value`` corresponds to a symbol used somewhere in our polynomial,
+            - the ``key`` is given by the name/label for that symbol.
+
+            A 'symbol' in this case refers to either a ``sympy.core.symbol.Symbol``
+            object or a ``sympy.tensor.indexed.Indexed`` object
+            (for objects with indices).
+
             The symbols stored in this dict are:
-            ========== ===== ===============================
-            Symbol     Units Description
-            ========== ===== ===============================
-            X          -     `tan(psi)` for wave angle `psi`
-            Omega[i]   rad/s Particle gyrofrequencies
-            omega_p[i] rad/s Particle plasma frequencies
-            omega      rad/s Wave frequency
-            k          -     Wave number
-            ========== ===== ===============================
-            .
+
+            ============== ===== ===================================
+            Symbol         Units Description
+            ============== ===== ===================================
+            ``X``          None  ``tan(psi)`` for wave angle ``psi``
+            ``Omega[i]``   rad/s Particle gyrofrequencies
+            ``omega_p[i]`` rad/s Particle plasma frequencies
+            ``omega``      rad/s Wave frequency
+            ``k``          1/m   Wave number
+            ============== ===== ===================================
         """
         if self._poly_k is None:
             self._poly_k = self._generate_poly_in_k()
 
         return self._poly_k, self._syms
 
-    def as_resonant_poly_in_omega(self):
+    def as_resonant_poly_in_omega(self):  # numpydoc ignore=RT05
         """
-        Retrieve resonant cpdr as a polynomial in `omega`.
+        Retrieve resonant cpdr as a polynomial in ``omega``.
 
         As described by Glauert [1]_ in paragraph 17:
 
-            For any given value of `X`, we substitute `k_par` from the resonance
+            For any given value of ``X``, we substitute ``k_par`` from the resonance
             condition into the dispersion relation to obtain a polynomial expression
-            for the frequency `omega`.
+            for the frequency ``omega``.
 
-        This function returns that polynomial expression for `omega`. The polynomial is
-        generated once on the first call to this func and then stored in memory for
+        This function returns that polynomial expression for ``omega``. The polynomial
+        is generated once on the first call to this func and then stored in memory for
         immediate retrieval in subsequent calls.
 
-        The order of the polynomial is equal to 6 + (2 * `num_particles`).
+        The order of the polynomial is equal to ``6 + (2 * num_particles)``.
 
         .. [1] Glauert, S. A., and R. B. Horne (2005),
-        Calculation of pitch angle and energy diffusion coefficients with the PADIE
-        code, J. Geophys. Res., 110, A04206, doi:10.1029/2004JA010851.
+           Calculation of pitch angle and energy diffusion coefficients with the PADIE
+           code, J. Geophys. Res., 110, A04206, `doi:10.1029/2004JA010851
+           <https://doi.org/10.1029/2004JA010851>`_.
 
         Returns
         -------
         symp.polys.polytools.Poly
-            A polynomial in `omega`.
+            A polynomial in ``omega``.
 
         dict
-            A dict of `key : value` pairs, in which:
-            - each `value` corresponds to a symbol used somewhere in our polynomial, and
-            - the `key` is given by the name/label for that symbol.
-            A 'symbol' in this case refers to either a sympy.core.symbol.Symbol object
-            or a sympy.tensor.indexed.Indexed object (for objects with indices).
+            A dict of ``key : value`` pairs, in which:
+
+            - each ``value`` corresponds to a symbol used somewhere in our polynomial,
+            - the ``key`` is given by the name/label for that symbol.
+
+            A 'symbol' in this case refers to either a ``sympy.core.symbol.Symbol``
+            object or a ``sympy.tensor.indexed.Indexed`` object
+            (for objects with indices).
+
             The symbols stored in this dict are:
-            ========== ===== =======================================
-            Symbol     Units Description
-            ========== ===== =======================================
-            X          -     `tan(psi)` for wave angle `psi`
-            Omega[i]   rad/s Particle gyrofrequencies
-            omega_p[i] rad/s Particle plasma frequencies
-            omega      rad/s Wave frequency
-            k          -     Wave number
-            n          -     Cyclotron resonance
-            v_par      m/s   Parallel component of particle velocity
-            gamma      -     Lorentz factor
-            psi        rad   Wave normal angle
-            ========== ===== =======================================
-            .
+
+            ============== ===== =======================================
+            Symbol         Units Description
+            ============== ===== =======================================
+            ``X``          None  ``tan(psi)`` for wave angle ``psi``
+            ``Omega[i]``   rad/s Particle gyrofrequencies
+            ``omega_p[i]`` rad/s Particle plasma frequencies
+            ``omega``      rad/s Wave frequency
+            ``k``          1/m   Wave number
+            ``n``          None  Cyclotron resonance
+            ``v_par``      m/s   Parallel component of particle velocity
+            ``gamma``      None  Lorentz factor
+            ``psi``        rad   Wave normal angle
+            ============== ===== =======================================
         """
         if self._resonant_poly_omega is None:
             self._resonant_poly_omega = self._generate_resonant_poly_in_omega()
@@ -255,7 +264,7 @@ class Cpdr:
 
     def _generate_resonant_poly_in_omega(self):
         """
-        Generate resonant cpdr as a polynomial in `omega`.
+        Generate resonant cpdr as a polynomial in ``omega``.
 
         Returns
         -------
