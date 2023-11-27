@@ -37,7 +37,7 @@ class Cpdr:
         wave_freqs: Gaussian,
         mag_field: MagField,
         resonances: Sequence[int],
-    ) -> None:
+    ) -> None:  # numpydoc ignore=GL08
         self._particles = particles
         self._wave_angles = wave_angles
         self._wave_freqs = wave_freqs
@@ -53,7 +53,16 @@ class Cpdr:
         # cpdr x resonant condition as a polynomial in omega, generated on request.
         self._resonant_poly_omega = None
 
-    def _generate_syms(self):  # numpydoc ignore=GL08
+    def _generate_syms(self):
+        """
+        Generate the symbols used in other class methods.
+
+        Returns
+        -------
+        dict
+            A dict of `key : value` pairs containing common symbols that can be
+            retrieved and used by other class methods.
+        """
         # Use this for indexing w.r.t. particle species
         i = sym.Idx("i", len(self._particles.all))
 
