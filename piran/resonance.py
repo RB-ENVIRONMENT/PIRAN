@@ -8,8 +8,8 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-import timing
-import cpdr
+from piran import timing
+from piran import cpdr
 
 
 def replace_cpdr_symbols(CPDR, values):

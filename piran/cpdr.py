@@ -5,7 +5,7 @@ Defines the Cpdr class.
 import sympy as sym
 import astropy.constants as const
 
-import piran.timing as timing
+from piran import timing
 
 
 class Cpdr:
