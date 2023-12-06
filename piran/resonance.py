@@ -13,6 +13,7 @@ import cpdr
 
 from mag_field import MagField
 from particles import Particles
+from particles import PiranParticle
 from gauss import Gaussian
 
 
@@ -350,7 +351,8 @@ def main():
     #   X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
     X_range = [1.0] * u.dimensionless_unscaled
 
-    cpdr_particles = Particles(("e", "H+"), (n_, n_), RKE, alpha)
+    piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
+    cpdr_particles = Particles(piran_particle_list, RKE, alpha)
     cpdr_wave_angles = Gaussian(0, 1, 0, 0.577)
     cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
     cpdr_mag_field = MagField(mlat, l_shell)
