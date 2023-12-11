@@ -13,7 +13,7 @@ from mag_field import MagField
 
 class Cpdr:
     """
-    A class for manipulation of the cold plasma dispersion relation.
+    A class for manipulating the cold plasma dispersion relation.
 
     Parameters
     ----------

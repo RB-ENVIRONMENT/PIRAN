@@ -46,7 +46,7 @@ class MagField:
 
     def __call__(self) -> np.number:
         """
-        Return the strength of the magnetic field.
+        Calculates the strength of the magnetic field.
 
         Returns
         -------
