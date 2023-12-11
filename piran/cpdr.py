@@ -8,7 +8,7 @@ import astropy.constants as const
 from typing import Sequence
 from particles import Particles
 from gauss import Gaussian
-from mag_field import MagField
+from magfield import MagField
 
 
 class Cpdr:
