@@ -2,6 +2,7 @@
 Defines the Gaussian class for use with Cpdr.
 """
 import numpy as np
+import numpy.typing
 
 
 class Gaussian:
@@ -34,18 +35,18 @@ class Gaussian:
         self._peak = peak
         self._width = width
 
-    def __call__(self, X: float) -> np.typing.ArrayLike:
+    def __call__(self, X: float) -> numpy.typing.ArrayLike:
         """
         Return the value of the distribution at location(s) X.
 
         Parameters
         ----------
-        X : np.typing.ArrayLike
+        X : numpy.typing.ArrayLike
             The location(s) at which the distribution is to be sampled.
 
         Returns
         -------
-        np.typing.ArrayLike
+        numpy.typing.ArrayLike
             The value of the distribution at location(s) X.
         """
         return (
