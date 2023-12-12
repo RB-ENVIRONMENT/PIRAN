@@ -11,7 +11,7 @@ from astropy.coordinates import Angle
 import timing
 import cpdr
 
-from mag_field import MagField
+from magfield import MagField
 from particles import Particles
 from particles import PiranParticle
 from gauss import Gaussian
