@@ -2,8 +2,9 @@
 Defines the PiranParticle and Particles classes for use with the Cpdr.
 """
 
-import plasmapy
 from typing import Sequence
+
+import plasmapy
 
 
 class PiranParticle(plasmapy.particles.Particle):
