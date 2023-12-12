@@ -3,18 +3,16 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-import timing
-import cpdr
-
-from magfield import MagField
-from particles import Particles
-from particles import PiranParticle
-from gauss import Gaussian
+from piran.timing import timing
+from piran.cpdr import Cpdr
+from piran.magfield import MagField
+from piran.particles import Particles
+from piran.particles import PiranParticle
+from piran.gauss import Gaussian
 
 
 def replace_cpdr_symbols(CPDR, values):
@@ -89,7 +87,7 @@ def poly_solver(poly):
     return roots
 
 
-@timing.timing
+@timing
 def compute_root_pairs(
     dispersion,
     n_range,
@@ -358,7 +356,7 @@ def main():
     cpdr_mag_field = MagField(mlat, l_shell)
     cpdr_resonances = n_range
 
-    dispersion = cpdr.Cpdr(
+    dispersion = Cpdr(
         cpdr_particles,
         cpdr_wave_angles,
         cpdr_wave_freqs,
