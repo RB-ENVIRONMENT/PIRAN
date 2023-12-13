@@ -3,13 +3,16 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-from piran import timing
-from piran import cpdr
+from piran.timing import timing
+from piran.cpdr import Cpdr
+from piran.magfield import MagField
+from piran.particles import Particles
+from piran.particles import PiranParticle
+from piran.gauss import Gaussian
 
 
 def replace_cpdr_symbols(CPDR, values):
@@ -84,7 +87,7 @@ def poly_solver(poly):
     return roots
 
 
-@timing.timing
+@timing
 def compute_root_pairs(
     dispersion,
     n_range,
@@ -346,7 +349,20 @@ def main():
     #   X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints))  # FIXME Unit?
     X_range = [1.0] * u.dimensionless_unscaled
 
-    dispersion = cpdr.Cpdr(2)
+    piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
+    cpdr_particles = Particles(piran_particle_list, RKE, alpha)
+    cpdr_wave_angles = Gaussian(0, 1, 0, 0.577)
+    cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
+    cpdr_mag_field = MagField(mlat, l_shell)
+    cpdr_resonances = n_range
+
+    dispersion = Cpdr(
+        cpdr_particles,
+        cpdr_wave_angles,
+        cpdr_wave_freqs,
+        cpdr_mag_field,
+        cpdr_resonances,
+    )
 
     # For each resonance n and tangent of wave normal angle psi,
     # solve simultaneously the dispersion relation and the
