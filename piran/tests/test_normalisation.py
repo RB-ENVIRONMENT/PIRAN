@@ -106,6 +106,7 @@ class TestNormalisationFactors:
         dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
 
         glauert_norm_factor = compute_glauert_normalisation_factor(
+            self.dispersion,
             dispersion_poly_k,
             glauert_root_pairs,
         )
@@ -136,6 +137,7 @@ class TestNormalisationFactors:
         dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
 
         glauert_norm_factor = compute_glauert_normalisation_factor(
+            self.dispersion,
             dispersion_poly_k,
             glauert_root_pairs,
             "trapezoid",
@@ -167,6 +169,7 @@ class TestNormalisationFactors:
         dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
 
         glauert_norm_factor = compute_glauert_normalisation_factor(
+            self.dispersion,
             dispersion_poly_k,
             glauert_root_pairs,
         )

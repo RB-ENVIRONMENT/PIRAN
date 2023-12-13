@@ -19,7 +19,7 @@ def solve_dispersion_relation(
     Parameters
     ----------
     dispersion : piran.cpdr.Cpdr
-        Cold plasma dispersion relation.
+        Cold plasma dispersion relation object.
     omega_c : tuple of astropy.units.quantity.Quantity
         Cyclotron (gyro) frequencies.
     omega_p : tuple of astropy.units.quantity.Quantity
@@ -69,6 +69,7 @@ def compute_wave_norm_angle_distribution(x, mean, sd):
 
 def compute_glauert_normalisation_factor(
     dispersion,
+    dispersion_poly_k,
     root_pairs,
     method="simpson",
 ):
@@ -79,7 +80,9 @@ def compute_glauert_normalisation_factor(
     Parameters
     ----------
     dispersion : piran.cpdr.Cpdr
-        Cold plasma dispersion relation.
+        Cold plasma dispersion relation object.
+    dispersion_poly_k : sympy.core.add.Add
+        Cold plasma dispersion relation as polynomial in k.
     root_pairs : list of tuples (X, omega, k)
         Solutions to the cold plasma dispersion relation.
     method : str, default="simpson"
@@ -89,10 +92,10 @@ def compute_glauert_normalisation_factor(
     norm_factor : np.floating
     """
     # Derivative in omega
-    dispersion_deriv_omega = dispersion.diff("omega")
+    dispersion_deriv_omega = dispersion_poly_k.diff("omega")
 
     # Derivative in k
-    dispersion_deriv_k = dispersion.diff("k")
+    dispersion_deriv_k = dispersion_poly_k.diff("k")
 
     # It has a better performance to substitute omega here since it is the
     # same for all root pairs/triplets and then lambdify the expression outside the loop,
@@ -109,16 +112,18 @@ def compute_glauert_normalisation_factor(
     )
 
     X_range = [pair[0] for pair in root_pairs]
+    wave_norm_angle_distribution = dispersion._wave_angles(np.array(X_range))
+
     evaluated_integrand = np.empty(len(root_pairs), dtype=np.float64)
     for i, pair in enumerate(root_pairs):
         X = pair[0]
         k = pair[2]
 
-        # g(X)
-        dist_wave_norm = compute_wave_norm_angle_distribution(X, 0.0, 0.577)
-
         evaluated_integrand[i] = (
-            dist_wave_norm * k**2 * dispersion_deriv_omega_eval(X, k) * X
+            wave_norm_angle_distribution[i]
+            * k**2
+            * dispersion_deriv_omega_eval(X, k)
+            * X
         ) / ((1 + X**2) ** (3 / 2) * dispersion_deriv_k_eval(X, k))
 
     if method == "trapezoid":
