@@ -34,15 +34,16 @@ def solve_dispersion_relation(
     root_pairs : list of tuples (X, omega, k)
         Solutions to the cold plasma dispersion relation.
     """
-    pairs = []
-    for i, X in enumerate(X_range):
-        values_dict = {
-            "X": X.value,
+    values_dict = {
             "omega": omega.value,
             "Omega": (omega_c[0].value, omega_c[1].value),
             "omega_p": (omega_p[0].value, omega_p[1].value),
         }
-        CPDR_k2 = replace_cpdr_symbols(dispersion._poly_k, values_dict)
+    CPDR_k = replace_cpdr_symbols(dispersion._poly_k, values_dict)
+
+    pairs = []
+    for i, X in enumerate(X_range):
+        CPDR_k2 = replace_cpdr_symbols(CPDR_k, {"X": X.value})
         k_l = poly_solver(CPDR_k2)
         valid_k_l = get_valid_roots(k_l)
 
