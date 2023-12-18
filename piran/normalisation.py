@@ -72,7 +72,7 @@ def compute_glauert_normalisation_factor(
     ----------
     dispersion : piran.cpdr.Cpdr
         Cold plasma dispersion relation object.
-    dispersion_poly_k : sympy.core.add.Add
+    dispersion_poly_k : sympy.core.expr.Expr
         Cold plasma dispersion relation as polynomial in k.
     root_pairs : list of tuples (X, omega, k)
         Solutions to the cold plasma dispersion relation.
