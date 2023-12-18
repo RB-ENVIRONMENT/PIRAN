@@ -58,15 +58,6 @@ def solve_dispersion_relation(
     return pairs
 
 
-def compute_wave_norm_angle_distribution(x, mean, sd):
-    """
-    For now we suppose that it is Gaussian.
-    """
-    dist_wave_norm = np.exp(-1.0 * ((x - mean) / sd) ** 2)
-
-    return dist_wave_norm
-
-
 def compute_glauert_normalisation_factor(
     dispersion,
     dispersion_poly_k,
