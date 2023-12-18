@@ -35,17 +35,19 @@ def solve_dispersion_relation(
         Solutions to the cold plasma dispersion relation.
     """
     values_dict = {
-            "omega": omega.value,
-            "Omega": (omega_c[0].value, omega_c[1].value),
-            "omega_p": (omega_p[0].value, omega_p[1].value),
-        }
-    cpdr_k_eval = sym.lambdify(["X"], replace_cpdr_symbols(dispersion._poly_k, values_dict), "numpy")
+        "omega": omega.value,
+        "Omega": (omega_c[0].value, omega_c[1].value),
+        "omega_p": (omega_p[0].value, omega_p[1].value),
+    }
+    cpdr_k_eval = sym.lambdify(
+        ["X"], replace_cpdr_symbols(dispersion._poly_k, values_dict), "numpy"
+    )
 
     pairs = []
     for i, X in enumerate(X_range):
-        # We've lambidifed `X` but `k` is still a symbol. When we call it with an argument
-        # it substitutes `X` with the value and returns a `sympy.core.add.Add` object,
-        # that's why calling `poly_solver(CPDR_k2)` still works.
+        # We've lambidifed `X` but `k` is still a symbol. When we call it with an
+        # argument it substitutes `X` with the value and returns a `sympy.core.add.Add`
+        # object, that's why calling `poly_solver(CPDR_k2)` still works.
         CPDR_k = cpdr_k_eval(X.value)
         k_l = poly_solver(CPDR_k)
         valid_k_l = get_valid_roots(k_l)
@@ -93,8 +95,8 @@ def compute_glauert_normalisation_factor(
     dispersion_deriv_k = dispersion_poly_k.diff("k")
 
     # It has a better performance to substitute omega here since it is the
-    # same for all root pairs/triplets and then lambdify the expression outside the loop,
-    # and use the lambdified object within the loop to replace X and k.
+    # same for all root pairs/triplets and then lambdify the expression outside the
+    # loop, and use the lambdified object within the loop to replace X and k.
     omega = root_pairs[0][1]  # All root pairs have the same omega
     values_dict = {
         "omega": omega,
