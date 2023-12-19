@@ -160,25 +160,34 @@ def compute_cunningham_normalisation_factor(
     # Derivative in k
     dispersion_deriv_k = dispersion_poly_k.diff("k")
 
+    omega = root_pairs[0][1]  # All root pairs have the same omega
+    values_dict = {
+        "omega": omega,
+    }
+    dispersion_deriv_omega_eval = replace_cpdr_symbols(
+        dispersion_deriv_omega, values_dict
+    )
+    dispersion_deriv_k_eval = replace_cpdr_symbols(dispersion_deriv_k, values_dict)
+
     norm_factor = np.empty(len(root_pairs), dtype=np.float64)
     for ii, pair in enumerate(root_pairs):
         X = pair[0]
-        omega = pair[1]
         k = pair[2]
 
         values_dict = {
-            "omega": omega,
             "k": k,
             "X": X,
         }
-        dispersion_deriv_omega_eval = replace_cpdr_symbols(
-            dispersion_deriv_omega, values_dict
+        dispersion_deriv_omega_eval2 = replace_cpdr_symbols(
+            dispersion_deriv_omega_eval, values_dict
         )
-        dispersion_deriv_k_eval = replace_cpdr_symbols(dispersion_deriv_k, values_dict)
+        dispersion_deriv_k_eval2 = replace_cpdr_symbols(
+            dispersion_deriv_k_eval, values_dict
+        )
 
-        norm_factor[ii] = (k**2 * dispersion_deriv_omega_eval * X) / (
-            (1 + X**2) ** (3 / 2) * dispersion_deriv_k_eval
+        norm_factor[ii] = (k**2 * dispersion_deriv_omega_eval2 * X) / (
+            (1 + X**2) ** (3 / 2) * dispersion_deriv_k_eval2
         )
-    norm_factor /= (2 * np.pi**2)
+    norm_factor /= 2 * np.pi**2
 
     return norm_factor
