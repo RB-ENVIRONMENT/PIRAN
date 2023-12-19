@@ -13,6 +13,7 @@ from piran.resonance import replace_cpdr_symbols
 from piran.normalisation import (
     solve_dispersion_relation,
     compute_glauert_normalisation_factor,
+    compute_cunningham_normalisation_factor,
 )
 
 
@@ -176,3 +177,44 @@ class TestNormalisationFactors:
 
         expected = -8.87151913e-19
         assert math.isclose(glauert_norm_factor, expected, rel_tol=1e-09, abs_tol=1e-27)
+
+    def test_cunningham_normalisation_1(self):
+        X_min = 0.00
+        X_max = 1.00
+        X_npoints = 100
+        X_range = u.Quantity(
+            np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+        )
+
+        root_pairs = solve_dispersion_relation(
+            self.dispersion,
+            (self.Omega_e, self.Omega_p),
+            (self.omega_pe, self.omega_pp),
+            self.omega,
+            X_range,
+        )
+
+        values_dict = {
+            "Omega": (self.Omega_e.value, self.Omega_p.value),
+            "omega_p": (self.omega_pe.value, self.omega_pp.value),
+        }
+        dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
+
+        cnf = compute_cunningham_normalisation_factor(
+            dispersion_poly_k,
+            root_pairs,
+        )
+
+        # Check the first, last, a few points in-between and the sum of all values.
+        # If an assertion fails, the test fails and the remaining asserts
+        # are not evaluated.
+        assert cnf[0] == 0.0
+        assert math.isclose(cnf[1], -6.14971590e-20, rel_tol=1e-09, abs_tol=1e-28)
+        assert math.isclose(cnf[20], -1.20262320e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[50], -2.71450691e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[80], -3.77673193e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[-1], -4.27878582e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf.sum(), -2.49251344e-16, rel_tol=1e-09, abs_tol=1e-24)
+
+        # Check the size of the array
+        assert cnf.size == X_npoints
