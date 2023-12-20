@@ -8,6 +8,7 @@ dependencies = [
     "plasmapy",
     "astropy",
     "numpy",
+    "scipy",
     "sympy",
     "matplotlib",
 ]
@@ -20,6 +21,9 @@ dev-extra = [
     "ruff",
     "black",
     "numpydoc",
+]
+test = [
+    "pytest",
 ]
 docs = [
     "sphinx",
@@ -40,4 +44,9 @@ exclude = [  # don't report on objects that match any of these regex
 '^timing',
 '^resonance',
 '^conf$',
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
 ]
