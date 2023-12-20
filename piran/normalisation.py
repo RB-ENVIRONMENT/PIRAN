@@ -133,3 +133,53 @@ def compute_glauert_normalisation_factor(
     norm_factor = integral * (1 / (2 * np.pi**2))
 
     return norm_factor
+
+
+def compute_cunningham_normalisation_factor(
+    dispersion_poly_k,
+    root_pairs,
+):
+    """
+    Calculate the normalisation factor from
+    Cunningham 2023 (denominator of equation 4b).
+
+    Parameters
+    ----------
+    dispersion_poly_k : sympy.core.expr.Expr
+        Cold plasma dispersion relation as polynomial in k.
+    root_pairs : list of tuples (X, omega, k)
+        Solutions to the cold plasma dispersion relation.
+
+    Returns
+    -------
+    norm_factor : numpy.ndarray[numpy.float64]
+    """
+    # Derivative in omega
+    dispersion_deriv_omega = dispersion_poly_k.diff("omega")
+
+    # Derivative in k
+    dispersion_deriv_k = dispersion_poly_k.diff("k")
+
+    # Since all root pairs have the same omega,
+    # replace it outside the loop and lamdify.
+    omega = root_pairs[0][1]
+    dd_domega = sym.lambdify(
+        ["X", "k"],
+        replace_cpdr_symbols(dispersion_deriv_omega, {"omega": omega}),
+        "numpy",
+    )
+    dd_dk = sym.lambdify(
+        ["X", "k"], replace_cpdr_symbols(dispersion_deriv_k, {"omega": omega}), "numpy"
+    )
+
+    norm_factor = np.empty(len(root_pairs), dtype=np.float64)
+    for ii, pair in enumerate(root_pairs):
+        X = pair[0]
+        k = pair[2]
+
+        norm_factor[ii] = (k**2 * dd_domega(X, k) * X) / (
+            (1 + X**2) ** (3 / 2) * dd_dk(X, k)
+        )
+    norm_factor /= 2 * np.pi**2
+
+    return norm_factor
