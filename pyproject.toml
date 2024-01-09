@@ -20,12 +20,12 @@ dev = [
 dev-extra = [
     "ruff",
     "black",
-    "numpydoc",
 ]
 test = [
     "pytest",
 ]
 docs = [
+    "numpydoc",
     "sphinx",
 ]
 
