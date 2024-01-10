@@ -4,12 +4,12 @@ Defines the Cpdr class.
 
 from typing import Sequence
 
-import sympy as sym
 import astropy.constants as const
+import sympy as sym
 
-from piran.particles import Particles
 from piran.gauss import Gaussian
 from piran.magfield import MagField
+from piran.particles import Particles
 
 
 class Cpdr:

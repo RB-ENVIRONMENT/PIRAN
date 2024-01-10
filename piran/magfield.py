@@ -2,10 +2,10 @@
 Defines the MagField class for use with the Cpdr.
 """
 
+import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
-import numpy as np
 
 
 class MagField:

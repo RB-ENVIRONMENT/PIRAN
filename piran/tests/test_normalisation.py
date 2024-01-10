@@ -1,20 +1,20 @@
 import math
+
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.magfield import MagField
-from piran.particles import Particles
-from piran.particles import PiranParticle
 from piran.gauss import Gaussian
-from piran.resonance import replace_cpdr_symbols
+from piran.magfield import MagField
 from piran.normalisation import (
-    solve_dispersion_relation,
-    compute_glauert_normalisation_factor,
     compute_cunningham_normalisation_factor,
+    compute_glauert_normalisation_factor,
+    solve_dispersion_relation,
 )
+from piran.particles import Particles, PiranParticle
+from piran.resonance import replace_cpdr_symbols
 
 
 class TestNormalisationFactors:
