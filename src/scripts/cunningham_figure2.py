@@ -85,9 +85,7 @@ def calculate_ratio(
     # Calculate the ratio Glauert/Cunningham normalisation factors
     ratios = []
     for X, cunningham_norm_factor in zip(X_range_cunningham, cunningham_norm_factors):
-        ratios.append(
-            (X, glauert_norm_factor / (integral_gx * cunningham_norm_factor))
-        )
+        ratios.append((X, glauert_norm_factor / (integral_gx * cunningham_norm_factor)))
 
     return ratios
 
@@ -130,11 +128,15 @@ def plot_figure2(
     if overlay is not None:
         overlay_ratio1x = overlay[:, 0]
         overlay_ratio1y = overlay[:, 1]
-        plt.loglog(overlay_ratio1x, overlay_ratio1y, color="k", linestyle="--", alpha=0.6)
+        plt.loglog(
+            overlay_ratio1x, overlay_ratio1y, color="k", linestyle="--", alpha=0.6
+        )
 
         overlay_ratio2x = overlay[:, 2]
         overlay_ratio2y = overlay[:, 3]
-        plt.loglog(overlay_ratio2x, overlay_ratio2y, color="r", linestyle="--", alpha=0.6)
+        plt.loglog(
+            overlay_ratio2x, overlay_ratio2y, color="r", linestyle="--", alpha=0.6
+        )
 
     # plt.minorticks_on()
     plt.xticks(x_ticks, [str(v) for v in x_ticks])
@@ -160,18 +162,44 @@ def plot_figure2(
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="Cunningham_Figure2", description="Reproduce Figure 2 from Cunningham, 2023"
+        prog="Cunningham_Figure2",
+        description="Reproduce Figure 2 from Cunningham, 2023",
     )
-    parser.add_argument("-p", "--path", required=True, help="Path to directory with Cunningham's dat files.")
-    parser.add_argument("-f", "--figure", choices=["a", "b", "c", "d"], required=True, help="Select figure to plot (a, b, c or d).")
-    parser.add_argument("-s", "--save", action="store_true", default=False, help="Pass this argument to save our results on disk, both figure and dat file.")
-    parser.add_argument("-o", "--overlay", action="store_true", default=False, help="Pass this argument to overlay Cunningham's results in our figures.")
+    parser.add_argument(
+        "-p",
+        "--path",
+        required=True,
+        help="Path to directory with Cunningham's dat files.",
+    )
+    parser.add_argument(
+        "-f",
+        "--figure",
+        choices=["a", "b", "c", "d"],
+        required=True,
+        help="Select figure to plot (a, b, c or d).",
+    )
+    parser.add_argument(
+        "-s",
+        "--save",
+        action="store_true",
+        default=False,
+        help="Pass this argument to save our results on disk, both figure and dat file.",
+    )
+    parser.add_argument(
+        "-o",
+        "--overlay",
+        action="store_true",
+        default=False,
+        help="Pass this argument to overlay Cunningham's results in our figures.",
+    )
 
     args = parser.parse_args()
 
     cunningham_dat_filepath = Path(args.path) / f"Figure2{args.figure}.dat"
     if not cunningham_dat_filepath.is_file():
-        raise Exception(f"Incorrect filepath for Cunningham's dat file: {cunningham_dat_filepath}")
+        raise Exception(
+            f"Incorrect filepath for Cunningham's dat file: {cunningham_dat_filepath}"
+        )
 
     filestem = cunningham_dat_filepath.stem
     if args.figure == "a" or args.figure == "b":
@@ -277,15 +305,15 @@ def main():
     ]
 
     # Use points from .dat files for integrating glauert's norm factor restricted to 0, min(X_max, sqrt(-P/S)
-    X_range_glauert_integral0 = u.Quantity(
-        np.insert(X_range_cunningham[0], 0, 0.0)
-    )
-    X_range_glauert_integral1 = u.Quantity(
-        np.insert(X_range_cunningham[1], 0, 0.0)
-    )
+    X_range_glauert_integral0 = u.Quantity(np.insert(X_range_cunningham[0], 0, 0.0))
+    X_range_glauert_integral1 = u.Quantity(np.insert(X_range_cunningham[1], 0, 0.0))
     # And restrict them
-    X_range_glauert_integral0 = X_range_glauert_integral0[X_range_glauert_integral0 < X_max_limits[0]]
-    X_range_glauert_integral1 = X_range_glauert_integral1[X_range_glauert_integral1 < X_max_limits[1]]
+    X_range_glauert_integral0 = X_range_glauert_integral0[
+        X_range_glauert_integral0 < X_max_limits[0]
+    ]
+    X_range_glauert_integral1 = X_range_glauert_integral1[
+        X_range_glauert_integral1 < X_max_limits[1]
+    ]
 
     # Or use a uniform distribution between X_min and X_upper = min(X_max, sqrt(-P/S))
     # X_range_glauert_integral0 = u.Quantity(
