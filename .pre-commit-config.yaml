@@ -2,24 +2,24 @@
 # See https://pre-commit.com/hooks.html for more hooks
 exclude: ^(private_docs|quarto-docs/_book)/
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
-    -   id: check-toml
--   repo: https://github.com/charliermarsh/ruff-pre-commit
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-toml
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.285
     hooks:
-    -   id: ruff
+      - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
--   repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black
     rev: 23.7.0
     hooks:
-    -   id: black
-- repo: https://github.com/pycqa/isort
-    rev: 5.6.4
+      - id: black
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
     hooks:
       - id: isort
