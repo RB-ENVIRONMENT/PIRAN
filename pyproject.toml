@@ -20,6 +20,7 @@ dev = [
 dev-extra = [
     "ruff",
     "black",
+    "isort",
 ]
 test = [
     "pytest",
@@ -50,3 +51,6 @@ exclude = [  # don't report on objects that match any of these regex
 addopts = [
     "--import-mode=importlib",
 ]
+
+[tool.isort]
+profile = "black"
