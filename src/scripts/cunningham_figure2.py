@@ -11,27 +11,25 @@
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
 import argparse
-from pathlib import Path
 import math
+from pathlib import Path
 
-import numpy as np
-from scipy.integrate import simpson
 import matplotlib.pyplot as plt
-
+import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
+from scipy.integrate import simpson
 
-from piran.particles import PiranParticle
-from piran.particles import Particles
+from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 from piran.magfield import MagField
-from piran.cpdr import Cpdr
 from piran.normalisation import (
-    solve_dispersion_relation,
-    compute_glauert_normalisation_factor,
     compute_cunningham_normalisation_factor,
+    compute_glauert_normalisation_factor,
+    solve_dispersion_relation,
 )
+from piran.particles import Particles, PiranParticle
 from piran.resonance import replace_cpdr_symbols
 
 

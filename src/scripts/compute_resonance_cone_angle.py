@@ -7,6 +7,7 @@
 #         --frequency_ratio 1.5`
 import argparse
 import math
+
 import numpy as np
 import sympy as sym
 from astropy import constants as const
