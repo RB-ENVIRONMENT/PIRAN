@@ -1,11 +1,11 @@
 # This script reproduces the results from Figure 2 in Cunningham, 2023.
 # To run use the `-p` option to pass the directory with the .dat
 # file from Cunningham paper (it is expected that the files are name
-# as "Figure?.dat") and the `-f` option to select the figure that
+# as "Figure2?.dat") and the `-f` option to select the figure that
 # you want to reproduce (a, b, c or d).
 # If you pass the optional `-s` argument the figure will be saved
-# on disk in the current working directory as "Figure[abcd].png",
-# instead of displayed on screen and also a file named "Figure[abcd].txt",
+# on disk in the current working directory as "Figure2[abcd].png",
+# instead of displayed on screen and also a file named "Figure2[abcd].txt",
 # will also be saved on disk. This contains our results, in a similar
 # format as the one in the .dat files.
 # Finally passing the `-o` argument will overlay Cunningham's results
