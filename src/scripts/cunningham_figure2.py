@@ -63,7 +63,8 @@ def calculate_ratio(
     )
 
     # Calculate integral of g(X)
-    # Technically we should prepend point X=0 and we should use left endpoint integration rule, not simpson
+    # Technically we should prepend point X=0 and we should use
+    # left endpoint integration rule, not simpson.
     eval_gx = np.empty(len(cunningham_root_pairs), dtype=np.float64)
     X_range = [pair[0] for pair in cunningham_root_pairs]
     for i, pair in enumerate(cunningham_root_pairs):
@@ -150,7 +151,8 @@ def plot_figure2(
     plt.ylabel("Ratio")
     plt.legend(loc="upper right")
     plt.title(
-        rf"Ratio of normalizers for $\omega_{{pe}}$/$\omega_{{ce}}$={frequency_ratio.value}"
+        rf"Ratio of normalizers for "
+        rf"$\omega_{{pe}}$/$\omega_{{ce}}$={frequency_ratio.value}"
     )
     plt.tight_layout()
 
@@ -183,7 +185,8 @@ def main():
         "--save",
         action="store_true",
         default=False,
-        help="Pass this argument to save our results on disk, both figure and dat file.",
+        help="Pass this argument to save our results on disk, \
+              both figure and dat file.",
     )
     parser.add_argument(
         "-o",
@@ -205,13 +208,13 @@ def main():
     if args.figure == "a" or args.figure == "b":
         X_min = 0.00
         X_max = 1.00
-        X_npoints = 1000
+        # X_npoints = 1000
         xticks = [0.01, 0.10, 1.00]
         yticks = [0.1, 1.0, 10.0, 100.0]
     elif args.figure == "c" or args.figure == "d":
         X_min = 0.00
         X_max = 5.67
-        X_npoints = 5000
+        # X_npoints = 5000
         xticks = [0.01, 0.10, 1.00, 10.00]
         yticks = [0.1, 1.0, 10.0, 100.0, 1000.0]
 
@@ -304,9 +307,10 @@ def main():
         min(X_max, 0.9999 * resonance_cone_limits[1]),
     ]
 
-    # Use points from .dat files for integrating glauert's norm factor restricted to 0, min(X_max, sqrt(-P/S)
-    X_range_glauert_integral0 = u.Quantity(np.insert(X_range_cunningham[0], 0, 0.0))
-    X_range_glauert_integral1 = u.Quantity(np.insert(X_range_cunningham[1], 0, 0.0))
+    # Use points from .dat files for integrating glauert's norm factor
+    # restricted to 0, min(X_max, sqrt(-P/S).
+    X_range_glauert_integral0 = u.Quantity(np.insert(X_range_cunningham[0], 0, X_min))
+    X_range_glauert_integral1 = u.Quantity(np.insert(X_range_cunningham[1], 0, X_min))
     # And restrict them
     X_range_glauert_integral0 = X_range_glauert_integral0[
         X_range_glauert_integral0 < X_max_limits[0]
@@ -365,9 +369,21 @@ def main():
         # Save ratios in similar format as the dat files from the paper
         comment = ""
         comment += "Column 1 is tangent of the wave normal angle used in column 2\n"
-        comment += f"Column 2 is the ratio of equation 4 to equation 5 using the X in column 1 when Xmax={X_max} and the ratio of the plasma frequency to the unsigned electron gyrofrequency is {frequency_ratio.value} and the ratio of the wave frequency to the unsigned electron gyrofrequency is {omega_ratios[0]}\n"
+        comment += (
+            f"Column 2 is the ratio of equation 4 to equation 5 using the X "
+            f"in column 1 when Xmax={X_max} and the ratio of the plasma "
+            f"frequency to the unsigned electron gyrofrequency is "
+            f"{frequency_ratio.value} and the ratio of the wave frequency "
+            f"to the unsigned electron gyrofrequency is {omega_ratios[0]}\n"
+        )
         comment += "Column 3 is tangent of the wave normal angle used in column 4\n"
-        comment += f"Column 4 is the ratio of equation 4 to equation 5 using the X in column 3 when Xmax={X_max} and the ratio of the plasma frequency to the unsigned electron gyrofrequency is {frequency_ratio.value} and the ratio of the wave frequency to the unsigned electron gyrofrequency is {omega_ratios[1]}"
+        comment += (
+            f"Column 4 is the ratio of equation 4 to equation 5 using the X "
+            f"in column 3 when Xmax={X_max} and the ratio of the plasma "
+            f"frequency to the unsigned electron gyrofrequency is "
+            f"{frequency_ratio.value} and the ratio of the wave frequency "
+            f"to the unsigned electron gyrofrequency is {omega_ratios[1]}"
+        )
 
         ratios = np.empty_like(cunningham_figure_data)
         for i in range(ratios.shape[0]):
