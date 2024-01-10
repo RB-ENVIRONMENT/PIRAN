@@ -64,18 +64,10 @@ def calculate_ratio(
 
     # Calculate integral of g(X)
     # Technically we should prepend point X=0 and we should use
-    # left endpoint integration rule, not simpson.
-    eval_gx = np.empty(len(cunningham_root_pairs), dtype=np.float64)
-    X_range = [pair[0] for pair in cunningham_root_pairs]
-    for i, pair in enumerate(cunningham_root_pairs):
-        xx = pair[0]
-
-        # g(X)
-        mean = 0.0
-        sd = 0.577
-        dist_wave_norm = np.exp(-1.0 * ((xx - mean) / sd) ** 2)
-        eval_gx[i] = dist_wave_norm
-    integral_gx = simpson(eval_gx, x=X_range)
+    # left endpoint integration rule, not simpson, as this is
+    # what Cunningham used in his paper.
+    eval_gx = dispersion._wave_angles(np.array(X_range_glauert))
+    integral_gx = simpson(eval_gx, x=X_range_glauert)
 
     # Calculate Cunningham's normalisation factors
     cunningham_norm_factors = compute_cunningham_normalisation_factor(
@@ -83,10 +75,12 @@ def calculate_ratio(
         cunningham_root_pairs,
     )
 
-    # Calculate the ratio Glauert/Cunningham normalisation factors
+    # Calculate the ratio of equation (4) to equation (5)
     ratios = []
     for X, cunningham_norm_factor in zip(X_range_cunningham, cunningham_norm_factors):
-        ratios.append((X, glauert_norm_factor / (integral_gx * cunningham_norm_factor)))
+        ratios.append(
+            (X, (1.0 / cunningham_norm_factor) / (integral_gx / glauert_norm_factor))
+        )
 
     return ratios
 
