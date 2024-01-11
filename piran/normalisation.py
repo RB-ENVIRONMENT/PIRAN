@@ -1,8 +1,8 @@
 import numpy as np
 import sympy as sym
-from scipy.integrate import trapezoid, simpson
+from scipy.integrate import simpson, trapezoid
 
-from piran.resonance import replace_cpdr_symbols, poly_solver, get_valid_roots
+from piran.resonance import get_valid_roots, poly_solver, replace_cpdr_symbols
 
 
 def solve_dispersion_relation(
