@@ -24,6 +24,7 @@ dev-extra = [
 ]
 test = [
     "pytest",
+    "coverage",
 ]
 docs = [
     "numpydoc",
