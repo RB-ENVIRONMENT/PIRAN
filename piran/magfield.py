@@ -10,16 +10,10 @@ from astropy.coordinates import Angle
 
 class MagField:
     """
-    A representation of the Earth's magnetic field at a given point.
+    A representation of the magnetic field of a planet (by default Earth's).
 
     Parameters
     ----------
-    mlat : float
-        Geomagnetic latitude in radians.
-
-    l_shell : float
-        The "L-shell", "L-value", or "McIlwain L-parameter".
-
     planetary_radius : astropy.units.Quantity[u.m]
         The radius of the planet of interest, given in units convertible to meters.
 
@@ -31,28 +25,36 @@ class MagField:
     @u.quantity_input
     def __init__(
         self,
-        mlat: Angle,
-        l_shell: float,
         planetary_radius: u.Quantity[u.m] = const.R_earth,
         planetary_mag_dipole_moment: u.Quantity[u.tesla * u.m**3] = 8.033454e15
         * (u.tesla * u.m**3),
     ) -> None:  # numpydoc ignore=GL08
-        self._mlat = mlat.rad
-        self._l_shell = l_shell
         self._radius = planetary_radius.to_value(u.m)
         self._mag_dipole_moment = planetary_mag_dipole_moment.to_value(
             u.tesla * u.m**3
         )
 
-    def __call__(self) -> np.number:
+    def get_strength(
+        self,
+        mlat: Angle,
+        l_shell: float,
+    ) -> np.number:
         """
         Calculates the strength of the magnetic field.
+
+        Parameters
+        ----------
+        mlat : astropy.coordinates.Angle
+            Geomagnetic latitude in radians.
+
+        l_shell : float
+            The "L-shell", "L-value", or "McIlwain L-parameter".
 
         Returns
         -------
         np.number
             The strength of the magnetic field.
         """
-        return (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(self._mlat) ** 2)) / (
-            self._l_shell**3 * self._radius**3 * np.cos(self._mlat) ** 6
+        return (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(mlat) ** 2)) / (
+            l_shell**3 * self._radius**3 * np.cos(mlat) ** 6
         )

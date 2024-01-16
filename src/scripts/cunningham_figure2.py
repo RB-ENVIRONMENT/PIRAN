@@ -282,7 +282,7 @@ def main():
     cpdr_particles = Particles(piran_particle_list, RKE, alpha)
     cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
     cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
-    cpdr_mag_field = MagField(mlat, l_shell)
+    cpdr_mag_field = MagField()
     cpdr_resonances = n_range
 
     dispersion = Cpdr(
