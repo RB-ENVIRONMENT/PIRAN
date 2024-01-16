@@ -5,6 +5,8 @@ Defines the Cpdr class.
 from typing import Sequence
 
 import astropy.constants as const
+import astropy.units as u
+import numpy as np
 import sympy as sym
 
 from piran.gauss import Gaussian
@@ -53,6 +55,30 @@ class Cpdr:
 
         # cpdr x resonant condition as a polynomial in omega, generated on request.
         self._resonant_poly_omega = None
+
+        # gyrofrequency = charge * mag field / mass
+        self._w_c = u.Quantity(
+            [
+                particle.charge * self._mag_field() / particle.mass
+                for particle in self._particles.all
+            ],
+            1 / u.s,
+        )
+
+        # plasma frequency = sqrt( (number density * charge^2) /
+        #                          (vacuum permittivity * mass) )
+        self._w_p = u.Quantity(
+            [
+                np.sqrt(
+                    (particle.density * particle.charge**2)
+                    / (const.eps0 * particle.mass)
+                )
+                for particle in self._particles.all
+            ],
+            1 / u.s,
+        )
+
+        self.stix = Stix(self._w_p, self._w_c)
 
     def _generate_syms(self):
         """
