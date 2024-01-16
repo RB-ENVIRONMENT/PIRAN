@@ -76,7 +76,7 @@ def calculate_ratio(
     # Technically we should prepend point X=0 and we should use
     # left endpoint integration rule, not simpson, as this is
     # what Cunningham used in his paper.
-    eval_gx = dispersion._wave_angles(np.array(X_range_glauert))
+    eval_gx = dispersion._wave_angles.eval(np.array(X_range_glauert))
     integral_gx = simpson(eval_gx, x=X_range_glauert)
 
     # Calculate Cunningham's normalisation factors

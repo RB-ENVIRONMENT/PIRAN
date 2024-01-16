@@ -35,7 +35,7 @@ class Gaussian:
         self._peak = peak
         self._width = width
 
-    def __call__(self, X: float) -> numpy.typing.ArrayLike:
+    def eval(self, X: float) -> numpy.typing.ArrayLike:
         """
         Return the value of the distribution at location(s) X.
 
