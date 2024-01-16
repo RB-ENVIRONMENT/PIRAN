@@ -39,20 +39,19 @@ class MagField:
     ) -> None:  # numpydoc ignore=GL08
         self._mlat = mlat.rad
         self._l_shell = l_shell
-        self._radius = planetary_radius.to_value(u.m)
-        self._mag_dipole_moment = planetary_mag_dipole_moment.to_value(
-            u.tesla * u.m**3
-        )
+        self._radius = planetary_radius.to(u.m)
+        self._mag_dipole_moment = planetary_mag_dipole_moment.to(u.tesla * u.m**3)
 
-    def __call__(self) -> np.number:
+    def __call__(self) -> u.Quantity[u.tesla]:
         """
         Calculates the strength of the magnetic field.
 
         Returns
         -------
-        np.number
+        u.Quantity[u.tesla]
             The strength of the magnetic field.
         """
-        return (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(self._mlat) ** 2)) / (
-            self._l_shell**3 * self._radius**3 * np.cos(self._mlat) ** 6
-        )
+        return (
+            (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(self._mlat) ** 2))
+            / (self._l_shell**3 * self._radius**3 * np.cos(self._mlat) ** 6)
+        ).to(u.tesla)
