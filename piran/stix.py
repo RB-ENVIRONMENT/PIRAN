@@ -16,7 +16,7 @@ class Stix:
         R = 1
 
         for idx in range(len(self._w_p)):
-            R -= (self._w_p[idx] ** 2) / (w * (w + self._w_c))
+            R -= (self._w_p[idx] ** 2) / (w * (w + self._w_c[idx]))
 
         return R
 
@@ -24,7 +24,7 @@ class Stix:
         L = 1
 
         for idx in range(len(self._w_p)):
-            L -= (self._w_p[idx] ** 2) / (w * (w - self._w_c))
+            L -= (self._w_p[idx] ** 2) / (w * (w - self._w_c[idx]))
 
         return L
 
