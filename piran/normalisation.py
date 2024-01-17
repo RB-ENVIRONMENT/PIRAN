@@ -109,7 +109,7 @@ def compute_glauert_normalisation_factor(
     )
 
     X_range = [pair[0] for pair in root_pairs]
-    wave_norm_angle_distribution = dispersion._wave_angles(np.array(X_range))
+    wave_norm_angle_distribution = dispersion._wave_angles.eval(np.array(X_range))
 
     evaluated_integrand = np.empty(len(root_pairs), dtype=np.float64)
     for i, pair in enumerate(root_pairs):
