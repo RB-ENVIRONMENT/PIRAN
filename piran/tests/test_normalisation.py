@@ -79,6 +79,8 @@ class TestNormalisationFactors:
             cpdr_wave_angles,
             cpdr_wave_freqs,
             cpdr_mag_field,
+            mlat,
+            l_shell,
             cpdr_resonances,
         )
 
