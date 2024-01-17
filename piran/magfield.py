@@ -53,6 +53,7 @@ class MagField:
         u.Quantity[u.tesla]
             The strength of the magnetic field.
         """
-        return (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(mlat.rad) ** 2)) / (
-            l_shell**3 * self._radius**3 * np.cos(mlat.rad) ** 6
+        return (
+            (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(mlat.rad) ** 2))
+            / (l_shell**3 * self._radius**3 * np.cos(mlat.rad) ** 6)
         ).to(u.tesla)
