@@ -54,3 +54,51 @@ class Stix:
     @u.quantity_input
     def D(self, w: u.Hz) -> u.dimensionless_unscaled:
         return (self.R(w) - self.L(w)) / 2
+
+    @u.quantity_input
+    def dR(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
+        R = 0
+
+        for idx in range(len(self._w_p)):
+            R += ((self._w_p[idx] ** 2) * (2 * w + self._w_c[idx])) / (
+                (w**2) * ((w + self._w_c[idx]) ** 2)
+            )
+
+        return R
+
+    @u.quantity_input
+    def dL(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
+        L = 0
+
+        for idx in range(len(self._w_p)):
+            L += ((self._w_p[idx] ** 2) * (2 * w - self._w_c[idx])) / (
+                (w**2) * ((w - self._w_c[idx]) ** 2)
+            )
+
+        return L
+
+    @u.quantity_input
+    def dP(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
+        P = 0
+
+        for idx in range(len(self._w_p)):
+            P += (2 * (self._w_p[idx] ** 2)) / (w**3)
+
+        return P
+
+    @u.quantity_input
+    def dS(self, w: u.Hz) -> u.dimensionless_unscaled:
+        return (self.dR(w) + self.dL(w)) / 2
+
+    @u.quantity_input
+    def dD(self, w: u.Hz) -> u.dimensionless_unscaled:
+        return (self.dR(w) - self.dL(w)) / 2
