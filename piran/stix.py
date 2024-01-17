@@ -2,17 +2,20 @@
 Defines the Stix class.
 """
 
-from typing import Sequence
+from astropy import units as u
 
 
 class Stix:
-    def __init__(
-        self, omega_p: Sequence[float], omega_c: Sequence[float]
-    ) -> None:  # numpydoc ignore=GL08
+    @u.quantity_input
+    def __init__(self, omega_p: u.Hz, omega_c: u.Hz) -> None:  # numpydoc ignore=GL08
         self._w_p = omega_p
         self._w_c = omega_c
 
-    def R(self, w) -> float:
+    @u.quantity_input
+    def R(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
         R = 1
 
         for idx in range(len(self._w_p)):
@@ -20,7 +23,11 @@ class Stix:
 
         return R
 
-    def L(self, w) -> float:
+    @u.quantity_input
+    def L(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
         L = 1
 
         for idx in range(len(self._w_p)):
@@ -28,7 +35,11 @@ class Stix:
 
         return L
 
-    def P(self, w) -> float:
+    @u.quantity_input
+    def P(self, w: u.Hz) -> u.dimensionless_unscaled:
+        if not w.isscalar:
+            raise ValueError("Frequency w should be a scalar")
+
         P = 1
 
         for idx in range(len(self._w_p)):
@@ -36,8 +47,10 @@ class Stix:
 
         return P
 
-    def S(self, w) -> float:
+    @u.quantity_input
+    def S(self, w: u.Hz) -> u.dimensionless_unscaled:
         return (self.R(w) + self.L(w)) / 2
 
-    def D(self, w) -> float:
+    @u.quantity_input
+    def D(self, w: u.Hz) -> u.dimensionless_unscaled:
         return (self.R(w) - self.L(w)) / 2
