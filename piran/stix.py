@@ -57,7 +57,7 @@ class Stix:
         return (self.R(w) - self.L(w)) / 2
 
     @u.quantity_input
-    def dR(self, w: u.Hz) -> u.dimensionless_unscaled:
+    def dR(self, w: u.Hz) -> u.s:
         if not w.isscalar:
             raise ValueError("Frequency w should be a scalar")
 
@@ -71,7 +71,7 @@ class Stix:
         return R
 
     @u.quantity_input
-    def dL(self, w: u.Hz) -> u.dimensionless_unscaled:
+    def dL(self, w: u.Hz) -> u.s:
         if not w.isscalar:
             raise ValueError("Frequency w should be a scalar")
 
@@ -85,7 +85,7 @@ class Stix:
         return L
 
     @u.quantity_input
-    def dP(self, w: u.Hz) -> u.dimensionless_unscaled:
+    def dP(self, w: u.Hz) -> u.s:
         if not w.isscalar:
             raise ValueError("Frequency w should be a scalar")
 
@@ -97,58 +97,74 @@ class Stix:
         return P
 
     @u.quantity_input
-    def dS(self, w: u.Hz) -> u.dimensionless_unscaled:
+    def dS(self, w: u.Hz) -> u.s:
         return (self.dR(w) + self.dL(w)) / 2
 
     @u.quantity_input
-    def dD(self, w: u.Hz) -> u.dimensionless_unscaled:
+    def dD(self, w: u.Hz) -> u.s:
         return (self.dR(w) - self.dL(w)) / 2
 
     @u.quantity_input
-    def A(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
-        return (self.S(w) * X.rad**2) + self.P(w)
+    def A(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
+        return (self.S(w) * X**2) + self.P(w)
 
     @u.quantity_input
-    def B(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
-        return (self.R(w) * self.L(w) * X.rad**2) + (
+    def B(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
+        return (self.R(w) * self.L(w) * X**2) + (
             (self.P(w) * self.S(w)) * (2 + X**2)
         )
 
     @u.quantity_input
-    def C(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
-        return (self.P(w) * self.R(w) * self.L(w)) * (1 + X.rad**2)
+    def C(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
+        return (self.P(w) * self.R(w) * self.L(w)) * (1 + X**2)
 
     @u.quantity_input
-    def dA(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
-        return (self.dS(w) * X.rad**2) + self.dP(w)
+    def dA(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.s:
+        return (self.dS(w) * X**2) + self.dP(w)
 
     @u.quantity_input
-    def dB(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
-        return ((self.dR(w) * self.L(w) + self.R(w) * self.dL(w)) * (X.rad**2)) + (
+    def dB(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.s:
+        return ((self.dR(w) * self.L(w) + self.R(w) * self.dL(w)) * (X**2)) + (
             (self.dP(w) * self.S(w) + self.P(w) * self.dS(w)) * (2 + X**2)
         )
 
     @u.quantity_input
-    def dC(self, w: u.Hz, X: u.rad) -> u.dimensionless_unscaled:
+    def dC(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.s:
         return (
             self.dP(w) * self.R(w) * self.L(w)
             + self.P(w) * self.dR(w) * self.L(w)
             + self.P(w) * self.R(w) * self.dL(w)
-        ) * (1 + X.rad**2)
+        ) * (1 + X**2)
 
     @u.quantity_input
     def jacobian(
-        self, w: u.Hz, X: u.rad, k: u.Quantity[1 / u.m], w_c: u.Hz
-    ) -> u.dimensionless_unscaled:
-        mu = const.c * k / w_c
-        return (
-            (k**2)
-            * (
-                (
-                    (self.dA(w, X) * mu**4 - self.dB(w, X) * mu**2 + self.dC(w, X))
-                    / (2 * (2 * self.A(w, X) * mu**4 - self.B(w, X) * mu**2))
-                )
-                - (1 / w)
+        self, w: u.Hz, X: u.dimensionless_unscaled, k: u.Quantity[1 / u.m]
+    ) -> u.Quantity[u.s / u.m**2]:
+        mu = const.c * k / w
+        return ((k**2) / (1 + X**2)) * (
+            (
+                (self.dA(w, X) * mu**4 - self.dB(w, X) * mu**2 + self.dC(w, X))
+                / (2 * (2 * self.A(w, X) * mu**4 - self.B(w, X) * mu**2))
             )
-            / (1 + X.rad**2)
+            - (1 / w)
+        )
+
+    @u.quantity_input
+    def dD_dk(
+        self, w: u.Hz, X: u.dimensionless_unscaled, k: u.Quantity[1 / u.m]
+    ) -> u.m:
+        mu = const.c * k / w
+
+        return (2 / k) * (2 * self.A(w, X) * mu**4 - self.B(w, X) * mu**2)
+
+    @u.quantity_input
+    def dD_dw(
+        self, w: u.Hz, X: u.dimensionless_unscaled, k: u.Quantity[1 / u.m]
+    ) -> u.s:
+        mu = const.c * k / w
+
+        return (
+            (self.dA(w, X) - 4 * self.A(w, X) / w) * mu**4
+            - (self.dB(w, X) - 2 * self.B(w, X) / w) * mu**2
+            + self.dC(w, X)
         )
