@@ -32,15 +32,8 @@ def plot(
     )
 
     plt.plot(x, y, "b")
-
-    # # plt.minorticks_on()
-    # plt.xticks(x_ticks, [str(v) for v in x_ticks])
-    # plt.yticks(y_ticks, [str(v) for v in y_ticks])
-    # plt.tick_params("x", which="both", top=True, labeltop=False)
-    # plt.tick_params("y", which="both", right=True, labelright=False)
-    # # plt.yticks(np.arange(0.2, 1.0, 0.1), [], minor=True)
-    # plt.xlim(x_lim_min, x_lim_max)
-    # plt.ylim(y_lim_min, y_lim_max)
+    plt.axhline(y=0.0, color="k", linestyle="--", alpha=0.4)
+    plt.ylim(-1.2e7, 1.2e7)
     plt.xlabel(r"X")
     plt.ylabel(rf"$|v_{{||}} - \partial \omega / \partial k_{{||}}|$")
     plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}$")
