@@ -35,7 +35,7 @@ def plot(
     plt.axhline(y=0.0, color="k", linestyle="--", alpha=0.4)
     plt.ylim(-1.2e7, 1.2e7)
     plt.xlabel(r"X")
-    plt.ylabel(rf"$|v_{{||}} - \partial \omega / \partial k_{{||}}|$")
+    plt.ylabel(rf"$v_{{||}} - \partial \omega / \partial k_{{||}}$")
     plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}$")
     plt.tight_layout()
 
