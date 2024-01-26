@@ -41,7 +41,7 @@ def plot(
     plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}, $n$={resonance}$")
     plt.tight_layout()
 
-    filestem = f"resonance({resonance}E({rke})alpha({float(alpha):05.2f})"
+    filestem = f"resonance({resonance})E({rke})alpha({float(alpha):05.2f})"
     if save:
         plt.savefig(f"{filestem}.png", dpi=150)
     else:
