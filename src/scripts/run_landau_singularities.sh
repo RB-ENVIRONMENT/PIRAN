@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 rke=1.0  # MeV
-alpha=($(seq 65.0 0.1 68.0))  # degrees
+alpha=($(seq 1.0 1.0 89.0))  # degrees
+resonance=($(seq -5 1 5))  # degrees
 
-for a in ${alpha[*]}
+for r in ${resonance[*]}
 do
-    python landau_singularities.py --rke "$rke" --alpha "$a" --save
+    for a in ${alpha[*]}
+    do
+        python -u landau_singularities.py --rke "$rke" --alpha "$a" --resonance "$r" --save 2>&1 | tee -a landau_singularities.log
+    done
 done

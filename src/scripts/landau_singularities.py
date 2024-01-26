@@ -1,7 +1,8 @@
-# python src/scripts/landau_singularities.py --rke 1.0 --alpha 5.0 [--save]
+# python src/scripts/landau_singularities.py --rke 1.0 --alpha 5.0 --resonance 0 [--save]
 # where rke in MeV and alpha in degrees.
-import math
 import argparse
+import math
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +15,7 @@ from piran.gauss import Gaussian
 from piran.magfield import MagField
 from piran.normalisation import solve_dispersion_relation
 from piran.particles import Particles, PiranParticle
-from piran.resonance import calc_lorentz_factor
+from piran.resonance import calc_lorentz_factor, compute_root_pairs
 
 
 def plot(
@@ -22,6 +23,7 @@ def plot(
     y,
     rke,
     alpha,
+    resonance,
     save,
 ):
     plt.rcParams.update(
@@ -31,24 +33,25 @@ def plot(
         }
     )
 
-    plt.plot(x, y, "b")
+    plt.plot(x, y, "b.")
     plt.axhline(y=0.0, color="k", linestyle="--", alpha=0.4)
-    plt.ylim(-1.2e7, 1.2e7)
+    plt.yscale("symlog")
+    plt.xlim(0.0, 1.0)
+    plt.ylim(-1e8, 3e8)
     plt.xlabel(r"X")
     plt.ylabel(rf"$v_{{||}} - \partial \omega / \partial k_{{||}}$")
-    plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}$")
+    plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}, $n$={resonance}$")
     plt.tight_layout()
 
-    filestem = f"E({rke})alpha({alpha})"
+    filestem = f"resonance({resonance}E({rke})alpha({alpha:02d})"
     if save:
         plt.savefig(f"{filestem}.png", dpi=150)
     else:
         plt.show()
 
 
-def compute(RKE, alpha):
+def compute(RKE, alpha, resonance):
     frequency_ratio = 1.5 * u.dimensionless_unscaled
-    omega_ratio = 0.1225
 
     # ============================== START ============================== #
     # Those should be attributes of one of the main classes
@@ -76,7 +79,6 @@ def compute(RKE, alpha):
     # We need those because they are input arguments to the new Cpdr class.
     # They are not needed for these tests.
 
-
     gamma = calc_lorentz_factor(RKE, const.m_e)
     v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
     v_par = v * math.cos(alpha.rad)
@@ -88,14 +90,12 @@ def compute(RKE, alpha):
     omega_uc = omega_m + 1.5 * delta_omega
 
     # Resonances
-    n_min = -5
-    n_max = 5
+    n_min = resonance
+    n_max = resonance
     n_range = u.Quantity(
         range(n_min, n_max + 1), unit=u.dimensionless_unscaled, dtype=np.int32
     )
     # =============================== END =============================== #
-
-    omega = abs(Omega_e) * omega_ratio
 
     piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
     cpdr_particles = Particles(piran_particle_list, RKE, alpha)
@@ -118,46 +118,60 @@ def compute(RKE, alpha):
 
     X_min = 0.00
     X_max = 1.00
-    X_npoints = 100
+    X_npoints = 200
     X_range = u.Quantity(
         np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
     )
 
-    xwk_roots = solve_dispersion_relation(
+    # For each resonance n and tangent of wave normal angle psi,
+    # solve simultaneously the dispersion relation and the
+    # resonance condition to get valid root pairs for omega and k.
+    root_pairs = compute_root_pairs(
         dispersion,
-        (Omega_e, Omega_p),
-        (omega_pe, omega_pp),
-        omega,
+        n_range,
         X_range,
+        v_par,
+        gamma,
+        Omega_e,
+        Omega_p,
+        omega_pe,
+        omega_pp,
+        omega_lc,
+        omega_uc,
     )
 
-    results = np.empty(len(xwk_roots), dtype=np.float64)
+    xwk_roots = root_pairs[resonance]
+
     x_axis = np.empty(len(xwk_roots), dtype=np.float64)
+    y_axis = np.empty(len(xwk_roots), dtype=np.float64)
     for ii, pair in enumerate(xwk_roots):
-        X = pair[0]
-        k = pair[2]
+        X_res = pair[0]
+        omega_res = pair[1] * u.Hz
+        k_res = pair[2]
 
-        dD_dk = dispersion.stix.dD_dk(omega, X, k / u.m).value
-        dD_dw = dispersion.stix.dD_dw(omega, X, k / u.m).value
+        dD_dk = dispersion.stix.dD_dk(omega_res, X_res, k_res / u.m).value
+        dD_dw = dispersion.stix.dD_dw(omega_res, X_res, k_res / u.m).value
 
-        results[ii] = v_par.value + (dD_dk / dD_dw) * math.sqrt(1 + X**2)
-        x_axis[ii] = X
+        y_axis[ii] = v_par.value + (dD_dk / dD_dw) * math.sqrt(1 + X_res**2)
+        x_axis[ii] = X_res
 
-    return x_axis, results
+    return x_axis, y_axis
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rke", required=True)
     parser.add_argument("--alpha", required=True)
+    parser.add_argument("--resonance", required=True)
     parser.add_argument("--save", action="store_true", default=False)
     args = parser.parse_args()
 
     rke = args.rke * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
     alpha = Angle(args.alpha, u.deg)  # pitch angle in degrees
+    resonance = int(args.resonance)  # resonance
 
-    x, y = compute(rke, alpha)
-    plot(x, y, args.rke, args.alpha, args.save)
+    x, y = compute(rke, alpha, resonance)
+    plot(x, y, args.rke, args.alpha, args.resonance, args.save)
 
 
 if __name__ == "__main__":
