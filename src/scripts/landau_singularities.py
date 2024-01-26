@@ -3,7 +3,6 @@
 import argparse
 import math
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy import constants as const
@@ -13,7 +12,6 @@ from astropy.coordinates import Angle
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 from piran.magfield import MagField
-from piran.normalisation import solve_dispersion_relation
 from piran.particles import Particles, PiranParticle
 from piran.resonance import calc_lorentz_factor, compute_root_pairs
 
@@ -39,11 +37,11 @@ def plot(
     plt.xlim(0.0, 1.0)
     plt.ylim(-1e8, 3e8)
     plt.xlabel(r"X")
-    plt.ylabel(rf"$v_{{||}} - \partial \omega / \partial k_{{||}}$")
+    plt.ylabel(r"$v_{||} - \partial \omega / \partial k_{||}$")
     plt.title(rf"$E$={rke} MeV, $\alpha$={alpha}$^{{\circ}}, $n$={resonance}$")
     plt.tight_layout()
 
-    filestem = f"resonance({resonance}E({rke})alpha({alpha:05.2f})"
+    filestem = f"resonance({resonance}E({rke})alpha({float(alpha):05.2f})"
     if save:
         plt.savefig(f"{filestem}.png", dpi=150)
     else:
