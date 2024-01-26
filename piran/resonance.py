@@ -86,7 +86,7 @@ def poly_solver(poly):
     return roots
 
 
-@timing
+# @timing
 def compute_root_pairs(
     dispersion,
     n_range,
@@ -170,7 +170,7 @@ def compute_root_pairs(
 
             # We expect at most 1 real positive root
             if len(valid_omega_l) > 1:
-                msg = "We got more than one real positive root for omega"
+                msg = f"n={n.value} X={X.value} We got more than one real positive root for omega"
                 raise ValueError(msg)
 
             # Find values of k for each valid omega root
@@ -193,7 +193,7 @@ def compute_root_pairs(
 
                 # We expect at most 1 real positive root
                 if valid_k_l.size > 1:
-                    msg = "We got more than one real positive root for k"
+                    msg = f"n={n.value} X={X.value} omega={valid_omega} We got more than one real positive root for k"
                     raise ValueError(msg)
 
                 # Note: At this point valid_k_l will contain only one element
