@@ -30,9 +30,7 @@ class MagField:
         * (u.tesla * u.m**3),
     ) -> None:  # numpydoc ignore=GL08
         self._radius = planetary_radius.to_value(u.m)
-        self._mag_dipole_moment = planetary_mag_dipole_moment.to_value(
-            u.tesla * u.m**3
-        )
+        self._mag_dipole_moment = planetary_mag_dipole_moment.to_value(u.tesla * u.m**3)
 
     def get_strength(
         self,
