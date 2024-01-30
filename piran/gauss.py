@@ -1,6 +1,7 @@
 """
 Defines the Gaussian class for use with Cpdr.
 """
+
 import numpy as np
 import numpy.typing
 
