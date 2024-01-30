@@ -110,9 +110,7 @@ class Stix:
 
     @u.quantity_input
     def B(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
-        return (self.R(w) * self.L(w) * X**2) + (
-            (self.P(w) * self.S(w)) * (2 + X**2)
-        )
+        return (self.R(w) * self.L(w) * X**2) + ((self.P(w) * self.S(w)) * (2 + X**2))
 
     @u.quantity_input
     def C(self, w: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
