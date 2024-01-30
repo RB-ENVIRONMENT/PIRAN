@@ -2,21 +2,21 @@ import math
 import time
 
 import numpy as np
-from scipy.optimize import root_scalar
 import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
+from scipy.optimize import root_scalar
 
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 from piran.magfield import MagField
 from piran.particles import Particles, PiranParticle
 from piran.resonance import (
-    replace_cpdr_symbols,
-    poly_solver,
-    get_valid_roots,
     calc_lorentz_factor,
+    get_valid_roots,
+    poly_solver,
+    replace_cpdr_symbols,
 )
 
 
