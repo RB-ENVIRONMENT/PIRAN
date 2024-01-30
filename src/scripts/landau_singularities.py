@@ -1,4 +1,7 @@
-# python src/scripts/landau_singularities.py --rke 1.0 --alpha 5.0 --resonance 0 [--save]
+# python src/scripts/landau_singularities.py --rke 1.0 \
+#                                            --alpha 5.0 \
+#                                            --resonance 0
+#                                           [--save]
 # where rke in MeV and alpha in degrees.
 import argparse
 import math

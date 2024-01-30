@@ -103,7 +103,10 @@ def find_resonant_triplets(
 
     # We expect at most 1 real positive root
     if valid_k_l.size > 1:
-        msg = f"n={n.value} X={X.value} omega={valid_omega} We got more than one real positive root for k"
+        msg = (
+            f"n={n.value} X={X.value} omega={valid_omega} "
+            f"We got more than one real positive root for k"
+        )
         # raise ValueError(msg)
         print(msg)
         return None
@@ -276,11 +279,6 @@ def main():
         print(root_results)
         print(f"{X=:.9f} - {omega=:.5e} - {k=:.5e} - {landau=:12.4e}")
         print()
-
-    # for X in X_range:
-    #     omega, k = find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, X)
-    #     landau = f(X, dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, dD_dw_lambif, dD_dk_lambif)
-    #     print(f"{X=:.3f} - {omega=:.4e} - {k=:.4e} - {landau=:12.4e}")
 
 
 if __name__ == "__main__":
