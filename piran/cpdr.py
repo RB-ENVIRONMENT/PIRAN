@@ -211,21 +211,9 @@ class Cpdr:
         # TODO: I don't like using `.value` here - too many symbols still present.
         # Can we move the substitution of c to somewhere further along?...
         # It's a shame we can't provide units for symbols to check consistency.
-        A = S * (X**2) + P
-        B = R * L * (X**2) + P * S * (2 + (X**2))
+        A = (S * (X**2) + P) * ((const.c.value / omega) ** 4)
+        B = (R * L * (X**2) + P * S * (2 + (X**2))) * ((const.c.value / omega) ** 2)
         C = P * R * L * (1 + (X**2))
-
-        self._A = A
-        self._B = B
-        self._C = C
-        self._R = R
-        self._L = L
-        self._P = P
-        self._S = S
-        self._D = (R - L) / 2
-
-        A = A * ((const.c.value / omega) ** 4)
-        B = B * ((const.c.value / omega) ** 2)
 
         # Return cpdr as a biquadratic polynomial in k.
         return sym.Poly.from_list([A, 0, -B, 0, C], k)

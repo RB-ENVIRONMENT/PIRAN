@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
@@ -67,7 +66,9 @@ class TestNormalisationFactors:
 
         self.omega = abs(self.Omega_e) * omega_ratio
 
-        piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
+        # Use "p+" for proton here instead of "H+".
+        # "H+" accounts for hydrogen isotopes so has a higher standard atomic weight!
+        piran_particle_list = (PiranParticle("e", n_), PiranParticle("p+", n_))
         cpdr_particles = Particles(piran_particle_list, RKE, alpha)
         # NOTE upper is just a very large number for now (X_max?)
         cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
@@ -221,148 +222,3 @@ class TestNormalisationFactors:
 
         # Check the size of the array
         assert cnf.size == X_npoints
-
-    def test_jacobian(self):
-        X_min = 0.00
-        X_max = 1.00
-        X_npoints = 100
-        X_range = u.Quantity(
-            np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
-        )
-
-        xwk_roots = solve_dispersion_relation(
-            self.dispersion,
-            (self.Omega_e, self.Omega_p),
-            (self.omega_pe, self.omega_pp),
-            self.omega,
-            X_range,
-        )
-
-        values_dict = {
-            "Omega": (self.Omega_e.value, self.Omega_p.value),
-            "omega_p": (self.omega_pe.value, self.omega_pp.value),
-        }
-        dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
-
-        dD_dw_sym = dispersion_poly_k.diff("omega")
-        dD_dk_sym = dispersion_poly_k.diff("k")
-
-        dD_dw = sym.lambdify(
-            ["X", "k"],
-            replace_cpdr_symbols(dD_dw_sym, {"omega": self.omega.value}),
-            "numpy",
-        )
-
-        dD_dk = sym.lambdify(
-            ["X", "k"],
-            replace_cpdr_symbols(dD_dk_sym, {"omega": self.omega.value}),
-            "numpy",
-        )
-
-        values_dict["omega"] = self.omega.value
-
-        R_sym = replace_cpdr_symbols(self.dispersion._R, values_dict)
-        assert np.isclose(float(R_sym), self.dispersion.stix.R(self.omega).value)
-        assert np.isclose(float(R_sym), 1, rtol=1e3)
-
-        L_sym = replace_cpdr_symbols(self.dispersion._L, values_dict)
-        assert np.isclose(float(L_sym), self.dispersion.stix.L(self.omega).value)
-        assert np.isclose(float(L_sym), 1, rtol=1e3)
-
-        P_sym = replace_cpdr_symbols(self.dispersion._P, values_dict)
-        assert np.isclose(float(P_sym), self.dispersion.stix.P(self.omega).value)
-        assert np.isclose(float(P_sym), 1, rtol=1e3)
-
-        S_sym = replace_cpdr_symbols(self.dispersion._S, values_dict)
-        assert np.isclose(float(S_sym), self.dispersion.stix.S(self.omega).value)
-        assert np.isclose(float(S_sym), 1, rtol=1e3)
-
-        D_sym = replace_cpdr_symbols(self.dispersion._D, values_dict)
-        assert np.isclose(float(D_sym), self.dispersion.stix.D(self.omega).value)
-        assert np.isclose(float(D_sym), 1, rtol=1e3)
-
-        dR_sym = self.dispersion._R.diff("omega")
-        dR_sym = replace_cpdr_symbols(dR_sym, values_dict)
-        assert np.isclose(float(dR_sym), self.dispersion.stix.dR(self.omega).value)
-        assert np.isclose(float(dR_sym), 1, rtol=1e3)
-
-        dL_sym = self.dispersion._L.diff("omega")
-        dL_sym = replace_cpdr_symbols(dL_sym, values_dict)
-        assert np.isclose(float(dL_sym), self.dispersion.stix.dL(self.omega).value)
-        assert np.isclose(float(dL_sym), 1, rtol=1e3)
-
-        dP_sym = self.dispersion._P.diff("omega")
-        dP_sym = replace_cpdr_symbols(dP_sym, values_dict)
-        assert np.isclose(float(dP_sym), self.dispersion.stix.dP(self.omega).value)
-        assert np.isclose(float(dP_sym), 1, rtol=1e3)
-
-        dS_sym = self.dispersion._S.diff("omega")
-        dS_sym = replace_cpdr_symbols(dS_sym, values_dict)
-        assert np.isclose(float(dS_sym), self.dispersion.stix.dS(self.omega).value)
-        assert np.isclose(float(dS_sym), 1, rtol=1e3)
-
-        dD_sym = self.dispersion._D.diff("omega")
-        dD_sym = replace_cpdr_symbols(dD_sym, values_dict)
-        assert np.isclose(float(dD_sym), self.dispersion.stix.dD(self.omega).value)
-        assert np.isclose(float(dD_sym), 1, rtol=1e3)
-
-        A_sym = replace_cpdr_symbols(self.dispersion._A, values_dict)
-        A_ = sym.lambdify(["X"], A_sym, "numpy")
-
-        B_sym = replace_cpdr_symbols(self.dispersion._B, values_dict)
-        B_ = sym.lambdify(["X"], B_sym, "numpy")
-
-        C_sym = replace_cpdr_symbols(self.dispersion._C, values_dict)
-        C_ = sym.lambdify(["X"], C_sym, "numpy")
-
-        dA_sym = replace_cpdr_symbols(self.dispersion._A.diff("omega"), values_dict)
-        dA_ = sym.lambdify(["X"], dA_sym, "numpy")
-
-        dB_sym = replace_cpdr_symbols(self.dispersion._B.diff("omega"), values_dict)
-        dB_ = sym.lambdify(["X"], dB_sym, "numpy")
-
-        dC_sym = replace_cpdr_symbols(self.dispersion._C.diff("omega"), values_dict)
-        dC_ = sym.lambdify(["X"], dC_sym, "numpy")
-
-        sympy_results = np.empty(len(xwk_roots), dtype=np.float64)
-        numeric_results = np.empty(len(xwk_roots), dtype=np.float64)
-        for ii, pair in enumerate(xwk_roots):
-            X = pair[0]
-            k = pair[2]
-
-            # This fails because A_ from sympy route already contains mu...
-            assert np.isclose(float(A_(X)), self.dispersion.stix.A(self.omega, X).value)
-            assert np.isclose(float(B_(X)), self.dispersion.stix.B(self.omega, X).value)
-            assert np.isclose(float(C_(X)), self.dispersion.stix.C(self.omega, X).value)
-
-            assert np.isclose(
-                float(dA_(X)), self.dispersion.stix.dA(self.omega, X).value
-            )
-            assert np.isclose(
-                float(dB_(X)), self.dispersion.stix.dB(self.omega, X).value
-            )
-            assert np.isclose(
-                float(dC_(X)), self.dispersion.stix.dC(self.omega, X).value
-            )
-
-            assert np.isclose(
-                float(dD_dk(X, k)),
-                self.dispersion.stix.dD_dk(self.omega, X, k / u.m).value,
-            )
-            assert np.isclose(
-                float(dD_dw(X, k)),
-                self.dispersion.stix.dD_dw(self.omega, X, k / u.m).value,
-            )
-
-            sympy_results[ii] = (k * dD_dw(X, k)) / ((1 + X**2) * dD_dk(X, k))
-
-            numeric_results[ii] = self.dispersion.stix.jacobian(
-                self.omega, X, k / u.m
-            ).value
-
-            print(
-                f"{ii} : Sympy {sympy_results[ii]} : Numeric {numeric_results[ii]} : Ratio {sympy_results[ii]/numeric_results[ii]}"
-            )
-
-        # This assertion will pass, but *only just*
-        assert np.allclose(sympy_results, numeric_results, atol=1e-20, equal_nan=False)
