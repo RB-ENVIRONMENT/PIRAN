@@ -12,10 +12,17 @@ from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 from piran.magfield import MagField
 from piran.particles import Particles, PiranParticle
-from piran.resonance import replace_cpdr_symbols, poly_solver, get_valid_roots, calc_lorentz_factor
+from piran.resonance import (
+    replace_cpdr_symbols,
+    poly_solver,
+    get_valid_roots,
+    calc_lorentz_factor,
+)
 
 
-def find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, X):
+def find_resonant_triplets(
+    dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, X
+):
     """
     This is similar to compute_root_pairs() from resonance module but modified
     to work for single resonance number and single X.
@@ -63,9 +70,7 @@ def find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cut
     # Categorise roots
     # Keep only real, positive and within bounds
     valid_omega_l = get_valid_roots(omega_l)
-    valid_omega_l = [
-        x for x in valid_omega_l if omega_lc.value <= x <= omega_uc.value
-    ]
+    valid_omega_l = [x for x in valid_omega_l if omega_lc.value <= x <= omega_uc.value]
 
     # If valid_omega_l is empty continue
     if len(valid_omega_l) == 0:
@@ -73,7 +78,9 @@ def find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cut
 
     # We expect at most 1 real positive root
     if len(valid_omega_l) > 1:
-        msg = f"n={n.value} X={X.value} We got more than one real positive root for omega"
+        msg = (
+            f"n={n.value} X={X.value} We got more than one real positive root for omega"
+        )
         # raise ValueError(msg)
         print(msg)
         return None
@@ -107,13 +114,28 @@ def find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cut
     return valid_omega, valid_k
 
 
-def f(x, dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, dD_dw_lambif, dD_dk_lambif):
+def f(
+    x,
+    dispersion,
+    v_par,
+    gamma,
+    gyro_freq,
+    plasma_freq,
+    cutoff_freq,
+    n,
+    dD_dw_lambif,
+    dD_dk_lambif,
+):
     """
     Function that given x returns the value of `v_par - dw/dk_par`.
     We will pass this to a root solver.
     """
-    omega, k = find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, x)
-    return v_par.value + (dD_dk_lambif(x, omega, k) / dD_dw_lambif(x, omega, k)) * math.sqrt(1 + x**2)
+    omega, k = find_resonant_triplets(
+        dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, x
+    )
+    return v_par.value + (
+        dD_dk_lambif(x, omega, k) / dD_dw_lambif(x, omega, k)
+    ) * math.sqrt(1 + x**2)
 
 
 def main():
@@ -214,14 +236,42 @@ def main():
     for method in ["bisect", "brentq", "brenth", "ridder", "toms748"]:
         print(f"Method: {method}")
         start = time.perf_counter()
-        root_results = root_scalar(f, args=(dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, dD_dw_lambif, dD_dk_lambif), bracket=[X_min, X_max], method=method)
+        root_results = root_scalar(
+            f,
+            args=(
+                dispersion,
+                v_par,
+                gamma,
+                gyro_freq,
+                plasma_freq,
+                cutoff_freq,
+                n,
+                dD_dw_lambif,
+                dD_dk_lambif,
+            ),
+            bracket=[X_min, X_max],
+            method=method,
+        )
         end = time.perf_counter()
         elapsed = end - start
         print(f"Elapsed time: {elapsed:.6f} seconds")
 
         X = root_results.root
-        omega, k = find_resonant_triplets(dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, X)
-        landau = f(X, dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, dD_dw_lambif, dD_dk_lambif)
+        omega, k = find_resonant_triplets(
+            dispersion, v_par, gamma, gyro_freq, plasma_freq, cutoff_freq, n, X
+        )
+        landau = f(
+            X,
+            dispersion,
+            v_par,
+            gamma,
+            gyro_freq,
+            plasma_freq,
+            cutoff_freq,
+            n,
+            dD_dw_lambif,
+            dD_dk_lambif,
+        )
 
         print(root_results)
         print(f"{X=:.9f} - {omega=:.5e} - {k=:.5e} - {landau=:12.4e}")
