@@ -415,8 +415,8 @@ def main():
 
     dispersion_relation = []
     values_dict = {
-        "Omega": tuple(dispersion._w_c.value),
-        "omega_p": tuple(dispersion._w_p.value),
+        "Omega": tuple(dispersion._omega_c.value),
+        "omega_p": tuple(dispersion._omega_p.value),
         "X": X,
     }
 

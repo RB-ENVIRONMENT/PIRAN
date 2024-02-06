@@ -63,7 +63,7 @@ class Cpdr:
         self._resonant_poly_omega = None
 
         # gyrofrequency = charge * mag field / mass
-        self._w_c = u.Quantity(
+        self._omega_c = u.Quantity(
             [
                 particle.charge
                 * self._mag_field.get_strength(self._mlat, self._l_shell)
@@ -75,7 +75,7 @@ class Cpdr:
 
         # plasma frequency = sqrt( (number density * charge^2) /
         #                          (vacuum permittivity * mass) )
-        self._w_p = u.Quantity(
+        self._omega_p = u.Quantity(
             [
                 np.sqrt(
                     (particle.density * particle.charge**2)
@@ -86,7 +86,7 @@ class Cpdr:
             1 / u.s,
         )
 
-        self.stix = Stix(self._w_p, self._w_c)
+        self.stix = Stix(self._omega_p, self._omega_c)
 
     def _generate_syms(self):
         """

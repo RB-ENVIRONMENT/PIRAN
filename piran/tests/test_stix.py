@@ -88,7 +88,7 @@ class TestStix:
             cpdr_resonances,
         )
 
-        self.omega = abs(self.dispersion._w_c[0]) * omega_ratio
+        self.omega = abs(self.dispersion._omega_c[0]) * omega_ratio
 
         self.dispersion.as_poly_in_k()
 
@@ -100,11 +100,11 @@ class TestStix:
             np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
         )
 
-        # Find resonant (X, w, k) triplets
+        # Find resonant (X, omega, k) triplets
         xwk_roots = solve_dispersion_relation(
             self.dispersion,
-            self.dispersion._w_c,
-            self.dispersion._w_p,
+            self.dispersion._omega_c,
+            self.dispersion._omega_p,
             self.omega,
             X_range,
         )
@@ -112,8 +112,8 @@ class TestStix:
         # Sub in known gyro- and plasma-frequencies before differentiating CPDR
         # (to give Sympy an easier time)
         values_dict = {
-            "Omega": tuple(self.dispersion._w_c.value),
-            "omega_p": tuple(self.dispersion._w_p.value),
+            "Omega": tuple(self.dispersion._omega_c.value),
+            "omega_p": tuple(self.dispersion._omega_p.value),
         }
         dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
 
@@ -136,7 +136,7 @@ class TestStix:
         )
 
         # Compare 'numeric' results versus similar 'sympy' results for all resonant
-        # (X, w, k) triplets
+        # (X, omega, k) triplets
         for pair in xwk_roots:
             X = pair[0]
             k = pair[2]
