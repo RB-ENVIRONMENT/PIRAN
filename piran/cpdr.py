@@ -5,11 +5,15 @@ Defines the Cpdr class.
 from typing import Sequence
 
 import astropy.constants as const
+import astropy.units as u
+import numpy as np
 import sympy as sym
+from astropy.coordinates import Angle
 
 from piran.gauss import Gaussian
 from piran.magfield import MagField
 from piran.particles import Particles
+from piran.stix import Stix
 
 
 class Cpdr:
@@ -37,12 +41,16 @@ class Cpdr:
         wave_angles: Gaussian,
         wave_freqs: Gaussian,
         mag_field: MagField,
+        mlat: Angle,
+        l_shell: float,
         resonances: Sequence[int],
     ) -> None:  # numpydoc ignore=GL08
         self._particles = particles
         self._wave_angles = wave_angles
         self._wave_freqs = wave_freqs
         self._mag_field = mag_field
+        self._mlat = mlat
+        self._l_shell = l_shell
         self._resonances = resonances
 
         # Dict of symbols used throughout these funcs
@@ -53,6 +61,32 @@ class Cpdr:
 
         # cpdr x resonant condition as a polynomial in omega, generated on request.
         self._resonant_poly_omega = None
+
+        # gyrofrequency = charge * mag field / mass
+        self._omega_c = u.Quantity(
+            [
+                particle.charge
+                * self._mag_field.get_flux_density(self._mlat, self._l_shell)
+                / particle.mass
+                for particle in self._particles.all
+            ],
+            1 / u.s,
+        )
+
+        # plasma frequency = sqrt( (number density * charge^2) /
+        #                          (vacuum permittivity * mass) )
+        self._omega_p = u.Quantity(
+            [
+                np.sqrt(
+                    (particle.density * particle.charge**2)
+                    / (const.eps0 * particle.mass)
+                )
+                for particle in self._particles.all
+            ],
+            1 / u.s,
+        )
+
+        self.stix = Stix(self._omega_p, self._omega_c)
 
     def _generate_syms(self):
         """

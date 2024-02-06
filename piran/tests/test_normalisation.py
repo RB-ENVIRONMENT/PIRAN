@@ -66,7 +66,9 @@ class TestNormalisationFactors:
 
         self.omega = abs(self.Omega_e) * omega_ratio
 
-        piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
+        # Use "p+" for proton here instead of "H+".
+        # "H+" accounts for hydrogen isotopes so has a higher standard atomic weight!
+        piran_particle_list = (PiranParticle("e", n_), PiranParticle("p+", n_))
         cpdr_particles = Particles(piran_particle_list, RKE, alpha)
         # NOTE upper is just a very large number for now (X_max?)
         cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
@@ -79,6 +81,8 @@ class TestNormalisationFactors:
             cpdr_wave_angles,
             cpdr_wave_freqs,
             cpdr_mag_field,
+            mlat,
+            l_shell,
             cpdr_resonances,
         )
 

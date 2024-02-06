@@ -360,6 +360,8 @@ def main():
         cpdr_wave_angles,
         cpdr_wave_freqs,
         cpdr_mag_field,
+        mlat,
+        l_shell,
         cpdr_resonances,
     )
 
@@ -412,15 +414,15 @@ def main():
     CPDR_k, _ = dispersion.as_poly_in_k()
 
     dispersion_relation = []
+    values_dict = {
+        "Omega": tuple(dispersion._omega_c.value),
+        "omega_p": tuple(dispersion._omega_p.value),
+        "X": X,
+    }
+
     for y in y_list:
         omega = Omega_e_abs * y
-
-        values_dict = {
-            "Omega": (Omega_e.value, Omega_p.value),  # FIXME is this signed?
-            "omega_p": (omega_pe.value, omega_pp.value),
-            "omega": omega.value,
-            "X": X,
-        }
+        values_dict["omega"] = omega.value
         CPDR_k2 = replace_cpdr_symbols(CPDR_k, values_dict)
 
         # Solve for k

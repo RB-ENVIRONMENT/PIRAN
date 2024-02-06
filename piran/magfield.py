@@ -29,16 +29,16 @@ class MagField:
         planetary_mag_dipole_moment: u.Quantity[u.tesla * u.m**3] = 8.033454e15
         * (u.tesla * u.m**3),
     ) -> None:  # numpydoc ignore=GL08
-        self._radius = planetary_radius.to_value(u.m)
-        self._mag_dipole_moment = planetary_mag_dipole_moment.to_value(u.tesla * u.m**3)
+        self._radius = planetary_radius.to(u.m)
+        self._mag_dipole_moment = planetary_mag_dipole_moment.to(u.tesla * u.m**3)
 
-    def get_strength(
+    def get_flux_density(
         self,
         mlat: Angle,
         l_shell: float,
-    ) -> np.number:
+    ) -> u.Quantity[u.tesla]:
         """
-        Calculates the strength of the magnetic field.
+        Calculates the magnetic flux density.
 
         Parameters
         ----------
@@ -50,9 +50,10 @@ class MagField:
 
         Returns
         -------
-        np.number
+        u.Quantity[u.tesla]
             The strength of the magnetic field.
         """
-        return (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(mlat) ** 2)) / (
-            l_shell**3 * self._radius**3 * np.cos(mlat) ** 6
-        )
+        return (
+            (self._mag_dipole_moment * np.sqrt(1 + 3 * np.sin(mlat.rad) ** 2))
+            / (l_shell**3 * self._radius**3 * np.cos(mlat.rad) ** 6)
+        ).to(u.tesla)
