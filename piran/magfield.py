@@ -32,13 +32,13 @@ class MagField:
         self._radius = planetary_radius.to(u.m)
         self._mag_dipole_moment = planetary_mag_dipole_moment.to(u.tesla * u.m**3)
 
-    def get_strength(
+    def get_flux_density(
         self,
         mlat: Angle,
         l_shell: float,
     ) -> u.Quantity[u.tesla]:
         """
-        Calculates the strength of the magnetic field.
+        Calculates the magnetic flux density.
 
         Parameters
         ----------

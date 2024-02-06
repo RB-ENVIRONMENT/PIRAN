@@ -66,7 +66,7 @@ class Cpdr:
         self._omega_c = u.Quantity(
             [
                 particle.charge
-                * self._mag_field.get_strength(self._mlat, self._l_shell)
+                * self._mag_field.get_flux_density(self._mlat, self._l_shell)
                 / particle.mass
                 for particle in self._particles.all
             ],
