@@ -110,7 +110,9 @@ class Stix:
 
     @u.quantity_input
     def B(self, omega: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
-        return (self.R(omega) * self.L(omega) * X**2) + ((self.P(omega) * self.S(omega)) * (2 + X**2))
+        return (self.R(omega) * self.L(omega) * X**2) + (
+            (self.P(omega) * self.S(omega)) * (2 + X**2)
+        )
 
     @u.quantity_input
     def C(self, omega: u.Hz, X: u.dimensionless_unscaled) -> u.dimensionless_unscaled:
@@ -122,8 +124,11 @@ class Stix:
 
     @u.quantity_input
     def dB(self, omega: u.Hz, X: u.dimensionless_unscaled) -> u.s:
-        return ((self.dR(omega) * self.L(omega) + self.R(omega) * self.dL(omega)) * (X**2)) + (
-            (self.dP(omega) * self.S(omega) + self.P(omega) * self.dS(omega)) * (2 + X**2)
+        return (
+            (self.dR(omega) * self.L(omega) + self.R(omega) * self.dL(omega)) * (X**2)
+        ) + (
+            (self.dP(omega) * self.S(omega) + self.P(omega) * self.dS(omega))
+            * (2 + X**2)
         )
 
     @u.quantity_input
@@ -141,7 +146,11 @@ class Stix:
         mu = const.c * k / omega
         return ((k**2) / (1 + X**2)) * (
             (
-                (self.dA(omega, X) * mu**4 - self.dB(omega, X) * mu**2 + self.dC(omega, X))
+                (
+                    self.dA(omega, X) * mu**4
+                    - self.dB(omega, X) * mu**2
+                    + self.dC(omega, X)
+                )
                 / (2 * (2 * self.A(omega, X) * mu**4 - self.B(omega, X) * mu**2))
             )
             - (1 / omega)
