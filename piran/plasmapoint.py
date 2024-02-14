@@ -29,8 +29,8 @@ class PlasmaPoint:
         self.__particles = tuple(Particle(x) for x in particles)
         self.__plasma_over_gyro_ratio = plasma_over_gyro_ratio
         self.__number_density = number_density
-        self.__gyro_freq = self.__compute_gyro_freq()
-        self.__plasma_freq = self.__compute_plasma_freq()
+        self.__gyro_freq = self.__compute_gyro_freq()  # Hz
+        self.__plasma_freq = self.__compute_plasma_freq()  # Hz
 
     @property
     def magpoint(self):
@@ -59,7 +59,7 @@ class PlasmaPoint:
     def __compute_gyro_freq(self):
         B = self.magpoint.flux_density
         gf = [(x.charge * B) / x.mass for x in self.particles]
-        return tuple(gf)
+        return tuple(x.to(u.Hz) for x in gf)
 
     def __compute_plasma_freq(self):
         if (
@@ -81,6 +81,6 @@ class PlasmaPoint:
                 charge = self.particles[i].charge
                 mass = self.particles[i].mass
                 pf.append(np.sqrt((num_density * charge**2) / (const.eps0 * mass)))
-            return tuple(pf)
+            return tuple(x.to(u.Hz) for x in pf)
         else:
             raise IllegalArgumentError("Not valid combination of input arguments")

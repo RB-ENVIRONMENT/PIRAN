@@ -46,7 +46,7 @@ class MagPoint:
         self.__l_shell = l_shell
         self.__planetary_radius = planetary_radius.to(u.m)
         self.__mag_dipole_moment = mag_dipole_moment.to(u.tesla * u.m**3)
-        self.__flux_density = self.__compute_flux_density()
+        self.__flux_density = self.__compute_flux_density()  # T
 
     @property
     def mlat(self):
