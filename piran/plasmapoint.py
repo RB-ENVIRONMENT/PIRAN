@@ -7,7 +7,7 @@ from typing import Sequence
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
-from plasmapy.particles import Particle
+from plasmapy.particles import ParticleList
 
 from piran.magpoint import MagPoint
 
@@ -26,7 +26,7 @@ class PlasmaPoint:
         number_density: Sequence[float] | None = None,
     ) -> None:
         self.__magpoint = magpoint
-        self.__particles = tuple(Particle(x) for x in particles)
+        self.__particles = ParticleList(particles)
         self.__plasma_over_gyro_ratio = plasma_over_gyro_ratio
         self.__number_density = number_density
         self.__gyro_freq = self.__compute_gyro_freq()  # Hz
