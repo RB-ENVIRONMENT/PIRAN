@@ -63,20 +63,22 @@ class PlasmaPoint:
 
     def __compute_plasma_freq(self):
         if (
-            self.plasma_over_gyro_ratio is not None
+            len(self.particles) == 2
+            and self.particles[0].symbol == "e-"
+            and (self.particles[1].symbol == "p+" or self.particles[1].symbol == "H 1+")
+            and self.plasma_over_gyro_ratio is not None
             and self.number_density is None
             and isinstance(self.plasma_over_gyro_ratio, float)
         ):
-            prim_particle = self.particles[0]
-            prim_particle_pf = abs(self.gyro_freq[0]) * self.plasma_over_gyro_ratio
+            # This is restrictive because, for now, we only support net-zero
+            # charge plasmas of electrons and protons.
+            electron = self.particles[0]
+            electron_pf = abs(self.gyro_freq[0]) * self.plasma_over_gyro_ratio
             num_density = (
-                prim_particle_pf**2
-                * const.eps0
-                * prim_particle.mass
-                / abs(prim_particle.charge) ** 2
+                electron_pf**2 * const.eps0 * electron.mass / abs(electron.charge) ** 2
             )
 
-            pf = [prim_particle_pf]
+            pf = [electron_pf]
             for i in range(1, len(self.particles)):
                 charge = self.particles[i].charge
                 mass = self.particles[i].mass
