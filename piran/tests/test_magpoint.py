@@ -99,10 +99,7 @@ class TestMagPoint:
         l_shell = 5.0 * u.dimensionless_unscaled
 
         with pytest.raises(TypeError):
-            mag_point = MagPoint(
-                mlat_deg,
-                l_shell,
-            )
+            MagPoint(mlat_deg, l_shell)
 
     def test_magpoint_6(self):
         """Raise u.UnitsError. mlat has wrong units"""
@@ -110,7 +107,4 @@ class TestMagPoint:
         l_shell = 5.0 * u.dimensionless_unscaled
 
         with pytest.raises(u.UnitsError):
-            mag_point = MagPoint(
-                mlat_deg,
-                l_shell,
-            )
+            MagPoint(mlat_deg, l_shell)

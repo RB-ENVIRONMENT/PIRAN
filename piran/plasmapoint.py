@@ -17,7 +17,6 @@ class IllegalArgumentError(ValueError):
 
 
 class PlasmaPoint:
-
     @u.quantity_input
     def __init__(
         self,
@@ -64,13 +63,18 @@ class PlasmaPoint:
 
     def __compute_plasma_freq(self):
         if (
-            self.plasma_over_gyro_ratio is not None and
-            self.number_density is None and
-            isinstance(self.plasma_over_gyro_ratio, float)
+            self.plasma_over_gyro_ratio is not None
+            and self.number_density is None
+            and isinstance(self.plasma_over_gyro_ratio, float)
         ):
             prim_particle = self.particles[0]
             prim_particle_pf = abs(self.gyro_freq[0]) * self.plasma_over_gyro_ratio
-            num_density = prim_particle_pf**2 * const.eps0 * prim_particle.mass / abs(prim_particle.charge) ** 2
+            num_density = (
+                prim_particle_pf**2
+                * const.eps0
+                * prim_particle.mass
+                / abs(prim_particle.charge) ** 2
+            )
 
             pf = [prim_particle_pf]
             for i in range(1, len(self.particles)):

@@ -39,7 +39,8 @@ class MagPoint:
         mlat: Quantity[u.rad],
         l_shell: float,
         planetary_radius: Quantity[u.m] = const.R_earth,
-        mag_dipole_moment: Quantity[u.tesla * u.m**3] = 8.033454e15 * (u.tesla * u.m**3),
+        mag_dipole_moment: Quantity[u.tesla * u.m**3] = 8.033454e15
+        * (u.tesla * u.m**3),
     ) -> None:
         self.__mlat = mlat.to(u.rad)
         self.__l_shell = l_shell
@@ -78,5 +79,9 @@ class MagPoint:
         """
         return (
             (self.__mag_dipole_moment * np.sqrt(1 + 3 * np.sin(self.__mlat) ** 2))
-            / (self.__l_shell**3 * self.__planetary_radius**3 * np.cos(self.__mlat) ** 6)
+            / (
+                self.__l_shell**3
+                * self.__planetary_radius**3
+                * np.cos(self.__mlat) ** 6
+            )
         ).to(u.tesla)
