@@ -17,6 +17,22 @@ class IllegalArgumentError(ValueError):
 
 
 class PlasmaPoint:
+    """
+    A representation of a net-zero charge plasma given a list of particles.
+
+    Parameters
+    ----------
+    magpoint : MagPoint
+        The magnetic field at a given point in space.
+
+    particles : Sequence[str]
+        A list-like collection of plasmapy particle-like objects.
+
+    plasma_over_gyro_ratio : TBD, default=None
+
+    number_density : TBD, default=None
+    """
+
     @u.quantity_input
     def __init__(
         self,
