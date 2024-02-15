@@ -7,6 +7,7 @@ from typing import Sequence
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
+from astropy.units import Quantity
 from plasmapy.particles import ParticleList, ParticleListLike
 
 from piran.magpoint import MagPoint
@@ -72,12 +73,12 @@ class PlasmaPoint:
     def plasma_freq(self):
         return self.__plasma_freq
 
-    def __compute_gyro_freq(self):
+    def __compute_gyro_freq(self) -> Quantity[u.Hz]:
         B = self.magpoint.flux_density
-        gf = [(x.charge * B) / x.mass for x in self.particles]
-        return tuple(x.to(u.Hz) for x in gf)
+        gf = [p.charge * B / p.mass for p in self.particles]
+        return Quantity(gf, u.Hz)
 
-    def __compute_plasma_freq(self):
+    def __compute_plasma_freq(self) -> Quantity[u.Hz]:
         if (
             len(self.particles) == 2
             and self.particles[0].symbol == "e-"
@@ -99,6 +100,6 @@ class PlasmaPoint:
                 charge = self.particles[i].charge
                 mass = self.particles[i].mass
                 pf.append(np.sqrt((num_density * charge**2) / (const.eps0 * mass)))
-            return tuple(x.to(u.Hz) for x in pf)
+            return Quantity(pf, u.Hz)
         else:
             raise IllegalArgumentError("Not valid combination of input arguments")
