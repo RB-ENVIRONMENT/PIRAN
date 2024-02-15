@@ -8,7 +8,7 @@ from piran.magpoint import MagPoint
 from piran.plasmapoint import IllegalArgumentError, PlasmaPoint
 
 
-class TestMagPoint:
+class TestPlasmaPoint:
     def test_plasmapoint_1(self):
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
