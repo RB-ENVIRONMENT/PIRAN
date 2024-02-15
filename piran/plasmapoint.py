@@ -7,7 +7,7 @@ from typing import Sequence
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
-from plasmapy.particles import ParticleList
+from plasmapy.particles import ParticleList, ParticleListLike
 
 from piran.magpoint import MagPoint
 
@@ -25,7 +25,7 @@ class PlasmaPoint:
     magpoint : MagPoint
         The magnetic field at a given point in space.
 
-    particles : Sequence[str]
+    particles : ParticleListLike
         A list-like collection of plasmapy particle-like objects.
 
     plasma_over_gyro_ratio : TBD, default=None
