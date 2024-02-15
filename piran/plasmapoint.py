@@ -37,7 +37,7 @@ class PlasmaPoint:
     def __init__(
         self,
         magpoint: MagPoint,
-        particles: Sequence[str],
+        particles: ParticleListLike,
         plasma_over_gyro_ratio: float | None = None,
         number_density: Sequence[float] | None = None,
     ) -> None:
