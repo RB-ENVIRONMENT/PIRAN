@@ -18,7 +18,7 @@ class IllegalArgumentError(ValueError):
 
 class PlasmaPoint:
     """
-    A representation of a net-zero charge plasma given a list of particles.
+    A representation of a quasineutral charge plasma given a list of particles.
 
     Parameters
     ----------
