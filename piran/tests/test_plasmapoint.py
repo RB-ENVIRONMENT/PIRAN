@@ -9,7 +9,7 @@ from piran.plasmapoint import IllegalArgumentError, PlasmaPoint
 
 
 class TestMagPoint:
-    def test_magpoint_1(self):
+    def test_plasmapoint_1(self):
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
         mag_point = MagPoint(mlat_deg, l_shell)
@@ -30,7 +30,7 @@ class TestMagPoint:
         assert math.isclose(plasma_point.plasma_freq[0].value, 89640.33, rel_tol=1e-6)
         assert math.isclose(plasma_point.plasma_freq[1].value, 2091.93, rel_tol=1e-5)
 
-    def test_magpoint_2(self):
+    def test_plasmapoint_2(self):
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
         mag_point = MagPoint(mlat_deg, l_shell)
@@ -51,7 +51,7 @@ class TestMagPoint:
         assert math.isclose(plasma_point.plasma_freq[0].value, 89640.33, rel_tol=1e-6)
         assert math.isclose(plasma_point.plasma_freq[1].value, 2091.75, rel_tol=1e-5)
 
-    def test_magpoint_3(self):
+    def test_plasmapoint_3(self):
         """
         Currently we expect only a plasma over gyro ratio of electrons
         which we use to get their number density. Until we implement the rest
