@@ -53,9 +53,8 @@ class TestPlasmaPoint:
 
     def test_plasmapoint_3(self):
         """
-        Currently we expect only a plasma over gyro ratio of electrons
-        which we use to get their number density. Until we implement the rest
-        of the use cases this should raise an IllegalArgumentError.
+        If we provide plasma over gyro ratio for electrons then
+        number_density must be None.
         """
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
