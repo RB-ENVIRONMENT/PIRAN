@@ -68,6 +68,10 @@ class PlasmaPoint:
             self.__plasma_over_gyro_ratio = np.abs(self.plasma_freq / self.gyro_freq)
         # =================================================================
 
+        self.__plasma_charge = sum(
+            [nd * p.charge_number for nd, p in zip(self.number_density, self.particles)]
+        )
+
     @property
     def magpoint(self):
         return self.__magpoint
@@ -91,6 +95,10 @@ class PlasmaPoint:
     @property
     def plasma_freq(self):
         return self.__plasma_freq
+
+    @property
+    def plasma_charge(self):
+        return self.__plasma_charge
 
     @u.quantity_input
     def __compute_gyro_freq(self) -> Quantity[u.rad / u.s]:

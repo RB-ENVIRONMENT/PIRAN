@@ -98,3 +98,5 @@ class TestPlasmaPoint:
 
         assert math.isclose(plasma_point.plasma_over_gyro_ratio[0], 1.5)
         assert math.isclose(plasma_point.plasma_over_gyro_ratio[1], 64.27552812)
+
+        assert math.isclose(plasma_point.plasma_charge.value, 0)
