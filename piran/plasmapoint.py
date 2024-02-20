@@ -47,8 +47,8 @@ class PlasmaPoint:
         self.__particles = ParticleList(particles)
         self.__plasma_over_gyro_ratio = plasma_over_gyro_ratio
         self.__number_density = number_density
-        self.__gyro_freq = self.__compute_gyro_freq()  # Hz
-        self.__plasma_freq = self.__compute_plasma_freq()  # Hz
+        self.__gyro_freq = self.__compute_gyro_freq()  # rad/s
+        self.__plasma_freq = self.__compute_plasma_freq()  # rad/s
 
     @property
     def magpoint(self):
