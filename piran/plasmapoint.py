@@ -8,6 +8,7 @@ import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
+from plasmapy.formulary.frequencies import wc_, wp_
 from plasmapy.particles import ParticleList, ParticleListLike
 
 from piran.magpoint import MagPoint
@@ -73,12 +74,14 @@ class PlasmaPoint:
     def plasma_freq(self):
         return self.__plasma_freq
 
-    def __compute_gyro_freq(self) -> Quantity[u.Hz]:
+    @u.quantity_input
+    def __compute_gyro_freq(self) -> Quantity[u.rad / u.s]:
         B = self.magpoint.flux_density
-        gf = [p.charge * B / p.mass for p in self.particles]
-        return Quantity(gf, u.Hz)
+        gf = [wc_(B, p, signed=True) for p in self.particles]
+        return Quantity(gf)
 
-    def __compute_plasma_freq(self) -> Quantity[u.Hz]:
+    @u.quantity_input
+    def __compute_plasma_freq(self) -> Quantity[u.rad / u.s]:
         if (
             len(self.particles) == 2
             and self.particles[0].symbol == "e-"
@@ -90,16 +93,17 @@ class PlasmaPoint:
             # This is restrictive because, for now, we only support net-zero
             # charge plasmas of electrons and protons.
             electron = self.particles[0]
-            electron_pf = abs(self.gyro_freq[0]) * self.plasma_over_gyro_ratio
+            electron_pf = np.abs(self.gyro_freq[0]) * self.plasma_over_gyro_ratio
             num_density = (
-                electron_pf**2 * const.eps0 * electron.mass / abs(electron.charge) ** 2
-            )
+                electron_pf**2
+                * const.eps0
+                * electron.mass
+                / np.abs(electron.charge) ** 2
+            ).to(1 / u.m**3, equivalencies=u.dimensionless_angles())
 
             pf = [electron_pf]
-            for i in range(1, len(self.particles)):
-                charge = self.particles[i].charge
-                mass = self.particles[i].mass
-                pf.append(np.sqrt((num_density * charge**2) / (const.eps0 * mass)))
-            return Quantity(pf, u.Hz)
+            for particle in self.particles[1:]:
+                pf.append(wp_(num_density, particle))
+            return Quantity(pf)
         else:
             raise IllegalArgumentError("Not valid combination of input arguments")
