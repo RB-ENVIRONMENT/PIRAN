@@ -19,7 +19,7 @@ class TestCpdrSymbolic:
         v_par = 2.81054871e08
         gamma = 2.95695118
 
-        # Triplets that are solve both the resonant condition
+        # Values that solve both the resonant condition
         # and the dispersion relation.
         n = 2
         X = 1.0
@@ -63,7 +63,7 @@ class TestCpdrSymbolic:
         v_par = 2.81054871e08
         gamma = 2.95695118
 
-        # Triplets that are solve both the resonant condition
+        # Values that solve both the resonant condition
         # and the dispersion relation.
         n = -2
         X = 1.0
