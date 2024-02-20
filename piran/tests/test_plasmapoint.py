@@ -66,7 +66,7 @@ class TestPlasmaPoint:
 
         particles = ("e", "p+")
         plasma_over_gyro_ratio = 1.5
-        number_density = 1
+        number_density = 1 * (1 / u.m**3)
 
         with pytest.raises(IllegalArgumentError):
             PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio, number_density)
