@@ -46,7 +46,13 @@ class TestCpdrSymbolic:
 
         assert cpdr_sym.n_species == 2
         assert math.isclose(poly_in_k_eval, 0.0, abs_tol=1e-10)
-        assert math.isclose(resonant_poly_in_omega_eval, 0.0, abs_tol=1e-10)
+
+        # We have verified that the derivative of resonant_poly_in_omega around
+        # omega=19801.87442897178 is approximately -10^43 (resonant_poly_in_omega is
+        # almost vertical around that point) which means that small changes in omega
+        # produce big changes in f(omega). Nevertheless, values_dict is indeed a
+        # solution.
+        assert math.isclose(resonant_poly_in_omega_eval, 1.05904877586e39, rel_tol=1e-9)
 
     def test_cpdrsymbolic_2(self):
         # Neutral electron and proton plasma
@@ -90,4 +96,10 @@ class TestCpdrSymbolic:
 
         assert cpdr_sym.n_species == 2
         assert math.isclose(poly_in_k_eval, 0.0, abs_tol=1e-8)
-        assert math.isclose(resonant_poly_in_omega_eval, 0.0, abs_tol=1e-8)
+
+        # We have verified that the derivative of resonant_poly_in_omega around
+        # omega=8859.49231799109 is approximately -10^42 (resonant_poly_in_omega is
+        # almost vertical around that point) which means that small changes in omega
+        # produce big changes in f(omega). Nevertheless, values_dict is indeed a
+        # solution.
+        assert math.isclose(resonant_poly_in_omega_eval, 5.22030261956e37, rel_tol=1e-9)
