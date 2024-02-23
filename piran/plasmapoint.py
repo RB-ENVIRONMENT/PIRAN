@@ -28,7 +28,7 @@ class PlasmaPoint:
     particles : ParticleListLike
         A list-like collection of plasmapy particle-like objects.
 
-    plasma_over_gyro_ratio : TO BE DELETED, default=None
+    plasma_over_gyro_ratio : float | None, default=None
 
     number_density : astropy.units.Quantity[1 / u.m**3] | None, default=None
     """
