@@ -50,12 +50,16 @@ class TestCpdrSymbolic:
         # The value of resonant_poly_in_omega_eval is significantly larger than 0.
         # However, we have verified that:
         #
-        # - our root is accurate within the bounds of floating point precision.
-        #   Evaluating resonant_poly_in_omega_eval at `omega * (1 + 1e-15)` results in
+        # - our root is accurate to roughly 8 significiant figures.
+        #   Evaluating resonant_poly_in_omega_eval at `omega * (1 + 1e-8)` results in
         #   a change in sign.
         # - the derivative of resonant_poly_in_omega around omega=19801.87442897178 is
         #   approximately -10^43 (resonant_poly_in_omega is almost vertical around that
         #   point) so small changes in omega produce big changes in f(omega).
+        # - in other testing where we substitued roots of `omega` back into the
+        #   resonant_poly_in_omega without copy-n-pasting values around (i.e. less
+        #   numerical noise), our roots were accurate up to roughly the 15th sig fig
+        #   (approaching the limits of floating point precision).
         #
         # Thus, values_dict is indeed a solution.
         assert math.isclose(resonant_poly_in_omega_eval, 1.05904877586e39, rel_tol=1e-9)
@@ -106,12 +110,16 @@ class TestCpdrSymbolic:
         # The value of resonant_poly_in_omega_eval is significantly larger than 0.
         # However, we have verified that:
         #
-        # - our root is accurate within the bounds of floating point precision.
-        #   Evaluating resonant_poly_in_omega_eval at `omega * (1 + 1e-15)` results in
+        # - our root is accurate to roughly 8 significant figures.
+        #   Evaluating resonant_poly_in_omega_eval at `omega * (1 + 1e-8)` results in
         #   a change in sign.
         # - the derivative of resonant_poly_in_omega around omega=8859.49231799109 is
         #   approximately -10^42 (resonant_poly_in_omega is almost vertical around that
         #   point) so small changes in omega produce big changes in f(omega).
+        # - in other testing where we substitued roots of `omega` back into the
+        #   resonant_poly_in_omega without copy-n-pasting values around (i.e. less
+        #   numerical noise), our roots were accurate up to roughly the 15th sig fig
+        #   (approaching the limits of floating point precision).
         #
         # Thus, values_dict is indeed a solution.
         assert math.isclose(resonant_poly_in_omega_eval, 5.22030261956e37, rel_tol=1e-9)
