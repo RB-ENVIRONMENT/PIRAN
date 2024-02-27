@@ -1,5 +1,4 @@
 import numpy as np
-
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
@@ -7,8 +6,8 @@ from astropy.units import Quantity
 
 @u.quantity_input
 def calc_lorentz_factor(
-        E: Quantity[u.Joule],
-        m: Quantity[u.kg],
+    E: Quantity[u.Joule],
+    m: Quantity[u.kg],
 ) -> float:
     """
     Calculate the Lorentz factor gamma for a given particle species given the

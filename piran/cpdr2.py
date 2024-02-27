@@ -1,4 +1,4 @@
-from typing import Union, Sequence
+from typing import Sequence
 
 import numpy as np
 import sympy as sym
@@ -6,9 +6,9 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
 
+from piran.cpdrsymbolic import CpdrSymbolic
 from piran.helpers import calc_lorentz_factor, get_valid_roots
 from piran.plasmapoint import PlasmaPoint
-from piran.cpdrsymbolic import CpdrSymbolic
 
 
 class Cpdr:
@@ -24,6 +24,7 @@ class Cpdr:
     freq_cutoff_params : Sequence[float] | None = None
         Frequency cutoff parameters (mean_factor, delta_factor, l_factor, u_factor)
     """
+
     @u.quantity_input
     def __init__(
         self,
@@ -73,10 +74,20 @@ class Cpdr:
                     "v_par": self.__v_par.value,
                 }
             )
-            self.__omega_mean_cutoff = freq_cutoff_params[0] * abs(self.__plasma.gyro_freq[0])
-            self.__omega_delta_cutoff = freq_cutoff_params[1] * abs(self.__plasma.gyro_freq[0])
-            self.__omega_lc = self.__omega_mean_cutoff + freq_cutoff_params[2] * self.__omega_delta_cutoff
-            self.__omega_uc = self.__omega_mean_cutoff + freq_cutoff_params[3] * self.__omega_delta_cutoff
+            self.__omega_mean_cutoff = freq_cutoff_params[0] * abs(
+                self.__plasma.gyro_freq[0]
+            )
+            self.__omega_delta_cutoff = freq_cutoff_params[1] * abs(
+                self.__plasma.gyro_freq[0]
+            )
+            self.__omega_lc = (
+                self.__omega_mean_cutoff
+                + freq_cutoff_params[2] * self.__omega_delta_cutoff
+            )
+            self.__omega_uc = (
+                self.__omega_mean_cutoff
+                + freq_cutoff_params[3] * self.__omega_delta_cutoff
+            )
 
     @property
     def symbolic(self):
@@ -228,7 +239,9 @@ class Cpdr:
             # Keep only real, positive and within bounds
             valid_omega_l = get_valid_roots(omega_l)
             valid_omega_l = [
-                x for x in valid_omega_l if self.__omega_lc.value <= x <= self.__omega_uc.value
+                x
+                for x in valid_omega_l
+                if self.__omega_lc.value <= x <= self.__omega_uc.value
             ]
 
             # If valid_omega_l is empty continue

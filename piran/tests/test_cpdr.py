@@ -26,7 +26,9 @@ class TestCpdr:
         alpha = Angle(5, u.deg)
         resonance = 2
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
-        self.cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+        self.cpdr = Cpdr(
+            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+        )
 
     def test_cpdr_1(self):
         assert math.isclose(self.cpdr.energy.value, 1.6021766339e-13)  # Joule
@@ -35,8 +37,8 @@ class TestCpdr:
         assert self.cpdr.resonance == 2
         assert math.isclose(self.cpdr.lorentz_factor, 2.956951183)
         assert math.isclose(self.cpdr.gamma, 2.956951183)
-        assert math.isclose(self.cpdr.rel_velocity.value, 2.82128455e+08)  # m/s
-        assert math.isclose(self.cpdr.v_par.value, 2.81054871e+08)  # m/s
+        assert math.isclose(self.cpdr.rel_velocity.value, 2.82128455e08)  # m/s
+        assert math.isclose(self.cpdr.v_par.value, 2.81054871e08)  # m/s
 
     def test_cpdr_2(self):
         omega = 7320.627086050828 * (u.rad / u.s)
@@ -79,7 +81,9 @@ class TestCpdr:
         alpha = Angle(71, u.deg)
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
-        cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+        cpdr = Cpdr(
+            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+        )
 
         X = [0.0, 0.3165829145728643] * u.dimensionless_unscaled
         roots = cpdr.solve_resonant(X)
