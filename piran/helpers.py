@@ -23,7 +23,7 @@ def calc_lorentz_factor(
     Note that this is different from plasmapy's `Lorentz_factor` which provides the
     'standard' way of calculating the Lorentz factor using the relative velocity `v`.
     """
-    return (E.to(u.J) / (m.to(u.kg) * const.c**2)) + 1
+    return (E.to(u.Joule) / (m.to(u.kg) * const.c**2)) + 1
 
 
 def get_real_and_positive_roots(values, tol=1e-8):
