@@ -26,7 +26,7 @@ def calc_lorentz_factor(
     return (E.to(u.J) / (m.to(u.kg) * const.c**2)) + 1
 
 
-def get_valid_roots(values, tol=1e-8):
+def get_real_and_positive_roots(values, tol=1e-8):
     """
     Filter roots based on a condition (e.g real and >tol)
 

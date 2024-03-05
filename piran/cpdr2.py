@@ -7,7 +7,7 @@ from astropy import units as u
 from astropy.units import Quantity
 
 from piran.cpdrsymbolic import CpdrSymbolic
-from piran.helpers import calc_lorentz_factor, get_valid_roots
+from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
 from piran.plasmapoint import PlasmaPoint
 
 
@@ -193,7 +193,7 @@ class Cpdr:
             # still works.
             cpdr_in_k = cpdr_in_X_k(X.value)
             k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
-            valid_k_l = get_valid_roots(k_l)
+            valid_k_l = get_real_and_positive_roots(k_l)
 
             if valid_k_l.size == 0:
                 k_sol.append(np.nan)
@@ -237,7 +237,7 @@ class Cpdr:
 
             # Categorise roots
             # Keep only real, positive and within bounds
-            valid_omega_l = get_valid_roots(omega_l)
+            valid_omega_l = get_real_and_positive_roots(omega_l)
             valid_omega_l = [
                 x
                 for x in valid_omega_l
@@ -268,7 +268,7 @@ class Cpdr:
                 k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
 
                 # Keep only real and positive roots
-                valid_k_l = get_valid_roots(k_l)
+                valid_k_l = get_real_and_positive_roots(k_l)
 
                 if valid_k_l.size == 0:
                     roots_tmp.append((X.value, valid_omega, np.nan))
