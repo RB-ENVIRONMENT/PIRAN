@@ -260,30 +260,54 @@ class Cpdr:
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                # Substitute omega into CPDR.
-                # Only k is a symbol after this
-                cpdr_in_k_omega = self.__poly_in_k.subs(
-                    {
-                        "X": X.value,
-                        "psi": psi.value,
-                        "omega": valid_omega,
-                    }
-                )
-
-                # Solve unmodified CPDR to obtain k roots for given X, omega
-                k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
-
-                # Keep only real and positive roots
-                valid_k_l = get_real_and_positive_roots(k_l)
-
-                if valid_k_l.size == 0:
-                    roots_tmp.append((X.value, valid_omega, np.nan))
-                elif valid_k_l.size == 1:
-                    roots_tmp.append((X.value, valid_omega, valid_k_l[0]))
-                else:
-                    msg = "We got more than one real positive root for k"
-                    raise ValueError(msg)
-
+                k = self.solve_cpdr(valid_omega, X.value)
+                roots_tmp.append((X.value, valid_omega, k))
             roots.append(roots_tmp)
 
         return roots
+
+    def solve_cpdr(
+        self,
+        omega: float,
+        X: float,
+    ) -> float:
+        """
+        Solve the cold plasma dispersion relation given wave frequency
+        omega and wave normal angle X=tan(psi).
+
+        Parameters
+        ----------
+        omega : float
+            Wave frequency.
+        X_range : float
+            Wave normal angles.
+
+        Returns
+        -------
+        k : float (or np.nan)
+        """
+        psi = np.arctan(X)
+
+        # Substitute omega and X into CPDR.
+        # Only k is a symbol after this.
+        cpdr_in_k_omega = self.__poly_in_k.subs(
+            {
+                "X": X,
+                "psi": psi,
+                "omega": omega,
+            }
+        )
+
+        # Solve unmodified CPDR to obtain k roots for given X, omega
+        k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
+
+        # Keep only real and positive roots
+        valid_k_l = get_real_and_positive_roots(k_l)
+
+        if valid_k_l.size == 0:
+            return np.nan
+        elif valid_k_l.size == 1:
+            return valid_k_l[0]
+        else:
+            msg = "We got more than one real positive root for k"
+            raise ValueError(msg)
