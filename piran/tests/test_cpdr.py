@@ -40,6 +40,22 @@ class TestCpdr:
         assert math.isclose(self.cpdr.rel_velocity.value, 2.82128455e08)  # m/s
         assert math.isclose(self.cpdr.v_par.value, 2.81054871e08)  # m/s
 
+        # Eval gaussian at mean
+        wave_freqs_eval1 = self.cpdr.wave_freqs.eval(20916.08 * (u.rad / u.s))
+        assert math.isclose(wave_freqs_eval1.value, 1.0)
+
+        # Eval above lower cutoff and below mean
+        wave_freqs_eval2 = self.cpdr.wave_freqs.eval(10000 * (u.rad / u.s))
+        assert math.isclose(wave_freqs_eval2.value, 0.2269673064)
+
+        # Eval below lower cutoff
+        wave_freqs_eval3 = self.cpdr.wave_freqs.eval(7000 * (u.rad / u.s))
+        assert math.isclose(wave_freqs_eval3.value, 0.0)
+
+        # Eval above upper cutoff
+        wave_freqs_eval4 = self.cpdr.wave_freqs.eval(35000 * (u.rad / u.s))
+        assert math.isclose(wave_freqs_eval4.value, 0.0)
+
     def test_cpdr_2(self):
         omega = 7320.627086050828 * (u.rad / u.s)
 

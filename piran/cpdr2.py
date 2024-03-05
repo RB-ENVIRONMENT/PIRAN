@@ -7,6 +7,7 @@ from astropy import units as u
 from astropy.units import Quantity
 
 from piran.cpdrsymbolic import CpdrSymbolic
+from piran.gauss import Gaussian
 from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
 from piran.plasmapoint import PlasmaPoint
 
@@ -82,6 +83,9 @@ class Cpdr:
             self.__omega_uc = (
                 omega_mean_cutoff + freq_cutoff_params[3] * omega_delta_cutoff
             )
+            self.__wave_freqs = Gaussian(
+                self.__omega_lc, self.__omega_uc, omega_mean_cutoff, omega_delta_cutoff
+            )
 
     @property
     def symbolic(self):
@@ -146,6 +150,10 @@ class Cpdr:
     @property
     def omega_uc(self):
         return self.__omega_uc
+
+    @property
+    def wave_freqs(self):
+        return self.__wave_freqs
 
     @u.quantity_input
     def solve_cpdr(
