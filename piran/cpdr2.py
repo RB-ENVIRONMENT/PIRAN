@@ -74,19 +74,13 @@ class Cpdr:
                     "v_par": self.__v_par.value,
                 }
             )
-            self.__omega_mean_cutoff = freq_cutoff_params[0] * abs(
-                self.__plasma.gyro_freq[0]
-            )
-            self.__omega_delta_cutoff = freq_cutoff_params[1] * abs(
-                self.__plasma.gyro_freq[0]
-            )
+            omega_mean_cutoff = freq_cutoff_params[0] * abs(self.__plasma.gyro_freq[0])
+            omega_delta_cutoff = freq_cutoff_params[1] * abs(self.__plasma.gyro_freq[0])
             self.__omega_lc = (
-                self.__omega_mean_cutoff
-                + freq_cutoff_params[2] * self.__omega_delta_cutoff
+                omega_mean_cutoff + freq_cutoff_params[2] * omega_delta_cutoff
             )
             self.__omega_uc = (
-                self.__omega_mean_cutoff
-                + freq_cutoff_params[3] * self.__omega_delta_cutoff
+                omega_mean_cutoff + freq_cutoff_params[3] * omega_delta_cutoff
             )
 
     @property
