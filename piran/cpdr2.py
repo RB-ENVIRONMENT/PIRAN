@@ -156,7 +156,7 @@ class Cpdr:
         return self.__wave_freqs
 
     @u.quantity_input
-    def solve_cpdr(
+    def solve_cpdr_for_norm_factor(
         self,
         omega: Quantity[u.rad / u.s],
         X_range: Quantity[u.dimensionless_unscaled],
@@ -164,6 +164,10 @@ class Cpdr:
         """
         Given wave frequency omega, solve the dispersion relation for each
         wave normal angle X=tan(psi) in X_range to get wave number k.
+        Optimised version, similar to solve_cpdr, but we lambdify in X
+        after we substitute omega and is more efficient when we have
+        a single value for omega and a range of X values (for example when
+        computing the normalisation factor).
 
         Parameters
         ----------

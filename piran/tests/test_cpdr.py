@@ -60,7 +60,7 @@ class TestCpdr:
         omega = 7320.627086050828 * (u.rad / u.s)
 
         X = [0.0, 0.33333333333333337, 1.0, 100] * u.dimensionless_unscaled
-        k = self.cpdr.solve_cpdr(omega, X)
+        k = self.cpdr.solve_cpdr_for_norm_factor(omega, X)
         assert math.isclose(k[0], 0.00011414445445389277)
         assert math.isclose(k[1], 0.00011766325510931447)
         assert math.isclose(k[2], 0.00014032247090573543)
