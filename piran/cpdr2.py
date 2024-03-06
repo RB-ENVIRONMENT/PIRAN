@@ -250,13 +250,13 @@ class Cpdr:
                 if self.__omega_lc.value <= x <= self.__omega_uc.value
             ]
 
-            # If valid_omega_l is empty continue
+            # If valid_omega_l is empty append NaN and continue
             if len(valid_omega_l) == 0:
-                roots.append([X.value, np.nan, np.nan])
+                roots.append([(X.value, np.nan, np.nan)])
                 continue
 
             # Find values of k for each valid omega root
-            # yielding some kind of nested dict of X, omega, k values
+            # yielding some kind of nested tuples of X, omega, k values
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
