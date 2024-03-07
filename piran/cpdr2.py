@@ -286,14 +286,11 @@ class Cpdr:
         -------
         k : float (or np.nan)
         """
-        psi = np.arctan(X)
-
         # Substitute omega and X into CPDR.
         # Only k is a symbol after this.
         cpdr_in_k_omega = self.__poly_in_k.subs(
             {
                 "X": X,
-                "psi": psi,
                 "omega": omega,
             }
         )
