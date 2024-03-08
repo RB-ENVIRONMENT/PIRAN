@@ -28,7 +28,9 @@ def get_resonance_condition(cpdr: Cpdr, X, y_list):
     resonance_condition = []
     for y in y_list:
         omega = np.abs(electron_gyro) * y
-        res_cond_k = (omega - (n * electron_gyro / gamma)) / (np.cos(psi.to(u.rad)) * v_par)
+        res_cond_k = (omega - (n * electron_gyro / gamma)) / (
+            np.cos(psi.to(u.rad)) * v_par
+        )
         x = res_cond_k * const.c / np.abs(electron_gyro)
         resonance_condition.append((x, y))
 
@@ -45,7 +47,7 @@ def get_dispersion_relation(cpdr: Cpdr, X, y_list):
         # from sympy which we sometimes get for X = 0.0
         try:
             k_root = cpdr.solve_cpdr(omega.value, X.value)
-        except Exception as e:
+        except Exception:
             continue
 
         if not np.isnan(k_root):
@@ -104,8 +106,20 @@ def plot_resonant_roots(
     lower_upper_x = np.arange(-1, 25, 1)
     lower_y = [(omega_lc / electron_gyro_abs).value for val in lower_upper_x]
     upper_y = [(omega_uc / electron_gyro_abs).value for val in lower_upper_x]
-    plt.semilogy(lower_upper_x, lower_y, "k:", linewidth=1.0, label=r"$\frac{\omega_{lc}}{| \Omega_e |}$")
-    plt.semilogy(lower_upper_x, upper_y, "k-.", linewidth=0.8, label=r"$\frac{\omega_{uc}}{| \Omega_e |}$")
+    plt.semilogy(
+        lower_upper_x,
+        lower_y,
+        "k:",
+        linewidth=1.0,
+        label=r"$\frac{\omega_{lc}}{| \Omega_e |}$",
+    )
+    plt.semilogy(
+        lower_upper_x,
+        upper_y,
+        "k-.",
+        linewidth=0.8,
+        label=r"$\frac{\omega_{uc}}{| \Omega_e |}$",
+    )
 
     plt.minorticks_on()
     plt.xticks(range(0, 21, 5))
@@ -116,7 +130,9 @@ def plot_resonant_roots(
     plt.xlabel(r"$k \frac{c}{| \Omega_e |}$")
     plt.ylabel(r"$\frac{\omega}{| \Omega_e |}$")
     plt.legend(loc="lower right")
-    plt.title(rf"$E={RKE}, \alpha={alpha.deg}^\circ, \psi={psi.to(u.deg).value:.2f}^\circ$")
+    plt.title(
+        rf"$E={RKE}, \alpha={alpha.deg}^\circ, \psi={psi.to(u.deg).value:.2f}^\circ$"
+    )
     plt.tight_layout()
 
     if save:
@@ -142,7 +158,9 @@ def main():
     X_min = 0.0
     X_max = 1.0
     X_npoints = 101
-    X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled)
+    X_range = u.Quantity(
+        np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+    )
 
     # Dimensionless frequency range
     # To be scaled up by abs(electron gyrofrequency) when used.
@@ -154,9 +172,7 @@ def main():
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
     cpdr_sym = CpdrSymbolic(len(particles))
-    cpdr = Cpdr(
-        cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
-    )
+    cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
     print(f"Plasma: {particles}")
     print(f"Energy: {energy}")
@@ -177,19 +193,26 @@ def main():
     print("Lower hybrid frequency from Artemyev 2016")
     omega_lh = np.sqrt(
         np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]
-        ) / np.sqrt(
-            1 + (cpdr.plasma.gyro_freq[0]**2 / cpdr.plasma.plasma_freq[0]**2)
-        )
+    ) / np.sqrt(1 + (cpdr.plasma.gyro_freq[0] ** 2 / cpdr.plasma.plasma_freq[0] ** 2))
     print(f"omega_lh: {omega_lh:.1f}")
-    print(f"approximate omega_lh: {np.sqrt(np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]):.1f}")
+    print(
+        f"approximate omega_lh: {np.sqrt(np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]):.1f}"
+    )
     print()
 
-
     for i, X in enumerate(X_range):
-        resonant_triplets = cpdr.solve_resonant([X] * u.dimensionless_unscaled)[0]  # We pass a single X
+        resonant_triplets = cpdr.solve_resonant([X] * u.dimensionless_unscaled)
         resonance_condition = get_resonance_condition(cpdr, X, y_list)
         dispersion_relation = get_dispersion_relation(cpdr, X, y_list)
-        plot_resonant_roots(cpdr, X, resonant_triplets, resonance_condition, dispersion_relation, i, save=False)
+        plot_resonant_roots(
+            cpdr,
+            X,
+            resonant_triplets[0],
+            resonance_condition,
+            dispersion_relation,
+            i,
+            save=False,
+        )
 
 
 if __name__ == "__main__":
