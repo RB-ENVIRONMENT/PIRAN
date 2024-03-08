@@ -228,7 +228,7 @@ class Cpdr:
 
         roots = []
         for X in X_range:
-            psi = np.arctan(X) * u.rad
+            psi = np.arctan(X)  # arctan of dimensionless returns radians
 
             # Only omega is a symbol after this
             resonant_cpdr_in_omega = self.__resonant_poly_in_omega.subs(
@@ -286,14 +286,11 @@ class Cpdr:
         -------
         k : float (or np.nan)
         """
-        psi = np.arctan(X)
-
         # Substitute omega and X into CPDR.
         # Only k is a symbol after this.
         cpdr_in_k_omega = self.__poly_in_k.subs(
             {
                 "X": X,
-                "psi": psi,
                 "omega": omega,
             }
         )
