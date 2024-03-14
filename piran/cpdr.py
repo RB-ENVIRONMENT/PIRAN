@@ -86,6 +86,12 @@ class Cpdr:
             1 / u.s,
         )
 
+        # A temporary hack to fix the test_normalisation errors.
+        # The Stix parameters are not even used there and also
+        # this old Cpdr class will get deleted soon.
+        self._omega_p = self._omega_p.value << u.rad / u.s
+        self._omega_c = self._omega_c.value << u.rad / u.s
+
         self.stix = Stix(self._omega_p, self._omega_c)
 
     def _generate_syms(self):
