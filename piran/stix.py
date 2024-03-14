@@ -11,8 +11,8 @@ class Stix:
     def __init__(
         self, omega_p: u.Quantity[u.rad / u.s], omega_c: u.Quantity[u.rad / u.s]
     ) -> None:  # numpydoc ignore=GL08
-        self._omega_p = omega_p
-        self._omega_c = omega_c
+        self.__omega_p = omega_p
+        self.__omega_c = omega_c
 
     @u.quantity_input
     def R(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
@@ -21,8 +21,8 @@ class Stix:
 
         R = 1
 
-        for idx in range(len(self._omega_p)):
-            R -= (self._omega_p[idx] ** 2) / (omega * (omega + self._omega_c[idx]))
+        for idx in range(len(self.__omega_p)):
+            R -= (self.__omega_p[idx] ** 2) / (omega * (omega + self.__omega_c[idx]))
 
         return R
 
@@ -33,8 +33,8 @@ class Stix:
 
         L = 1
 
-        for idx in range(len(self._omega_p)):
-            L -= (self._omega_p[idx] ** 2) / (omega * (omega - self._omega_c[idx]))
+        for idx in range(len(self.__omega_p)):
+            L -= (self.__omega_p[idx] ** 2) / (omega * (omega - self.__omega_c[idx]))
 
         return L
 
@@ -45,8 +45,8 @@ class Stix:
 
         P = 1
 
-        for idx in range(len(self._omega_p)):
-            P -= (self._omega_p[idx] / omega) ** 2
+        for idx in range(len(self.__omega_p)):
+            P -= (self.__omega_p[idx] / omega) ** 2
 
         return P
 
@@ -65,9 +65,9 @@ class Stix:
 
         R = 0
 
-        for idx in range(len(self._omega_p)):
-            R += ((self._omega_p[idx] ** 2) * (2 * omega + self._omega_c[idx])) / (
-                (omega**2) * ((omega + self._omega_c[idx]) ** 2)
+        for idx in range(len(self.__omega_p)):
+            R += ((self.__omega_p[idx] ** 2) * (2 * omega + self.__omega_c[idx])) / (
+                (omega**2) * ((omega + self.__omega_c[idx]) ** 2)
             )
 
         return R
@@ -79,9 +79,9 @@ class Stix:
 
         L = 0
 
-        for idx in range(len(self._omega_p)):
-            L += ((self._omega_p[idx] ** 2) * (2 * omega - self._omega_c[idx])) / (
-                (omega**2) * ((omega - self._omega_c[idx]) ** 2)
+        for idx in range(len(self.__omega_p)):
+            L += ((self.__omega_p[idx] ** 2) * (2 * omega - self.__omega_c[idx])) / (
+                (omega**2) * ((omega - self.__omega_c[idx]) ** 2)
             )
 
         return L
@@ -93,8 +93,8 @@ class Stix:
 
         P = 0
 
-        for idx in range(len(self._omega_p)):
-            P += (2 * (self._omega_p[idx] ** 2)) / (omega**3)
+        for idx in range(len(self.__omega_p)):
+            P += (2 * (self.__omega_p[idx] ** 2)) / (omega**3)
 
         return P
 
