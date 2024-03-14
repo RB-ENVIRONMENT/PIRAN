@@ -10,6 +10,7 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
 from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
 from piran.plasmapoint import PlasmaPoint
+from piran.stix import Stix
 
 
 class Cpdr:
@@ -50,6 +51,9 @@ class Cpdr:
         # CPDR derivatives
         self.__poly_in_k_dk = self.__poly_in_k.diff("k")
         self.__poly_in_k_domega = self.__poly_in_k.diff("omega")
+
+        # Stix parameters
+        self.__stix = Stix(self.__plasma.plasma_freq, self.__plasma.gyro_freq)
 
         if (
             energy is not None
@@ -106,6 +110,10 @@ class Cpdr:
     @property
     def poly_in_k_domega(self):
         return self.__poly_in_k_domega
+
+    @property
+    def stix(self):
+        return self.__stix
 
     @property
     def resonant_poly_in_omega(self):
