@@ -1,98 +1,34 @@
 import math
 
 import numpy as np
-import sympy as sym
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-from piran.cpdr import Cpdr
-from piran.gauss import Gaussian
-from piran.magfield import MagField
-from piran.normalisation import solve_dispersion_relation
-from piran.particles import Particles, PiranParticle
-from piran.resonance import replace_cpdr_symbols
+from piran.cpdr2 import Cpdr
+from piran.cpdrsymbolic import CpdrSymbolic
+from piran.magpoint import MagPoint
+from piran.plasmapoint import PlasmaPoint
 
 
 class TestStix:
     def setup_method(self):
-        frequency_ratio = 1.5 * u.dimensionless_unscaled
+        mlat_deg = Angle(0 * u.deg)
+        l_shell = 4.5
+        mag_point = MagPoint(mlat_deg, l_shell)
+
+        particles = ("e", "p+")
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+
+        n_particles = len(particles)
+        cpdr_sym = CpdrSymbolic(n_particles)
+
+        self.cpdr = Cpdr(cpdr_sym, plasma_point)
+
         omega_ratio = 0.1225
+        self.omega = np.abs(self.cpdr.plasma.gyro_freq[0]) * omega_ratio
 
-        # ============================== START ============================== #
-        # Those should be attributes of one of the main classes
-        # The *only* parts of these we still need are:
-        # - mlat
-        # - l_shell
-        # - n_
-        #
-        # Unfortunately n_ requires everything else :(
-        # Can we define something for PiranParticle that lets us just pass in a
-        # frequency_ratio instead of a number density or plasma frequency?...
-        # Uncertain - we would need access to the gyrofrequency which is currently
-        # stored in the Cpdr class.
-
-        M = 8.033454e15 * (u.tesla * u.m**3)
-        mlat = Angle(0, u.deg)
-        l_shell = 4.5 * u.dimensionless_unscaled
-        B = (M * math.sqrt(1 + 3 * math.sin(mlat.rad) ** 2)) / (
-            l_shell**3 * const.R_earth**3 * math.cos(mlat.rad) ** 6
-        )
-
-        q_e = -const.e.si  # Signed electron charge
-
-        self.Omega_e = (q_e * B) / const.m_e
-        Omega_e_abs = abs(self.Omega_e)
-        self.omega_pe = Omega_e_abs * frequency_ratio
-
-        n_ = self.omega_pe**2 * const.eps0 * const.m_e / abs(q_e) ** 2
-        # =============================== END =============================== #
-
-        # ============================== START ============================== #
-        # We need those because they are input arguments to the new Cpdr class.
-        # They are not needed for these tests.
-        RKE = 1.0 * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
-        alpha = Angle(5, u.deg)  # pitch angle
-
-        # Lower and upper cut-off frequencies
-        omega_m = 0.35 * Omega_e_abs
-        delta_omega = 0.15 * Omega_e_abs
-        omega_lc = omega_m - 1.5 * delta_omega
-        omega_uc = omega_m + 1.5 * delta_omega
-
-        # Resonances
-        n_min = -5
-        n_max = 5
-        n_range = u.Quantity(
-            range(n_min, n_max + 1), unit=u.dimensionless_unscaled, dtype=np.int32
-        )
-        # =============================== END =============================== #
-
-        # Use "p+" for proton here instead of "H+".
-        # "H+" accounts for hydrogen isotopes so has a higher standard atomic weight!
-        piran_particle_list = (PiranParticle("e", n_), PiranParticle("p+", n_))
-        cpdr_particles = Particles(piran_particle_list, RKE, alpha)
-        # NOTE upper is just a very large number for now (X_max?)
-        cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
-        cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
-        cpdr_mag_field = MagField()
-        cpdr_resonances = n_range
-
-        self.dispersion = Cpdr(
-            cpdr_particles,
-            cpdr_wave_angles,
-            cpdr_wave_freqs,
-            cpdr_mag_field,
-            mlat,
-            l_shell,
-            cpdr_resonances,
-        )
-
-        self.omega = abs(self.dispersion._omega_c[0]) * omega_ratio
-
-        self.dispersion.as_poly_in_k()
-
-    def test_jacobian(self):
+    def test_stix_1(self):
         X_min = 0.00
         X_max = 1.00
         X_npoints = 100
@@ -100,49 +36,35 @@ class TestStix:
             np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
         )
 
-        # Find resonant (X, omega, k) triplets
-        xwk_roots = solve_dispersion_relation(
-            self.dispersion,
-            self.dispersion._omega_c,
-            self.dispersion._omega_p,
-            self.omega,
-            X_range,
-        )
+        # Find (X, omega, k) CPDR roots
+        for X in X_range:
+            k = self.cpdr.solve_cpdr(self.omega.value, X.value)
+            k <<= u.rad / u.m
 
-        # Sub in known gyro- and plasma-frequencies before differentiating CPDR
-        # (to give Sympy an easier time)
-        values_dict = {
-            "Omega": tuple(self.dispersion._omega_c.value),
-            "omega_p": tuple(self.dispersion._omega_p.value),
-        }
-        dispersion_poly_k = replace_cpdr_symbols(self.dispersion._poly_k, values_dict)
+            values_dict = {
+                "X": X.value,
+                "omega": self.omega.value,
+                "k": k.value,
+            }
+            dD_dw = self.cpdr.poly_in_k_domega.subs(values_dict)
+            dD_dk = self.cpdr.poly_in_k_dk.subs(values_dict)
 
-        # Differentiate CPDR w.r.t. omega, k
-        dD_dw_sym = dispersion_poly_k.diff("omega")
-        dD_dk_sym = dispersion_poly_k.diff("k")
+            dD_dw <<= u.s / u.rad
+            dD_dk <<= u.m / u.rad
 
-        # Sub known value for omega back in (now that we are past the
-        # 'differentiate w.r.t. omega' step) and lambdify for speed.
-        dD_dw = sym.lambdify(
-            ["X", "k"],
-            replace_cpdr_symbols(dD_dw_sym, {"omega": self.omega.value}),
-            "numpy",
-        )
+            # Test dD/domega
+            numeric_dD_dw = self.cpdr.stix.dD_dw(self.omega, X, k)
+            assert math.isclose(dD_dw.value, numeric_dD_dw.value)
+            assert dD_dw.unit == numeric_dD_dw.unit
 
-        dD_dk = sym.lambdify(
-            ["X", "k"],
-            replace_cpdr_symbols(dD_dk_sym, {"omega": self.omega.value}),
-            "numpy",
-        )
+            # Test dD/dk
+            numeric_dD_dk = self.cpdr.stix.dD_dk(self.omega, X, k)
+            assert math.isclose(dD_dk.value, dD_dk.value)
+            assert dD_dk.unit == numeric_dD_dk.unit
 
-        # Compare 'numeric' results versus similar 'sympy' results for all resonant
-        # (X, omega, k) triplets
-        for pair in xwk_roots:
-            X = pair[0]
-            k = pair[2]
+            # Test jacobian
+            sympy_result = (k * dD_dw) / ((1 + X**2) * dD_dk)
+            numeric_result = self.cpdr.stix.jacobian(self.omega, X, k)
 
-            sympy_result = (k * dD_dw(X, k)) / ((1 + X**2) * dD_dk(X, k))
-
-            numeric_result = self.dispersion.stix.jacobian(self.omega, X, k / u.m).value
-
-            assert math.isclose(sympy_result, numeric_result)
+            assert math.isclose(sympy_result.value, numeric_result.value)
+            assert sympy_result.unit == numeric_result.unit
