@@ -43,8 +43,14 @@ def get_dispersion_relation(cpdr: Cpdr, X, y_list):
         electron_gyro = cpdr.plasma.gyro_freq[0]
         omega = np.abs(electron_gyro) * y
 
-        # Try/Except to avoid those zoo complex infinity
-        # from sympy which we sometimes get for X = 0.0
+        # When y=1, omega becomes equal to the absolute value
+        # of the gyrofrequency of the first particle/particle
+        # of interest. For those cases CPDR becomes NaN,
+        # because of the denominator of the Stix parameters.
+        # However, when also X=0 then CPDR becomes a polynomial
+        # with Sympy's `zoo` complex infinity as coefficients,
+        # and we get "PolynomialError: multivariate polynomials not
+        # supported" when we call `.as_poly()`.
         try:
             k_root = cpdr.solve_cpdr(omega.value, X.value)
         except Exception:
