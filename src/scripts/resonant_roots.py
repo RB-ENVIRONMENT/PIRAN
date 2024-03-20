@@ -200,7 +200,7 @@ def main():
     )
     print()
 
-    resonant_triplets = cpdr.solve_resonant(X)
+    resonant_triplets = cpdr.solve_resonant(X_range)
     for i, X in enumerate(X_range):
         resonance_condition = get_resonance_condition(cpdr, X, y_list)
         dispersion_relation = get_dispersion_relation(cpdr, X, y_list)
