@@ -108,17 +108,17 @@ def plot_resonant_roots(
     upper_y = [(omega_uc / electron_gyro_abs).value for val in lower_upper_x]
     plt.semilogy(
         lower_upper_x,
-        lower_y,
-        "k:",
-        linewidth=1.0,
-        label=r"$\frac{\omega_{lc}}{| \Omega_e |}$",
-    )
-    plt.semilogy(
-        lower_upper_x,
         upper_y,
         "k-.",
         linewidth=0.8,
         label=r"$\frac{\omega_{uc}}{| \Omega_e |}$",
+    )
+    plt.semilogy(
+        lower_upper_x,
+        lower_y,
+        "k:",
+        linewidth=1.0,
+        label=r"$\frac{\omega_{lc}}{| \Omega_e |}$",
     )
 
     plt.minorticks_on()
