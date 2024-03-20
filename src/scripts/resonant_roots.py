@@ -200,14 +200,14 @@ def main():
     )
     print()
 
+    resonant_triplets = cpdr.solve_resonant(X)
     for i, X in enumerate(X_range):
-        resonant_triplets = cpdr.solve_resonant([X] * u.dimensionless_unscaled)
         resonance_condition = get_resonance_condition(cpdr, X, y_list)
         dispersion_relation = get_dispersion_relation(cpdr, X, y_list)
         plot_resonant_roots(
             cpdr,
             X,
-            resonant_triplets[0],
+            resonant_triplets[i],
             resonance_condition,
             dispersion_relation,
             i,
