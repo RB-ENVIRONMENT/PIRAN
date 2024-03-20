@@ -5,6 +5,7 @@ import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
+from scipy.optimize import root_scalar
 
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
@@ -265,6 +266,75 @@ class Cpdr:
             roots.append(roots_tmp)
 
         return roots
+
+    @u.quantity_input
+    def solve_resonant_for_x(
+        self,
+        omega: u.Quantity[u.rad / u.s],
+        X_range: u.Quantity[u.dimensionless_unscaled],
+    ) -> u.Quantity[u.dimensionless_unscaled]:
+
+        if not omega.isscalar:
+            raise Exception
+
+        X = self.symbolic.syms.get("X")
+        psi = self.symbolic.syms.get("psi")
+
+        # Only psi is a symbol after this
+        resonant_cpdr_in_psi = self.__resonant_poly_in_omega.subs(
+            {X: sym.tan(psi), "omega": omega.value}
+        )
+
+        # lambdify our func in psi
+        resonant_cpdr_in_psi_lambdified = sym.lambdify(psi, resonant_cpdr_in_psi)
+
+        # print symbolic func in psi to check it isn't garbage
+        sym.pprint(resonant_cpdr_in_psi)
+
+        # transform range in X to range in psi
+        psi_range = np.arctan(X_range)
+
+        # evaluate func for all psi and store sign of result
+        cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
+
+        # store sign for first value of psi
+        current_sign = cpdr_signs[0]
+        change_of_sign = 0
+        indices = []
+
+        # loop over remaining values of psi and track when sign changes
+        for i, sign in enumerate(cpdr_signs[1:]):
+            if sign != current_sign:
+                print(
+                    f"Change of sign between psi = {psi_range[i].to_value(u.deg)}, {psi_range[i+1].to_value(u.deg)}"
+                )
+                print(f"Indices = {i}, {i+1}")
+                print()
+                current_sign = sign
+                change_of_sign = change_of_sign + 1
+                indices.append(i)
+
+        roots = []
+
+        # Use scipy's root_scalar to hone in on roots
+        print("Finding roots...")
+        for index in indices:
+            root_result = root_scalar(
+                resonant_cpdr_in_psi_lambdified,
+                bracket=[psi_range[index].value, psi_range[index + 1].value],
+                method="brentq",
+            )
+            roots.append(root_result.root)
+            print(f"Root at: {root_result.root * 180 / np.pi}")
+
+        print()
+        print(cpdr_signs)
+        print()
+        print(f"{change_of_sign=}")
+        print()
+
+        # Convert back to X and return
+        return np.tan(roots) << u.dimensionless_unscaled
 
     def solve_cpdr(
         self,
