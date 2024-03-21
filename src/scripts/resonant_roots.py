@@ -18,8 +18,17 @@ from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
 
-def get_resonance_condition(cpdr: Cpdr, X, y_list):
+def get_resonance_condition(cpdr: Cpdr, X, y_list, k_par_sign):
+    """
+    k_par_sign: 'positive' for theta in [0, pi/2] or
+        'negative' for theta in (pi/2, pi].
+    """
     psi = np.arctan(X)
+    if k_par_sign == "positive":
+        theta = psi.to(u.rad)
+    elif k_par_sign == "negative":
+        theta = (np.pi << u.rad) - psi.to(u.rad)
+
     n = cpdr.resonance
     electron_gyro = cpdr.plasma.gyro_freq[0]
     gamma = cpdr.gamma
@@ -28,9 +37,7 @@ def get_resonance_condition(cpdr: Cpdr, X, y_list):
     resonance_condition = []
     for y in y_list:
         omega = np.abs(electron_gyro) * y
-        res_cond_k = (omega - (n * electron_gyro / gamma)) / (
-            np.cos(psi.to(u.rad)) * v_par
-        )
+        res_cond_k = (omega - (n * electron_gyro / gamma)) / (np.cos(theta) * v_par)
         x = res_cond_k * const.c / np.abs(electron_gyro)
         resonance_condition.append((x, y))
 
@@ -67,7 +74,8 @@ def plot_resonant_roots(
     cpdr: Cpdr,
     X,
     resonant_roots,
-    resonance_condition,
+    resonance_condition_kpar_pos,
+    resonance_condition_kpar_neg,
     dispersion_relation,
     i,
     save=False,
@@ -87,15 +95,32 @@ def plot_resonant_roots(
     omega_lc = cpdr.omega_lc
     omega_uc = cpdr.omega_uc
 
-    # Plot resonance condition
-    res_x = [val[0].value for val in resonance_condition]
-    res_y = [val[1].value for val in resonance_condition]
-    plt.semilogy(res_x, res_y, linestyle="--", label=f"Resonance condition n={n}")
+    # Plot resonance condition for positive k_par
+    res_x1 = [val[0].value for val in resonance_condition_kpar_pos]
+    res_y1 = [val[1].value for val in resonance_condition_kpar_pos]
+    plt.semilogy(
+        res_x1,
+        res_y1,
+        color="tab:blue",
+        linestyle="dashed",
+        label=rf"Resonance condition n={n} $(\psi)$",
+    )
+
+    # Plot resonance condition for negative k_par
+    res_x2 = [val[0].value for val in resonance_condition_kpar_neg]
+    res_y2 = [val[1].value for val in resonance_condition_kpar_neg]
+    plt.semilogy(
+        res_x2,
+        res_y2,
+        color="tab:blue",
+        linestyle="dotted",
+        label=rf"Resonance condition n={n} $(\pi - \psi)$",
+    )
 
     # Plot dispersion relation
     disp_x = [val[0].value for val in dispersion_relation]
     disp_y = [val[1].value for val in dispersion_relation]
-    plt.semilogy(disp_x, disp_y, "k", label="Dispersion relation")
+    plt.semilogy(disp_x, disp_y, color="k", label="Dispersion relation")
 
     # Plot resonant roots
     for root in resonant_roots:
@@ -103,7 +128,7 @@ def plot_resonant_roots(
             continue
         x = root[2] * (const.c.value / electron_gyro_abs.value)
         y = root[1] / electron_gyro_abs.value
-        plt.semilogy(x, y, "ro")
+        plt.semilogy(x, y, color="tab:blue", marker="o")
     # x = [root[2] * (const.c.value / electron_gyro_abs.value) for root in resonant_roots if not (np.isnan(root[1]) or np.isnan(root[2]))]
     # y = [root[1] / electron_gyro_abs.value for root in resonant_roots if not (np.isnan(root[1]) or np.isnan(root[2]))]
     # plt.semilogy(x, y, "ro")
@@ -157,8 +182,8 @@ def main():
     plasma_over_gyro_ratio = 1.5
 
     energy = 1.0 * u.MeV
-    alpha = Angle(76, u.deg)
-    resonance = 0
+    alpha = Angle(83, u.deg)
+    resonance = -1
     freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
 
     X_min = 0.0
@@ -208,13 +233,19 @@ def main():
 
     resonant_triplets = cpdr.solve_resonant(X_range)
     for i, X in enumerate(X_range):
-        resonance_condition = get_resonance_condition(cpdr, X, y_list)
+        resonance_condition_kpar_pos = get_resonance_condition(
+            cpdr, X, y_list, "positive"
+        )
+        resonance_condition_kpar_neg = get_resonance_condition(
+            cpdr, X, y_list, "negative"
+        )
         dispersion_relation = get_dispersion_relation(cpdr, X, y_list)
         plot_resonant_roots(
             cpdr,
             X,
             resonant_triplets[i],
-            resonance_condition,
+            resonance_condition_kpar_pos,
+            resonance_condition_kpar_neg,
             dispersion_relation,
             i,
             save=False,
