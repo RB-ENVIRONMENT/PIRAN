@@ -77,9 +77,20 @@ class TestCpdr:
         assert math.isclose(roots[0][0].X.value, 0.01)
         assert math.isclose(roots[0][0].omega.value, 18549.99508102283)
         assert math.isclose(roots[0][0].k.value, 0.0002098277253605769)
+        assert math.isclose(roots[0][0].k_par.value, 0.0002098172347610972)
+        assert math.isclose(roots[0][0].k_perp.value, 0.0000020981723476109)
+
         assert math.isclose(roots[1][0].X.value, 0.99)
         assert math.isclose(roots[1][0].omega.value, 19814.68720788155)
         assert math.isclose(roots[1][0].k.value, 0.0003015784216619821)
+        assert math.isclose(roots[1][0].k_par.value, 0.0002143170398076355)
+        assert math.isclose(roots[1][0].k_perp.value, 0.0002121738694095591)
+
+        assert roots[0][0].X.unit == u.dimensionless_unscaled
+        assert roots[0][0].omega.unit == u.rad / u.s
+        assert roots[0][0].k.unit == u.rad / u.m
+        assert roots[0][0].k_par.unit == u.rad / u.m
+        assert roots[0][0].k_perp.unit == u.rad / u.m
 
     def test_cpdr_4(self):
         """Different pitch angle alpha"""
