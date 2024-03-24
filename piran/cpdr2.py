@@ -1,4 +1,5 @@
-from typing import Sequence
+import math
+from typing import NamedTuple, Sequence
 
 import numpy as np
 import sympy as sym
@@ -223,16 +224,27 @@ class Cpdr:
     def solve_resonant(
         self,
         X_range: Quantity[u.dimensionless_unscaled],
-    ):
+    ) -> Sequence[Sequence[NamedTuple]]:
         """
         Simultaneously solve the resonance condition and the dispersion relation
-        to get root pairs of wave frequency omega and wave number k given
-        resonance n and tangent of wave normal angle X=tan(psi).
+        to get root pairs of wave frequency omega and wave number k, including its
+        parallel and perpendicular components, given tangent of wave normal angle
+        X=tan(psi).
 
         Returns
         -------
         # roots :
         """
+        Root = NamedTuple(
+            "Root",
+            [
+                ("X", Quantity[u.dimensionless_unscaled]),
+                ("omega", Quantity[u.rad / u.s]),
+                ("k", Quantity[u.rad / u.m]),
+                ("k_par", Quantity[u.rad / u.m]),
+                ("k_perp", Quantity[u.rad / u.m]),
+            ],
+        )
 
         roots = []
         for X in X_range:
@@ -260,16 +272,38 @@ class Cpdr:
 
             # If valid_omega_l is empty append NaN and continue
             if len(valid_omega_l) == 0:
-                roots.append([(X.value, np.nan, np.nan)])
+                root = Root(
+                    X=X << u.dimensionless_unscaled,
+                    omega=np.nan << u.rad / u.s,
+                    k=np.nan << u.rad / u.m,
+                    k_par=np.nan << u.rad / u.m,
+                    k_perp=np.nan << u.rad / u.m,
+                )
+                roots.append([root])
                 continue
 
             # Find values of k for each valid omega root
-            # yielding some kind of nested tuples of X, omega, k values
+            # yielding some kind of nested named tuples of
+            # X, omega, k, k_par, k_perp values
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                k = self.solve_cpdr(valid_omega, X.value)
-                roots_tmp.append((X.value, valid_omega, k))
+                k = self.solve_cpdr(valid_omega, X.value) << u.rad / u.m
+                k_par = self.find_resonant_parallel_wavenumber(
+                    X << u.dimensionless_unscaled,
+                    valid_omega << u.rad / u.s,
+                    k << u.rad / u.m,
+                )
+                k_perp = k * np.sin(psi)
+
+                root = Root(
+                    X=X << u.dimensionless_unscaled,
+                    omega=valid_omega << u.rad / u.s,
+                    k=k << u.rad / u.m,
+                    k_par=k_par << u.rad / u.m,
+                    k_perp=k_perp << u.rad / u.m,
+                )
+                roots_tmp.append(root)
             roots.append(roots_tmp)
 
         return roots
@@ -316,3 +350,58 @@ class Cpdr:
         else:
             msg = "We got more than one real positive root for k"
             raise ValueError(msg)
+
+    @u.quantity_input
+    def find_resonant_parallel_wavenumber(
+        self,
+        X: Quantity[u.dimensionless_unscaled],
+        omega: Quantity[u.rad / u.s],
+        k: Quantity[u.rad / u.m],
+    ) -> Quantity[u.rad / u.m]:
+        """
+        Given triplet X, omega and k, solution to the resonant cpdr,
+        find if k_par = k * cos(psi) or k_par = k * cos(pi - psi),
+        i.e. if k_par is positive or negative respectively
+        (since wavenumber k is always positive and psi in
+        [0, 90] degrees).
+
+        Parameters
+        ----------
+        X : float
+            Wave normal angle.
+        omega : float
+            Wave frequency.
+        k : float
+            Wavenumber.
+
+        Returns
+        -------
+        k_par : float (or np.nan)
+        """
+        if np.isnan(k):
+            return np.nan << u.rad / u.m
+
+        psi = np.arctan(X)
+        k_par = k * np.cos(psi)
+        gyrofreq = self.plasma.gyro_freq[0]
+        reson = self.resonance
+        v_par = self.v_par
+        gamma = self.gamma
+
+        result1 = omega - k_par * v_par - reson * gyrofreq / gamma  # [0, pi/2]
+        result2 = omega + k_par * v_par - reson * gyrofreq / gamma  # (pi/2, pi]
+
+        if math.isclose(result1.value, 0.0, abs_tol=1e-6) and math.isclose(
+            result2.value, 0.0, abs_tol=1e-6
+        ):
+            raise ValueError("Both are roots")
+        elif not math.isclose(result1.value, 0.0, abs_tol=1e-6) and not math.isclose(
+            result2.value, 0.0, abs_tol=1e-6
+        ):
+            raise ValueError("None of them is root")
+        elif math.isclose(result1.value, 0.0, abs_tol=1e-6):
+            # k_par is positive
+            return k_par
+        elif math.isclose(result2.value, 0.0, abs_tol=1e-6):
+            # k_par is negative
+            return -k_par

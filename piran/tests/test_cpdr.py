@@ -73,12 +73,13 @@ class TestCpdr:
         assert len(roots) == 2
         assert len(roots[0]) == 1
         assert len(roots[1]) == 1
-        assert math.isclose(roots[0][0][0], 0.01)
-        assert math.isclose(roots[0][0][1], 18549.99508102283)
-        assert math.isclose(roots[0][0][2], 0.0002098277253605769)
-        assert math.isclose(roots[1][0][0], 0.99)
-        assert math.isclose(roots[1][0][1], 19814.68720788155)
-        assert math.isclose(roots[1][0][2], 0.0003015784216619821)
+
+        assert math.isclose(roots[0][0].X.value, 0.01)
+        assert math.isclose(roots[0][0].omega.value, 18549.99508102283)
+        assert math.isclose(roots[0][0].k.value, 0.0002098277253605769)
+        assert math.isclose(roots[1][0].X.value, 0.99)
+        assert math.isclose(roots[1][0].omega.value, 19814.68720788155)
+        assert math.isclose(roots[1][0].k.value, 0.0003015784216619821)
 
     def test_cpdr_4(self):
         """Different pitch angle alpha"""
@@ -107,14 +108,14 @@ class TestCpdr:
         assert len(roots) == 2
 
         assert len(roots[0]) == 1
-        assert math.isclose(roots[0][0][0], 0.0)
-        assert math.isclose(roots[0][0][1], 22060.04543112965)
-        assert math.isclose(roots[0][0][2], 0.00024016935645729707)
+        assert math.isclose(roots[0][0].X.value, 0.0)
+        assert math.isclose(roots[0][0].omega.value, 22060.04543112965)
+        assert math.isclose(roots[0][0].k.value, 0.00024016935645729707)
 
         assert len(roots[1]) == 2
-        assert math.isclose(roots[1][0][0], 0.3165829145728643)
-        assert math.isclose(roots[1][0][1], 34361.48787566025)
-        assert math.isclose(roots[1][0][2], 0.0003923953536206822)
-        assert math.isclose(roots[1][1][0], 0.3165829145728643)
-        assert math.isclose(roots[1][1][1], 21197.313961282573)
-        assert math.isclose(roots[1][1][2], 0.00024206540583296198)
+        assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
+        assert math.isclose(roots[1][0].omega.value, 34361.48787566025)
+        assert math.isclose(roots[1][0].k.value, 0.0003923953536206822)
+        assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
+        assert math.isclose(roots[1][1].omega.value, 21197.313961282573)
+        assert math.isclose(roots[1][1].k.value, 0.00024206540583296198)
