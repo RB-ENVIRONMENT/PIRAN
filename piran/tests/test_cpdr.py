@@ -173,7 +173,7 @@ class TestCpdr:
         assert np.isnan(roots[0][0].k)
 
     def test_cpdr_6(self):
-        """Test k_par positive and negative"""
+        """More solve_resonant and find_resonant_parallel_wavenumber tests"""
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
         mag_point = MagPoint(mlat_deg, l_shell)
@@ -193,6 +193,7 @@ class TestCpdr:
             cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
         )
 
+        # Test k_par positive and negative
         X = [0.6] << u.dimensionless_unscaled
         roots = cpdr.solve_resonant(X)
 
@@ -210,3 +211,22 @@ class TestCpdr:
         assert math.isclose(roots[0][1].k.value, 0.0001954579422)
         assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
         assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
+
+        # Test no resonant wavenumber
+        X = [1e30] << u.dimensionless_unscaled
+        roots = cpdr.solve_resonant(X)
+
+        assert len(roots) == 1
+        assert len(roots[0]) == 2
+
+        assert math.isclose(roots[0][0].X.value, 1e30)
+        assert math.isclose(roots[0][0].omega.value, 20213.427803)
+        assert np.isnan(roots[0][0].k)
+        assert np.isnan(roots[0][0].k_par)
+        assert np.isnan(roots[0][0].k_perp)
+
+        assert math.isclose(roots[0][1].X.value, 1e30)
+        assert math.isclose(roots[0][1].omega.value, 20206.733655)
+        assert np.isnan(roots[0][1].k)
+        assert np.isnan(roots[0][1].k_par)
+        assert np.isnan(roots[0][1].k_perp)
