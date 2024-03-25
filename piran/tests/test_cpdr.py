@@ -171,3 +171,42 @@ class TestCpdr:
         assert math.isclose(roots[0][0].X.value, 0.0)
         assert np.isnan(roots[0][0].omega)
         assert np.isnan(roots[0][0].k)
+
+    def test_cpdr_6(self):
+        """Test k_par positive and negative"""
+        mlat_deg = Angle(0 * u.deg)
+        l_shell = 4.5
+        mag_point = MagPoint(mlat_deg, l_shell)
+
+        particles = ("e", "p+")
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+
+        n_particles = len(particles)
+        cpdr_sym = CpdrSymbolic(n_particles)
+
+        energy = 1.0 * u.MeV
+        alpha = Angle(83, u.deg)
+        resonance = -1
+        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        cpdr = Cpdr(
+            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+        )
+
+        X = [0.6] << u.dimensionless_unscaled
+        roots = cpdr.solve_resonant(X)
+
+        assert len(roots) == 1
+        assert len(roots[0]) == 2
+
+        assert math.isclose(roots[0][0].X.value, 0.6)
+        assert math.isclose(roots[0][0].omega.value, 33719.09383836)
+        assert math.isclose(roots[0][0].k.value, 0.0004581964569)
+        assert math.isclose(roots[0][0].k_par.value, 0.0003929002204)
+        assert math.isclose(roots[0][0].k_perp.value, 0.0002357401322)
+
+        assert math.isclose(roots[0][1].X.value, 0.6)
+        assert math.isclose(roots[0][1].omega.value, 14447.39075335)
+        assert math.isclose(roots[0][1].k.value, 0.0001954579422)
+        assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
+        assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
