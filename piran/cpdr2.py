@@ -391,17 +391,16 @@ class Cpdr:
         result1 = omega - k_par * v_par - reson * gyrofreq / gamma  # [0, pi/2]
         result2 = omega + k_par * v_par - reson * gyrofreq / gamma  # (pi/2, pi]
 
-        if math.isclose(result1.value, 0.0, abs_tol=1e-6) and math.isclose(
-            result2.value, 0.0, abs_tol=1e-6
-        ):
-            raise ValueError("Both are roots")
-        elif not math.isclose(result1.value, 0.0, abs_tol=1e-6) and not math.isclose(
-            result2.value, 0.0, abs_tol=1e-6
-        ):
-            raise ValueError("None of them is root")
-        elif math.isclose(result1.value, 0.0, abs_tol=1e-6):
-            # k_par is positive
+        k_par_is_pos = math.isclose(result1.value, 0.0, abs_tol=1e-6)
+        k_par_is_neg = math.isclose(result2.value, 0.0, abs_tol=1e-6)
+
+        if k_par_is_pos and not k_par_is_neg:
+            # only positive k_par is root
             return k_par
-        elif math.isclose(result2.value, 0.0, abs_tol=1e-6):
-            # k_par is negative
+        elif k_par_is_neg and not k_par_is_pos:
+            # only negative k_par is root
             return -k_par
+        elif k_par_is_pos and k_par_is_neg:
+            raise ValueError("Both are roots")
+        else:
+            raise ValueError("None of them is root")
