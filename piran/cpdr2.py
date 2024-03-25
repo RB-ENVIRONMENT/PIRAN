@@ -367,16 +367,16 @@ class Cpdr:
 
         Parameters
         ----------
-        X : float
+        X : Quantity[u.dimensionless_unscaled]
             Wave normal angle.
-        omega : float
+        omega : Quantity[u.rad / u.s]
             Wave frequency.
-        k : float
+        k : Quantity[u.rad / u.m]
             Wavenumber.
 
         Returns
         -------
-        k_par : float (or np.nan)
+        k_par : Quantity[u.rad / u.m]
         """
         if np.isnan(k):
             return np.nan << u.rad / u.m
