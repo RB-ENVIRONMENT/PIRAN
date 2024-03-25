@@ -8,7 +8,11 @@ from astropy.units import Quantity
 
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
-from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
+from piran.helpers import (
+    calc_lorentz_factor,
+    calc_momentum,
+    get_real_and_positive_roots,
+)
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
 
@@ -70,6 +74,13 @@ class Cpdr:
             )
             self.__rel_velocity = const.c * np.sqrt(1 - (1 / self.__gamma**2))
             self.__v_par = self.__rel_velocity * np.cos(self.__pitch_angle)
+
+            self.__momentum = calc_momentum(
+                self.__gamma, self.__plasma.particles[0].mass
+            )
+            self.__p_par = self.__momentum * np.cos(self.__pitch_angle)
+            self.__p_perp = self.__momentum * np.sin(self.__pitch_angle)
+
             self.__resonant_poly_in_omega = self.__symbolic.resonant_poly_in_omega.subs(
                 {
                     "omega_c": tuple(self.__plasma.gyro_freq.value),
@@ -150,6 +161,18 @@ class Cpdr:
     @property
     def v_par(self):
         return self.__v_par
+
+    @property
+    def momentum(self):
+        return self.__momentum
+
+    @property
+    def p_par(self):
+        return self.__p_par
+
+    @property
+    def p_perp(self):
+        return self.__p_perp
 
     @property
     def omega_lc(self):

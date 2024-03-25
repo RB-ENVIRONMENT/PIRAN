@@ -39,6 +39,18 @@ class TestCpdr:
         assert math.isclose(self.cpdr.gamma, 2.956951183)
         assert math.isclose(self.cpdr.rel_velocity.value, 2.82128455e08)  # m/s
         assert math.isclose(self.cpdr.v_par.value, 2.81054871e08)  # m/s
+        assert math.isclose(self.cpdr.momentum.value, 7.5994128855e-22)  # kg*m/s
+        assert math.isclose(self.cpdr.p_par.value, 7.5704948251e-22)  # kg*m/s
+        assert math.isclose(self.cpdr.p_perp.value, 6.6233247448e-23)  # kg*m/s
+
+        assert self.cpdr.energy.unit == u.Joule
+        assert self.cpdr.pitch_angle.unit == u.rad
+        assert self.cpdr.alpha.unit == u.rad
+        assert self.cpdr.rel_velocity.unit == u.m / u.s
+        assert self.cpdr.v_par.unit == u.m / u.s
+        assert self.cpdr.momentum.unit == u.kg * u.m / u.s
+        assert self.cpdr.p_par.unit == u.kg * u.m / u.s
+        assert self.cpdr.p_perp.unit == u.kg * u.m / u.s
 
         # Eval gaussian at mean
         wave_freqs_eval1 = self.cpdr.wave_freqs.eval(20916.08 * (u.rad / u.s))
