@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 
@@ -68,6 +69,12 @@ class TestCpdr:
         assert math.isclose(k[1], 0.00011766325510931447)
         assert math.isclose(k[2], 0.00014032247090573543)
         assert math.isnan(k[3]) is True
+
+        # Raise valuer error (more than 1 real and positive root k)
+        omega = 100000 << (u.rad / u.s)
+        X = [1.0] << u.dimensionless_unscaled
+        with pytest.raises(ValueError):
+            self.cpdr.solve_cpdr_for_norm_factor(omega, X)
 
     def test_cpdr_3(self):
         X = [0.01, 0.99] * u.dimensionless_unscaled
