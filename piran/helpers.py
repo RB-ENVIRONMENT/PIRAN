@@ -26,6 +26,27 @@ def calc_lorentz_factor(
     return (E.to(u.Joule) / (m.to(u.kg) * const.c**2)) + 1
 
 
+@u.quantity_input
+def calc_momentum(
+    gamma: Quantity[u.dimensionless_unscaled],
+    mass: Quantity[u.kg],
+) -> Quantity[u.kg * u.m / u.s]:
+    """
+    Calculate the relativistic momentum for a given particle species given the
+    Lorentz factor gamma and rest mass.
+
+    Parameters
+    ----------
+        gamma: unitless (Lorentz factor)
+        mass:  kg       (Rest mass)
+
+    Returns
+    -------
+        momentum: kg*m/s (Relativistic momentum)
+    """
+    return np.sqrt(gamma**2 - 1) * mass * const.c
+
+
 def get_real_and_positive_roots(values, tol=1e-8):
     """
     Filter roots based on a condition (e.g real and >tol)

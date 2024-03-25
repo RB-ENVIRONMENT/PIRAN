@@ -3,7 +3,11 @@ import math
 import numpy as np
 from astropy import units as u
 
-from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
+from piran.helpers import (
+    calc_lorentz_factor,
+    calc_momentum,
+    get_real_and_positive_roots,
+)
 
 
 class TestHelpers:
@@ -13,6 +17,14 @@ class TestHelpers:
 
         gamma = calc_lorentz_factor(energy, mass)
         assert math.isclose(gamma, 2.9569511835738735)
+
+    def test_calc_momentum_1(self):
+        gamma = 2.9569511835738735
+        mass = 9.1093837015e-31 << u.kg
+
+        momentum = calc_momentum(gamma, mass)
+        assert math.isclose(momentum.value, 7.5994128855e-22)
+        assert momentum.unit == u.kg * u.m / u.s
 
     def test_get_real_and_positive_roots_1(self):
         test_array_1 = np.array(
