@@ -366,10 +366,14 @@ class Cpdr:
     ) -> Quantity[u.rad / u.m]:
         """
         Given triplet X, omega and k, solution to the resonant cpdr,
-        find if k_par = k * cos(psi) or k_par = k * cos(pi - psi),
-        i.e. if k_par is positive or negative respectively
-        (since wavenumber k is always positive and psi in
-        [0, 90] degrees).
+        return k_par = k * cos(psi) or k_par = k * cos(pi - psi)
+        according to the resonance condition,
+        i.e. the _signed_ value of k_par.
+        (We have to check this manually since the wavenumber k is
+        always positive and psi is in [0, 90] degrees but the
+        resonant cpdr returns solutions for psi in [0, 180],
+        i.e. including _negative_ k_par, and we are interested in all
+        of these solutions!)
 
         Parameters
         ----------
