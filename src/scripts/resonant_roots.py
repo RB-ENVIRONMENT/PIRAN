@@ -124,13 +124,13 @@ def plot_resonant_roots(
 
     # Plot resonant roots
     for root in resonant_roots:
-        if np.isnan(root[1]) or np.isnan(root[2]):
+        if np.isnan(root.omega) or np.isnan(root.k):
             continue
-        x = root[2] * (const.c.value / electron_gyro_abs.value)
-        y = root[1] / electron_gyro_abs.value
+        x = root.k * (const.c.value / electron_gyro_abs.value)
+        y = root.omega / electron_gyro_abs.value
         plt.semilogy(x, y, color="tab:blue", marker="o")
-    # x = [root[2] * (const.c.value / electron_gyro_abs.value) for root in resonant_roots if not (np.isnan(root[1]) or np.isnan(root[2]))]
-    # y = [root[1] / electron_gyro_abs.value for root in resonant_roots if not (np.isnan(root[1]) or np.isnan(root[2]))]
+    # x = [root.k * (const.c.value / electron_gyro_abs.value) for root in resonant_roots if not (np.isnan(root.omega) or np.isnan(root.k))]
+    # y = [root.omega / electron_gyro_abs.value for root in resonant_roots if not (np.isnan(root.omega) or np.isnan(root.k))]
     # plt.semilogy(x, y, "ro")
 
     # Plot upper and lower cutoffs
