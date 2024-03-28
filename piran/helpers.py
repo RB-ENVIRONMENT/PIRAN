@@ -33,7 +33,7 @@ def calc_momentum(
 ) -> Quantity[u.kg * u.m / u.s]:
     """
     Calculate the relativistic momentum for a given particle species given the
-    Lorentz factor gamma and rest mass.
+    Lorentz factor gamma and rest mass (Glauert & Horne 2005 Eq. 18).
 
     Parameters
     ----------
