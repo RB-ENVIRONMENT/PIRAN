@@ -13,6 +13,17 @@ from piran.helpers import calc_lorentz_factor, get_real_and_positive_roots
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
 
+ResonantRoot = NamedTuple(
+    "ResonantRoot",
+    [
+        ("X", Quantity[u.dimensionless_unscaled]),
+        ("omega", Quantity[u.rad / u.s]),
+        ("k", Quantity[u.rad / u.m]),
+        ("k_par", Quantity[u.rad / u.m]),
+        ("k_perp", Quantity[u.rad / u.m]),
+    ],
+)
+
 
 class Cpdr:
     """
@@ -235,16 +246,6 @@ class Cpdr:
         -------
         # roots :
         """
-        Root = NamedTuple(
-            "Root",
-            [
-                ("X", Quantity[u.dimensionless_unscaled]),
-                ("omega", Quantity[u.rad / u.s]),
-                ("k", Quantity[u.rad / u.m]),
-                ("k_par", Quantity[u.rad / u.m]),
-                ("k_perp", Quantity[u.rad / u.m]),
-            ],
-        )
 
         roots = []
         for X in X_range:
@@ -272,7 +273,7 @@ class Cpdr:
 
             # If valid_omega_l is empty append NaN and continue
             if len(valid_omega_l) == 0:
-                root = Root(
+                root = ResonantRoot(
                     X=X << u.dimensionless_unscaled,
                     omega=np.nan << u.rad / u.s,
                     k=np.nan << u.rad / u.m,
@@ -296,7 +297,7 @@ class Cpdr:
                 )
                 k_perp = k * np.sin(psi)
 
-                root = Root(
+                root = ResonantRoot(
                     X=X << u.dimensionless_unscaled,
                     omega=valid_omega << u.rad / u.s,
                     k=k << u.rad / u.m,
