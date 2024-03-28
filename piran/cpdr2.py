@@ -242,9 +242,14 @@ class Cpdr:
         parallel and perpendicular components, given tangent of wave normal angle
         X=tan(psi).
 
+        Parameters
+        ----------
+        X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
+            Wave normal angles.
+
         Returns
         -------
-        # roots :
+        Resonant roots as a list of lists of ResonantRoot objects.
         """
 
         roots = []
