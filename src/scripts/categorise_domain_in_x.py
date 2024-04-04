@@ -34,7 +34,13 @@ def main():
     cpdr_sym = CpdrSymbolic(len(particles))
     cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
-    cpdr.solve_resonant_for_x(cpdr.omega_uc, X_range)
+    X_l = cpdr.solve_resonant_for_x(cpdr.omega_lc, X_range)
+    X_u = cpdr.solve_resonant_for_x(cpdr.omega_uc, X_range)
+    X_all = np.sort(
+        cpdr.solve_resonant_for_x(u.Quantity([cpdr.omega_uc, cpdr.omega_lc]), X_range)
+    )
+
+    print(f"{X_l=}\n" f"{X_u=}\n" f"{X_all=}\n")
 
 
 if __name__ == "__main__":

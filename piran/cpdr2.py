@@ -272,69 +272,62 @@ class Cpdr:
         self,
         omega: u.Quantity[u.rad / u.s],
         X_range: u.Quantity[u.dimensionless_unscaled],
+        verbose: bool = False,
     ) -> u.Quantity[u.dimensionless_unscaled]:
 
-        if not omega.isscalar:
-            raise Exception
-
-        X = self.symbolic.syms.get("X")
-        psi = self.symbolic.syms.get("psi")
-
-        # Only psi is a symbol after this
-        resonant_cpdr_in_psi = self.__resonant_poly_in_omega.subs(
-            {X: sym.tan(psi), "omega": omega.value}
-        )
-
-        # lambdify our func in psi
-        resonant_cpdr_in_psi_lambdified = sym.lambdify(psi, resonant_cpdr_in_psi)
-
-        # print symbolic func in psi to check it isn't garbage
-        sym.pprint(resonant_cpdr_in_psi)
-
-        # transform range in X to range in psi
-        psi_range = np.arctan(X_range)
-
-        # evaluate func for all psi and store sign of result
-        cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
-
-        # store sign for first value of psi
-        current_sign = cpdr_signs[0]
-        change_of_sign = 0
-        indices = []
-
-        # loop over remaining values of psi and track when sign changes
-        for i, sign in enumerate(cpdr_signs[1:]):
-            if sign != current_sign:
-                print(
-                    f"Change of sign between psi = {psi_range[i].to_value(u.deg)}, {psi_range[i+1].to_value(u.deg)}"
-                )
-                print(f"Indices = {i}, {i+1}")
-                print()
-                current_sign = sign
-                change_of_sign = change_of_sign + 1
-                indices.append(i)
-
         roots = []
+        for om in np.atleast_1d(omega):
 
-        # Use scipy's root_scalar to hone in on roots
-        print("Finding roots...")
-        for index in indices:
-            root_result = root_scalar(
-                resonant_cpdr_in_psi_lambdified,
-                bracket=[psi_range[index].value, psi_range[index + 1].value],
-                method="brentq",
+            X = self.symbolic.syms.get("X")
+            psi = self.symbolic.syms.get("psi")
+
+            # Only psi is a symbol after this
+            resonant_cpdr_in_psi = self.__resonant_poly_in_omega.subs(
+                {X: sym.tan(psi), "omega": om.value}
             )
-            roots.append(root_result.root)
-            print(f"Root at: {root_result.root * 180 / np.pi}")
 
-        print()
-        print(cpdr_signs)
-        print()
-        print(f"{change_of_sign=}")
-        print()
+            # lambdify our func in psi
+            resonant_cpdr_in_psi_lambdified = sym.lambdify(psi, resonant_cpdr_in_psi)
+
+            # transform range in X to range in psi
+            psi_range = np.arctan(X_range)
+
+            # evaluate func for all psi and store sign of result
+            cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
+
+            # We want to perform a pairwise comparison of consecutive elements and
+            # look for a chance of sign (from 1 to -1 or vice versa).
+            # We can do this efficiently by adding an ndarray containing the first
+            # element of each pair to an ndarray containing the second element of
+            # each pair.
+            # Anywhere that the result is 0 indicates a change in sign!
+            pairwise_sign_sums = cpdr_signs[:-1] + cpdr_signs[1:]
+
+            # Find indices corresponding to changes of sign.
+            # This is faster than looping over the whole pairwise_sign_sums
+            # for large arrays.
+            sign_change_indices = np.flatnonzero(pairwise_sign_sums == 0)
+
+            # For each index where we have identified that a change of sign occurs,
+            # use scipy's root_scalar to hone in on the root.
+            for idx in sign_change_indices:
+                root_result = root_scalar(
+                    resonant_cpdr_in_psi_lambdified,
+                    bracket=[psi_range[idx].value, psi_range[idx + 1].value],
+                    method="brentq",
+                )
+                roots.append(root_result.root)
+
+                if verbose:
+                    print(
+                        f"For {om=}\n"
+                        f"Change of sign between psi = {psi_range[idx].to_value(u.deg)}, {psi_range[idx+1].to_value(u.deg)}\n"
+                        f"Indices = {idx}, {idx+1}\n"
+                        f"Root at: {root_result.root * 180 / np.pi}\n"
+                    )
 
         # Convert back to X and return
-        return np.tan(roots) << u.dimensionless_unscaled
+        return u.Quantity(np.tan(roots), u.dimensionless_unscaled)
 
     def solve_cpdr(
         self,
