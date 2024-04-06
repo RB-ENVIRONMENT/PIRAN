@@ -69,13 +69,23 @@ def plot_figure2(
         overlay_ratio1x = overlay[:, 0]
         overlay_ratio1y = overlay[:, 1]
         plt.loglog(
-            overlay_ratio1x, overlay_ratio1y, color="k", linestyle="--", alpha=0.6
+            overlay_ratio1x,
+            overlay_ratio1y,
+            color="k",
+            linestyle="--",
+            alpha=0.6,
+            label=rf"$\omega$/$\omega_{{ce}}$={omega_ratios[0]} from paper",
         )
 
         overlay_ratio2x = overlay[:, 2]
         overlay_ratio2y = overlay[:, 3]
         plt.loglog(
-            overlay_ratio2x, overlay_ratio2y, color="r", linestyle="--", alpha=0.6
+            overlay_ratio2x,
+            overlay_ratio2y,
+            color="r",
+            linestyle="--",
+            alpha=0.6,
+            label=rf"$\omega$/$\omega_{{ce}}$={omega_ratios[1]} from paper",
         )
 
     # plt.minorticks_on()
