@@ -200,11 +200,11 @@ def main():
 
         resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
         epsilon = 0.9999  # Glauert & Horne 2005 paragraph 23
-        X_max_limit = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
+        X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
 
         # For Glauert's norm factor use a uniform distribution
-        # between X_min and X_upper=min(X_max, sqrt(-P/S)).
-        X_range_glauert = X_range[X_range <= X_max_limit]
+        # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
+        X_range_glauert = X_range[X_range <= X_upper]
 
         # Glauert's norm factor
         norm_factor_glauert = compute_glauert_norm_factor(
