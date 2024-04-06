@@ -1,73 +1,22 @@
 import numpy as np
 import sympy as sym
+from astropy import units as u
+from astropy.coordinates import Angle
 from scipy.integrate import simpson, trapezoid
 
-from piran.resonance import get_valid_roots, poly_solver, replace_cpdr_symbols
+from piran.cpdr2 import Cpdr
+from piran.cpdrsymbolic import CpdrSymbolic
+from piran.gauss import Gaussian
+from piran.magpoint import MagPoint
+from piran.plasmapoint import PlasmaPoint
 
 
-def solve_dispersion_relation(
-    dispersion,
-    omega_c,
-    omega_p,
-    omega,
-    X_range,
-):
-    """
-    Given wave frequency omega, solve the dispersion relation for each
-    wave normal angle X=tan(psi) in X_range to get wave number k.
-
-    Parameters
-    ----------
-    dispersion : piran.cpdr.Cpdr
-        Cold plasma dispersion relation object.
-    omega_c : tuple of astropy.units.quantity.Quantity
-        Cyclotron (gyro) frequencies.
-    omega_p : tuple of astropy.units.quantity.Quantity
-        Plasma frequencies.
-    omega : astropy.units.quantity.Quantity
-        Wave frequency.
-    X_range : array_like of astropy.units.quantity.Quantity
-        Wave normal angles.
-
-    Returns
-    -------
-    root_pairs : list of tuples (X, omega, k)
-        Solutions to the cold plasma dispersion relation.
-    """
-    values_dict = {
-        "omega": omega.value,
-        "Omega": (omega_c[0].value, omega_c[1].value),
-        "omega_p": (omega_p[0].value, omega_p[1].value),
-    }
-    cpdr_k_eval = sym.lambdify(
-        ["X"], replace_cpdr_symbols(dispersion._poly_k, values_dict), "numpy"
-    )
-
-    pairs = []
-    for i, X in enumerate(X_range):
-        # We've lambidifed `X` but `k` is still a symbol. When we call it with an
-        # argument it substitutes `X` with the value and returns a `sympy.core.add.Add`
-        # object, that's why calling `poly_solver(CPDR_k2)` still works.
-        CPDR_k = cpdr_k_eval(X.value)
-        k_l = poly_solver(CPDR_k)
-        valid_k_l = get_valid_roots(k_l)
-
-        if valid_k_l.size == 0:
-            continue
-
-        if valid_k_l.size > 1:
-            msg = "We got more than one real positive root for k."
-            raise ValueError(msg)
-
-        pairs.append((X.value, omega.value, valid_k_l[0]))
-
-    return pairs
-
-
-def compute_glauert_normalisation_factor(
-    dispersion,
-    dispersion_poly_k,
-    root_pairs,
+@u.quantity_input
+def compute_glauert_norm_factor(
+    cpdr: Cpdr,
+    omega: u.Quantity[u.rad / u.s],
+    X_range: u.Quantity[u.dimensionless_unscaled],
+    wave_norm_angle_dist: Gaussian,
     method="simpson",
 ):
     """
@@ -76,52 +25,52 @@ def compute_glauert_normalisation_factor(
 
     Parameters
     ----------
-    dispersion : piran.cpdr.Cpdr
+    cpdr : piran.cpdr.Cpdr
         Cold plasma dispersion relation object.
-    dispersion_poly_k : sympy.core.expr.Expr
-        Cold plasma dispersion relation as polynomial in k.
-    root_pairs : list of tuples (X, omega, k)
-        Solutions to the cold plasma dispersion relation.
+    omega : astropy.units.quantity.Quantity convertible to rad/second
+        Wave frequency.
+    X_range : astropy.units.quantity.Quantity (dimensionless_unscaled)
+        Wave normal angles.
+    wave_norm_angle_dist : piran.gauss.Gaussian
+        Distribution of wave normal angles.
     method : str, default="simpson"
 
     Returns
     -------
     norm_factor : np.floating
     """
+    # Given omega and X_range calculate wave number k,
+    # solution to the dispersion relation.
+    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # k
+
+    # It is more performant to substitute omega here, since it is the
+    # same for all root pairs/triplets, and then lambdify the expression outside
+    # the loop and use the lambdified object within the loop to replace X and k.
+    values_dict = {"omega": omega.value}
+
     # Derivative in omega
-    dispersion_deriv_omega = dispersion_poly_k.diff("omega")
+    cpdr_domega_lamb = sym.lambdify(
+        ["X", "k"], cpdr.poly_in_k_domega.subs(values_dict), "numpy"
+    )
 
     # Derivative in k
-    dispersion_deriv_k = dispersion_poly_k.diff("k")
-
-    # It has a better performance to substitute omega here since it is the
-    # same for all root pairs/triplets and then lambdify the expression outside the
-    # loop, and use the lambdified object within the loop to replace X and k.
-    omega = root_pairs[0][1]  # All root pairs have the same omega
-    values_dict = {
-        "omega": omega,
-    }
-    dispersion_deriv_omega_eval = sym.lambdify(
-        ["X", "k"], replace_cpdr_symbols(dispersion_deriv_omega, values_dict), "numpy"
-    )
-    dispersion_deriv_k_eval = sym.lambdify(
-        ["X", "k"], replace_cpdr_symbols(dispersion_deriv_k, values_dict), "numpy"
+    cpdr_dk_lamb = sym.lambdify(
+        ["X", "k"], cpdr.poly_in_k_dk.subs(values_dict), "numpy"
     )
 
-    X_range = [pair[0] for pair in root_pairs]
-    wave_norm_angle_distribution = dispersion._wave_angles.eval(np.array(X_range))
+    wave_norm_angle_dist = wave_norm_angle_dist.eval(X_range)
 
-    evaluated_integrand = np.empty(len(root_pairs), dtype=np.float64)
-    for i, pair in enumerate(root_pairs):
-        X = pair[0]
-        k = pair[2]
+    evaluated_integrand = np.zeros_like(X_range, dtype=np.float64)
+    for i in range(evaluated_integrand.shape[0]):
+        X = X_range[i]
+        k = wave_numbers[i]
 
         evaluated_integrand[i] = (
-            wave_norm_angle_distribution[i]
+            wave_norm_angle_dist[i]
             * k**2
-            * dispersion_deriv_omega_eval(X, k)
+            * cpdr_domega_lamb(X, k)
             * X
-        ) / ((1 + X**2) ** (3 / 2) * dispersion_deriv_k_eval(X, k))
+        ) / ((1 + X**2) ** (3 / 2) * cpdr_dk_lamb(X, k))
 
     if method == "trapezoid":
         integral = trapezoid(evaluated_integrand, x=X_range)
@@ -135,9 +84,11 @@ def compute_glauert_normalisation_factor(
     return norm_factor
 
 
-def compute_cunningham_normalisation_factor(
-    dispersion_poly_k,
-    root_pairs,
+@u.quantity_input
+def compute_cunningham_norm_factor(
+    cpdr,
+    omega,
+    X_range,
 ):
     """
     Calculate the normalisation factor from
@@ -145,40 +96,43 @@ def compute_cunningham_normalisation_factor(
 
     Parameters
     ----------
-    dispersion_poly_k : sympy.core.expr.Expr
-        Cold plasma dispersion relation as polynomial in k.
-    root_pairs : list of tuples (X, omega, k)
-        Solutions to the cold plasma dispersion relation.
+    cpdr : piran.cpdr.Cpdr
+        Cold plasma dispersion relation object.
+    omega : astropy.units.quantity.Quantity convertible to rad/second
+        Wave frequency.
+    X_range : astropy.units.quantity.Quantity (dimensionless_unscaled)
+        Wave normal angles.
 
     Returns
     -------
     norm_factor : numpy.ndarray[numpy.float64]
     """
+    # Given omega and X_range calculate wave number k,
+    # solution to the dispersion relation.
+    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # k
+
+    # It is more performant to substitute omega here, since it is the
+    # same for all root pairs/triplets, and then lambdify the expression outside
+    # the loop and use the lambdified object within the loop to replace X and k.
+    values_dict = {"omega": omega.value}
+
     # Derivative in omega
-    dispersion_deriv_omega = dispersion_poly_k.diff("omega")
+    cpdr_domega_lamb = sym.lambdify(
+        ["X", "k"], cpdr.poly_in_k_domega.subs(values_dict), "numpy"
+    )
 
     # Derivative in k
-    dispersion_deriv_k = dispersion_poly_k.diff("k")
-
-    # Since all root pairs have the same omega,
-    # replace it outside the loop and lamdify.
-    omega = root_pairs[0][1]
-    dd_domega = sym.lambdify(
-        ["X", "k"],
-        replace_cpdr_symbols(dispersion_deriv_omega, {"omega": omega}),
-        "numpy",
-    )
-    dd_dk = sym.lambdify(
-        ["X", "k"], replace_cpdr_symbols(dispersion_deriv_k, {"omega": omega}), "numpy"
+    cpdr_dk_lamb = sym.lambdify(
+        ["X", "k"], cpdr.poly_in_k_dk.subs(values_dict), "numpy"
     )
 
-    norm_factor = np.empty(len(root_pairs), dtype=np.float64)
-    for ii, pair in enumerate(root_pairs):
-        X = pair[0]
-        k = pair[2]
+    norm_factor = np.zeros_like(X_range, dtype=np.float64)
+    for i in range(norm_factor.shape[0]):
+        X = X_range[i]
+        k = wave_numbers[i]
 
-        norm_factor[ii] = (k**2 * dd_domega(X, k) * X) / (
-            (1 + X**2) ** (3 / 2) * dd_dk(X, k)
+        norm_factor[i] = (k**2 * cpdr_domega_lamb(X, k) * X) / (
+            (1 + X**2) ** (3 / 2) * cpdr_dk_lamb(X, k)
         )
     norm_factor /= 2 * np.pi**2
 
