@@ -45,7 +45,9 @@ class TestNormalisationFactors:
         X_w = 0.577 << u.dimensionless_unscaled  # angular width
         wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
-        norm_factor_glauert = compute_glauert_norm_factor(self.cpdr, self.omega, X_range, wave_norm_angle_dist, method="simpson")
+        norm_factor_glauert = compute_glauert_norm_factor(
+            self.cpdr, self.omega, X_range, wave_norm_angle_dist, method="simpson"
+        )
 
         expected = -8.53830973e-19
         assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)
@@ -62,7 +64,9 @@ class TestNormalisationFactors:
         X_w = 0.577 << u.dimensionless_unscaled  # angular width
         wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
-        norm_factor_glauert = compute_glauert_norm_factor(self.cpdr, self.omega, X_range, wave_norm_angle_dist, method="trapezoid")
+        norm_factor_glauert = compute_glauert_norm_factor(
+            self.cpdr, self.omega, X_range, wave_norm_angle_dist, method="trapezoid"
+        )
 
         expected = -8.53769363e-19
         assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)
@@ -79,7 +83,9 @@ class TestNormalisationFactors:
         X_w = 0.577 << u.dimensionless_unscaled  # angular width
         wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
-        norm_factor_glauert = compute_glauert_norm_factor(self.cpdr, self.omega, X_range, wave_norm_angle_dist)
+        norm_factor_glauert = compute_glauert_norm_factor(
+            self.cpdr, self.omega, X_range, wave_norm_angle_dist
+        )
 
         expected = -8.87151913e-19
         assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)

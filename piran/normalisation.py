@@ -1,14 +1,10 @@
 import numpy as np
 import sympy as sym
 from astropy import units as u
-from astropy.coordinates import Angle
 from scipy.integrate import simpson, trapezoid
 
 from piran.cpdr2 import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
-from piran.magpoint import MagPoint
-from piran.plasmapoint import PlasmaPoint
 
 
 @u.quantity_input
@@ -66,10 +62,7 @@ def compute_glauert_norm_factor(
         k = wave_numbers[i]
 
         evaluated_integrand[i] = (
-            wave_norm_angle_dist[i]
-            * k**2
-            * cpdr_domega_lamb(X, k)
-            * X
+            wave_norm_angle_dist[i] * k**2 * cpdr_domega_lamb(X, k) * X
         ) / ((1 + X**2) ** (3 / 2) * cpdr_dk_lamb(X, k))
 
     if method == "trapezoid":
