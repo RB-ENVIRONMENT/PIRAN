@@ -149,13 +149,13 @@ def main():
     if args.figure == "a" or args.figure == "b":
         X_min = 0.00 << u.dimensionless_unscaled
         X_max = 1.00 << u.dimensionless_unscaled
-        X_npoints = 1000
+        X_npoints = 200
         xticks = [0.01, 0.10, 1.00]
         yticks = [0.1, 1.0, 10.0, 100.0]
     elif args.figure == "c" or args.figure == "d":
         X_min = 0.00 << u.dimensionless_unscaled
         X_max = 5.67 << u.dimensionless_unscaled
-        X_npoints = 5000
+        X_npoints = 1800
         xticks = [0.01, 0.10, 1.00, 10.00]
         yticks = [0.1, 1.0, 10.0, 100.0, 1000.0]
 
