@@ -11,17 +11,13 @@
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
 import argparse
-import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
-
-from piran.magfield import MagField
 
 from piran.cpdr2 import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
@@ -198,7 +194,9 @@ def main():
     norm_ratios = []
     omega_ratios = [0.125, 0.575]
     for i, omega_ratio in enumerate(omega_ratios):
-        omega = np.abs(cpdr.plasma.gyro_freq[0]) * omega_ratio  # Electron gyrofrequency * ratio
+        omega = (
+            np.abs(cpdr.plasma.gyro_freq[0]) * omega_ratio
+        )  # Electron gyrofrequency * ratio
 
         resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
         epsilon = 0.9999  # Glauert & Horne 2005 paragraph 23
@@ -209,7 +207,9 @@ def main():
         X_range_glauert = X_range[X_range <= X_max_limit]
 
         # Glauert's norm factor
-        norm_factor_glauert = compute_glauert_norm_factor(cpdr, omega, X_range_glauert, wave_norm_angle_dist, method="simpson")
+        norm_factor_glauert = compute_glauert_norm_factor(
+            cpdr, omega, X_range_glauert, wave_norm_angle_dist, method="simpson"
+        )
 
         # Cunningham's norm factors (numpy ndarray)
         norm_factors_cunningham = compute_cunningham_norm_factor(
@@ -226,9 +226,15 @@ def main():
 
         # Calculate the ratio of equation (4) to equation (5)
         ratio = []
-        for X, norm_factor_cunningham in zip(X_range_cunningham[i], norm_factors_cunningham):
+        for X, norm_factor_cunningham in zip(
+            X_range_cunningham[i], norm_factors_cunningham
+        ):
             ratio.append(
-                (X, (1.0 / norm_factor_cunningham) / (integral_gx / norm_factor_glauert))
+                (
+                    X,
+                    (1.0 / norm_factor_cunningham)
+                    / (integral_gx / norm_factor_glauert),
+                )
             )
 
         norm_ratios.append(ratio)
