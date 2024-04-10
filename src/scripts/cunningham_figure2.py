@@ -11,93 +11,28 @@
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
 import argparse
-import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
-from piran.cpdr import Cpdr
+from piran.cpdr2 import Cpdr
+from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
-from piran.magfield import MagField
+from piran.magpoint import MagPoint
 from piran.normalisation import (
-    compute_cunningham_normalisation_factor,
-    compute_glauert_normalisation_factor,
-    solve_dispersion_relation,
+    compute_cunningham_norm_factor,
+    compute_glauert_norm_factor,
 )
-from piran.particles import Particles, PiranParticle
-from piran.resonance import replace_cpdr_symbols
-
-
-def calculate_ratio(
-    dispersion,
-    omega_c,
-    omega_p,
-    omega_ratio,
-    X_range_glauert,
-    X_range_cunningham,
-):
-    omega = abs(omega_c[0]) * omega_ratio  # Electron gyrofrequency * ratio
-
-    glauert_root_pairs = solve_dispersion_relation(
-        dispersion,
-        omega_c,
-        omega_p,
-        omega,
-        X_range_glauert,
-    )
-
-    cunningham_root_pairs = solve_dispersion_relation(
-        dispersion,
-        omega_c,
-        omega_p,
-        omega,
-        X_range_cunningham,
-    )
-
-    values_dict = {
-        "Omega": (omega_c[0].value, omega_c[1].value),
-        "omega_p": (omega_p[0].value, omega_p[1].value),
-    }
-    dispersion_poly_k = replace_cpdr_symbols(dispersion._poly_k, values_dict)
-
-    # Calculate normalisation factors from Glauert
-    glauert_norm_factor = compute_glauert_normalisation_factor(
-        dispersion,
-        dispersion_poly_k,
-        glauert_root_pairs,
-    )
-
-    # Calculate integral of g(X)
-    # Technically we should prepend point X=0 and we should use
-    # left endpoint integration rule, not simpson, as this is
-    # what Cunningham used in his paper.
-    eval_gx = dispersion._wave_angles.eval(np.array(X_range_glauert))
-    integral_gx = simpson(eval_gx, x=X_range_glauert)
-
-    # Calculate Cunningham's normalisation factors
-    cunningham_norm_factors = compute_cunningham_normalisation_factor(
-        dispersion_poly_k,
-        cunningham_root_pairs,
-    )
-
-    # Calculate the ratio of equation (4) to equation (5)
-    ratios = []
-    for X, cunningham_norm_factor in zip(X_range_cunningham, cunningham_norm_factors):
-        ratios.append(
-            (X, (1.0 / cunningham_norm_factor) / (integral_gx / glauert_norm_factor))
-        )
-
-    return ratios
+from piran.plasmapoint import PlasmaPoint
 
 
 def plot_figure2(
     norm_ratios,
-    frequency_ratio,
+    plasma_over_gyro_ratio,
     omega_ratios,
     x_ticks,
     y_ticks,
@@ -134,13 +69,23 @@ def plot_figure2(
         overlay_ratio1x = overlay[:, 0]
         overlay_ratio1y = overlay[:, 1]
         plt.loglog(
-            overlay_ratio1x, overlay_ratio1y, color="k", linestyle="--", alpha=0.6
+            overlay_ratio1x,
+            overlay_ratio1y,
+            color="k",
+            linestyle="--",
+            alpha=0.6,
+            label=rf"$\omega$/$\omega_{{ce}}$={omega_ratios[0]} from paper",
         )
 
         overlay_ratio2x = overlay[:, 2]
         overlay_ratio2y = overlay[:, 3]
         plt.loglog(
-            overlay_ratio2x, overlay_ratio2y, color="r", linestyle="--", alpha=0.6
+            overlay_ratio2x,
+            overlay_ratio2y,
+            color="r",
+            linestyle="--",
+            alpha=0.6,
+            label=rf"$\omega$/$\omega_{{ce}}$={omega_ratios[1]} from paper",
         )
 
     # plt.minorticks_on()
@@ -156,7 +101,7 @@ def plot_figure2(
     plt.legend(loc="upper right")
     plt.title(
         rf"Ratio of normalizers for "
-        rf"$\omega_{{pe}}$/$\omega_{{ce}}$={frequency_ratio.value}"
+        rf"$\omega_{{pe}}$/$\omega_{{ce}}$={plasma_over_gyro_ratio}"
     )
     plt.tight_layout()
 
@@ -168,7 +113,7 @@ def plot_figure2(
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="Cunningham_Figure2",
+        prog="Cunningham_2023_Figure2",
         description="Reproduce Figure 2 from Cunningham, 2023",
     )
     parser.add_argument(
@@ -199,104 +144,52 @@ def main():
         default=False,
         help="Pass this argument to overlay Cunningham's results in our figures.",
     )
-
     args = parser.parse_args()
 
-    cunningham_dat_filepath = Path(args.path) / f"Figure2{args.figure}.dat"
-    if not cunningham_dat_filepath.is_file():
-        raise Exception(
-            f"Incorrect filepath for Cunningham's dat file: {cunningham_dat_filepath}"
-        )
-
-    filestem = cunningham_dat_filepath.stem
     if args.figure == "a" or args.figure == "b":
-        X_min = 0.00
-        X_max = 1.00
-        # X_npoints = 1000
+        X_min = 0.00 << u.dimensionless_unscaled
+        X_max = 1.00 << u.dimensionless_unscaled
+        X_npoints = 200
         xticks = [0.01, 0.10, 1.00]
         yticks = [0.1, 1.0, 10.0, 100.0]
     elif args.figure == "c" or args.figure == "d":
-        X_min = 0.00
-        X_max = 5.67
-        # X_npoints = 5000
+        X_min = 0.00 << u.dimensionless_unscaled
+        X_max = 5.67 << u.dimensionless_unscaled
+        X_npoints = 1800
         xticks = [0.01, 0.10, 1.00, 10.00]
         yticks = [0.1, 1.0, 10.0, 100.0, 1000.0]
 
     if args.figure == "a" or args.figure == "c":
-        frequency_ratio = 1.5 * u.dimensionless_unscaled
-        resonance_cone_limits = [6.67910235853265, 1.15458277480413]
+        plasma_over_gyro_ratio = 1.5
     elif args.figure == "b" or args.figure == "d":
-        frequency_ratio = 10.0 * u.dimensionless_unscaled
-        resonance_cone_limits = [8.03773679895362, 1.41695373926307]
+        plasma_over_gyro_ratio = 10.0
 
-    # ============================== START ============================== #
-    # Those should be attributes of one of the main classes
-    # Magnetic field
-    M = 8.033454e15 * (u.tesla * u.m**3)
-    mlat = Angle(0, u.deg)
-    l_shell = 4.5 * u.dimensionless_unscaled
-    B = (M * math.sqrt(1 + 3 * math.sin(mlat.rad) ** 2)) / (
-        l_shell**3 * const.R_earth**3 * math.cos(mlat.rad) ** 6
+    X_range = u.Quantity(
+        np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
     )
 
-    q_e = -const.e.si  # Signed electron charge
-    q_p = const.e.si  # Signed proton charge
+    X_m = 0.0 << u.dimensionless_unscaled  # peak
+    X_w = 0.577 << u.dimensionless_unscaled  # angular width
+    wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
-    # Gyrofrequency can be calculated directly using electron charge, mass, and
-    # the magnetic field.
-    Omega_e = (q_e * B) / const.m_e
+    mlat_deg = Angle(0 * u.deg)
+    l_shell = 4.5
+    mag_point = MagPoint(mlat_deg, l_shell)
 
-    # Application of the frequency ratio yields the electron plasma frequency.
-    Omega_e_abs = abs(Omega_e)
-    omega_pe = Omega_e_abs * frequency_ratio
+    particles = ("e", "p+")
+    plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-    # We assume that the number density of electrons and protons are equal.
-    # These can be derived from the electron plasma frequency.
-    n_ = omega_pe**2 * const.eps0 * const.m_e / abs(q_e) ** 2
+    n_particles = len(particles)
+    cpdr_sym = CpdrSymbolic(n_particles)
 
-    Omega_p = (q_p * B) / const.m_p
-    omega_pp = np.sqrt((n_ * q_p**2) / (const.eps0 * const.m_p))
-    # =============================== END =============================== #
-
-    # ============================== START ============================== #
-    # We need those because they are input arguments to the new Cpdr class.
-    # They are not needed for this script.
-    RKE = 1.0 * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
-    alpha = Angle(5, u.deg)  # pitch angle
-
-    # Lower and upper cut-off frequencies
-    omega_m = 0.35 * Omega_e_abs
-    delta_omega = 0.15 * Omega_e_abs
-    omega_lc = omega_m - 1.5 * delta_omega
-    omega_uc = omega_m + 1.5 * delta_omega
-
-    # Resonances
-    n_min = -5
-    n_max = 5
-    n_range = u.Quantity(
-        range(n_min, n_max + 1), unit=u.dimensionless_unscaled, dtype=np.int32
-    )
-    # =============================== END =============================== #
-
-    piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
-    cpdr_particles = Particles(piran_particle_list, RKE, alpha)
-    cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
-    cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
-    cpdr_mag_field = MagField()
-    cpdr_resonances = n_range
-
-    dispersion = Cpdr(
-        cpdr_particles,
-        cpdr_wave_angles,
-        cpdr_wave_freqs,
-        cpdr_mag_field,
-        mlat,
-        l_shell,
-        cpdr_resonances,
-    )
-    dispersion.as_poly_in_k()
+    cpdr = Cpdr(cpdr_sym, plasma_point)
 
     # Load data from Cunningham paper
+    cunningham_dat_filepath = Path(args.path) / f"Figure2{args.figure}.dat"
+    if not cunningham_dat_filepath.is_file():
+        msg = f"Incorrect path for Cunningham's dat file: {cunningham_dat_filepath}"
+        raise Exception(msg)
+
     cunningham_figure_data = np.loadtxt(
         cunningham_dat_filepath,
         dtype=np.float64,
@@ -308,61 +201,64 @@ def main():
         u.Quantity(cunningham_figure_data[:, 2], unit=u.dimensionless_unscaled),
     ]
 
-    X_max_limits = [
-        min(X_max, 0.9999 * resonance_cone_limits[0]),
-        min(X_max, 0.9999 * resonance_cone_limits[1]),
-    ]
-
-    # Use points from .dat files for integrating glauert's norm factor
-    # restricted to 0, min(X_max, sqrt(-P/S).
-    X_range_glauert_integral0 = u.Quantity(np.insert(X_range_cunningham[0], 0, X_min))
-    X_range_glauert_integral1 = u.Quantity(np.insert(X_range_cunningham[1], 0, X_min))
-    # And restrict them
-    X_range_glauert_integral0 = X_range_glauert_integral0[
-        X_range_glauert_integral0 < X_max_limits[0]
-    ]
-    X_range_glauert_integral1 = X_range_glauert_integral1[
-        X_range_glauert_integral1 < X_max_limits[1]
-    ]
-
-    # Or use a uniform distribution between X_min and X_upper = min(X_max, sqrt(-P/S))
-    # X_range_glauert_integral0 = u.Quantity(
-    #     np.linspace(X_min, X_max_limits[0], X_npoints), unit=u.dimensionless_unscaled
-    # )
-    # X_range_glauert_integral1 = u.Quantity(
-    #     np.linspace(X_min, X_max_limits[1], X_npoints), unit=u.dimensionless_unscaled
-    # )
-
-    X_range_glauert_integral = [X_range_glauert_integral0, X_range_glauert_integral1]
-
+    norm_ratios = []
     omega_ratios = [0.125, 0.575]
+    for i, omega_ratio in enumerate(omega_ratios):
+        omega = (
+            np.abs(cpdr.plasma.gyro_freq[0]) * omega_ratio
+        )  # Electron gyrofrequency * ratio
 
-    ratio1 = calculate_ratio(
-        dispersion,
-        (Omega_e, Omega_p),
-        (omega_pe, omega_pp),
-        omega_ratios[0],
-        X_range_glauert_integral[0],
-        X_range_cunningham[0],
-    )
+        resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
+        epsilon = 0.9999  # Glauert & Horne 2005 paragraph 23
+        X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
 
-    ratio2 = calculate_ratio(
-        dispersion,
-        (Omega_e, Omega_p),
-        (omega_pe, omega_pp),
-        omega_ratios[1],
-        X_range_glauert_integral[1],
-        X_range_cunningham[1],
-    )
+        # For Glauert's norm factor use a uniform distribution
+        # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
+        X_range_glauert = X_range[X_range <= X_upper]
+
+        # Glauert's norm factor
+        norm_factor_glauert = compute_glauert_norm_factor(
+            cpdr, omega, X_range_glauert, wave_norm_angle_dist, method="simpson"
+        )
+
+        # Cunningham's norm factors (numpy ndarray)
+        norm_factors_cunningham = compute_cunningham_norm_factor(
+            cpdr,
+            omega,
+            X_range_cunningham[i],
+        )
+
+        # Calculate integral of g(X) to normalise it.
+        # Technically we should use left endpoint integration rule,
+        # not simpson, as this is what Cunningham used in his paper.
+        eval_gx = wave_norm_angle_dist.eval(X_range_glauert)
+        integral_gx = simpson(eval_gx, x=X_range_glauert)
+
+        # Calculate the ratio of equation (4) to equation (5)
+        ratio = []
+        for X, norm_factor_cunningham in zip(
+            X_range_cunningham[i], norm_factors_cunningham
+        ):
+            ratio.append(
+                (
+                    X,
+                    (1.0 / norm_factor_cunningham)
+                    / (integral_gx / norm_factor_glauert),
+                )
+            )
+
+        norm_ratios.append(ratio)
 
     if args.overlay:
         overlay = cunningham_figure_data
     else:
         overlay = None
 
+    filestem = cunningham_dat_filepath.stem
+
     plot_figure2(
-        (ratio1, ratio2),
-        frequency_ratio,
+        norm_ratios,
+        plasma_over_gyro_ratio,
         omega_ratios,
         xticks,
         yticks,
@@ -379,7 +275,7 @@ def main():
             f"Column 2 is the ratio of equation 4 to equation 5 using the X "
             f"in column 1 when Xmax={X_max} and the ratio of the plasma "
             f"frequency to the unsigned electron gyrofrequency is "
-            f"{frequency_ratio.value} and the ratio of the wave frequency "
+            f"{plasma_over_gyro_ratio} and the ratio of the wave frequency "
             f"to the unsigned electron gyrofrequency is {omega_ratios[0]}\n"
         )
         comment += "Column 3 is tangent of the wave normal angle used in column 4\n"
@@ -387,16 +283,16 @@ def main():
             f"Column 4 is the ratio of equation 4 to equation 5 using the X "
             f"in column 3 when Xmax={X_max} and the ratio of the plasma "
             f"frequency to the unsigned electron gyrofrequency is "
-            f"{frequency_ratio.value} and the ratio of the wave frequency "
+            f"{plasma_over_gyro_ratio} and the ratio of the wave frequency "
             f"to the unsigned electron gyrofrequency is {omega_ratios[1]}"
         )
 
         ratios = np.empty_like(cunningham_figure_data)
         for i in range(ratios.shape[0]):
-            ratios[i, 0] = ratio1[i][0]
-            ratios[i, 1] = ratio1[i][1]
-            ratios[i, 2] = ratio2[i][0]
-            ratios[i, 3] = ratio2[i][1]
+            ratios[i, 0] = norm_ratios[0][i][0]
+            ratios[i, 1] = norm_ratios[0][i][1]
+            ratios[i, 2] = norm_ratios[1][i][0]
+            ratios[i, 3] = norm_ratios[1][i][1]
 
         np.savetxt(
             f"{filestem}.txt",
