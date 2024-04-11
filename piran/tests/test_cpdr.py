@@ -5,7 +5,7 @@ import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 
-from piran.cpdr2 import Cpdr
+from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint

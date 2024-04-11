@@ -19,7 +19,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
-from piran.cpdr2 import Cpdr
+from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
 from piran.magpoint import MagPoint
