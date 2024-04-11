@@ -5,7 +5,6 @@ import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
-from scipy.optimize import root_scalar
 
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
@@ -266,68 +265,6 @@ class Cpdr:
             roots.append(roots_tmp)
 
         return roots
-
-    @u.quantity_input
-    def solve_resonant_for_x(
-        self,
-        omega: u.Quantity[u.rad / u.s],
-        X_range: u.Quantity[u.dimensionless_unscaled],
-        verbose: bool = False,
-    ) -> u.Quantity[u.dimensionless_unscaled]:
-
-        roots = []
-        for om in np.atleast_1d(omega):
-
-            X = self.symbolic.syms.get("X")
-            psi = self.symbolic.syms.get("psi")
-
-            # Only psi is a symbol after this
-            resonant_cpdr_in_psi = self.__resonant_poly_in_omega.subs(
-                {X: sym.tan(psi), "omega": om.value}
-            )
-
-            # lambdify our func in psi
-            resonant_cpdr_in_psi_lambdified = sym.lambdify(psi, resonant_cpdr_in_psi)
-
-            # transform range in X to range in psi
-            psi_range = np.arctan(X_range)
-
-            # evaluate func for all psi and store sign of result
-            cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
-
-            # We want to perform a pairwise comparison of consecutive elements and
-            # look for a chance of sign (from 1 to -1 or vice versa).
-            # We can do this efficiently by adding an ndarray containing the first
-            # element of each pair to an ndarray containing the second element of
-            # each pair.
-            # Anywhere that the result is 0 indicates a change in sign!
-            pairwise_sign_sums = cpdr_signs[:-1] + cpdr_signs[1:]
-
-            # Find indices corresponding to changes of sign.
-            # This is faster than looping over the whole pairwise_sign_sums
-            # for large arrays.
-            sign_change_indices = np.flatnonzero(pairwise_sign_sums == 0)
-
-            # For each index where we have identified that a change of sign occurs,
-            # use scipy's root_scalar to hone in on the root.
-            for idx in sign_change_indices:
-                root_result = root_scalar(
-                    resonant_cpdr_in_psi_lambdified,
-                    bracket=[psi_range[idx].value, psi_range[idx + 1].value],
-                    method="brentq",
-                )
-                roots.append(root_result.root)
-
-                if verbose:
-                    print(
-                        f"For {om=}\n"
-                        f"Change of sign between psi = {psi_range[idx].to_value(u.deg)}, {psi_range[idx+1].to_value(u.deg)}\n"
-                        f"Indices = {idx}, {idx+1}\n"
-                        f"Root at: {root_result.root * 180 / np.pi}\n"
-                    )
-
-        # Convert back to X and return
-        return u.Quantity(np.tan(roots), u.dimensionless_unscaled)
 
     def solve_cpdr(
         self,
