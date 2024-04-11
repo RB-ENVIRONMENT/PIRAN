@@ -3,7 +3,7 @@ import sympy as sym
 from astropy import units as u
 from scipy.integrate import simpson, trapezoid
 
-from piran.cpdr2 import Cpdr
+from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 
 
