@@ -100,23 +100,46 @@ def count_roots_per_subdomain(
     domains,
 ):
     # Now check how many roots exist in each subdomain.
-    # We need to pick a point within each subdomain - midpoint will do!
-    midpoints = u.Quantity(
-        [(subdomain[0] + subdomain[1]) / 2 for subdomain in domains],
-        u.dimensionless_unscaled,
-    )
-    domain_roots = cpdr.solve_resonant(midpoints)
-
     num_roots = []
-    for subdomain in domain_roots:
-        # Special case: if we have 1 'root', check for NaN!
-        if len(subdomain) == 1 and subdomain[0].count(np.nan):
-            num_roots.append(0)
+    for subdomain in domains:
+        left_roots = cpdr.solve_resonant(subdomain[0] * (1 + 1e-4))[0]
+        right_roots = cpdr.solve_resonant(subdomain[1] * (1 - 1e-4))[0]
+
+        num_left_roots = len(left_roots)
+        num_right_roots = len(right_roots)
+
+        # First, check the number of roots are equal at left and right endpoints of
+        # subdomain. If not, uh-oh...
+        if num_left_roots != num_right_roots:
+            print(
+                f"Roots not fixed in {subdomain=}\n"
+                f"{num_left_roots=}\n"
+                f"{num_right_roots=}\n"
+            )
+            num_roots.append(np.nan)
             continue
 
-        # Failing either of the above checks, our number of roots is just equal
-        # to the number of (X, omega, k) tuples in our subdomain list
-        num_roots.append(len(subdomain))
+        # Special case: if we have 1 'root', check for NaN!
+        if num_left_roots == 1:
+            left_root_is_nan = bool(left_roots[0].count(np.nan))
+            right_root_is_nan = bool(right_roots[0].count(np.nan))
+
+            if left_root_is_nan and right_root_is_nan:
+                num_roots.append(0)
+            elif not (left_root_is_nan or right_root_is_nan):
+                num_roots.append(1)
+            else:
+                print(
+                    f"Roots not fixed in {subdomain=}\n"
+                    f"{num_left_roots=}\n"
+                    f"{num_right_roots=}\n"
+                )
+                num_roots.append(np.nan)
+
+        # Regular case: number of roots is equal to the number of (X, omega, k)
+        # tuples in current subdomain.
+        else:
+            num_roots.append(num_left_roots)
 
     return num_roots
 
