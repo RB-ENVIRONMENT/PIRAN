@@ -54,7 +54,7 @@ def compute_glauert_norm_factor(
         ["X", "k"], cpdr.poly_in_k_dk.subs(values_dict), "numpy"
     )
 
-    wave_norm_angle_dist = wave_norm_angle_dist.eval(X_range)
+    eval_gx = wave_norm_angle_dist.eval(X_range)
 
     evaluated_integrand = np.zeros_like(X_range, dtype=np.float64)
     for i in range(evaluated_integrand.shape[0]):
@@ -62,7 +62,7 @@ def compute_glauert_norm_factor(
         k = wave_numbers[i]
 
         evaluated_integrand[i] = (
-            wave_norm_angle_dist[i] * k**2 * np.abs(cpdr_domega_lamb(X, k)) * X
+            eval_gx[i] * k**2 * np.abs(cpdr_domega_lamb(X, k)) * X
         ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k)))
 
     if method == "trapezoid":
