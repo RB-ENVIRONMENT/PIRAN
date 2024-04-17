@@ -62,8 +62,8 @@ def compute_glauert_norm_factor(
         k = wave_numbers[i]
 
         evaluated_integrand[i] = (
-            wave_norm_angle_dist[i] * k**2 * cpdr_domega_lamb(X, k) * X
-        ) / ((1 + X**2) ** (3 / 2) * cpdr_dk_lamb(X, k))
+            wave_norm_angle_dist[i] * k**2 * np.abs(cpdr_domega_lamb(X, k)) * X
+        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k)))
 
     if method == "trapezoid":
         integral = trapezoid(evaluated_integrand, x=X_range)
@@ -124,8 +124,8 @@ def compute_cunningham_norm_factor(
         X = X_range[i]
         k = wave_numbers[i]
 
-        norm_factor[i] = (k**2 * cpdr_domega_lamb(X, k) * X) / (
-            (1 + X**2) ** (3 / 2) * cpdr_dk_lamb(X, k)
+        norm_factor[i] = (k**2 * np.abs(cpdr_domega_lamb(X, k)) * X) / (
+            (1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k))
         )
     norm_factor /= 2 * np.pi**2
 
