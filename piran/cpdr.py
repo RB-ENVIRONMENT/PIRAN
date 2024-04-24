@@ -276,7 +276,7 @@ class Cpdr:
         """
 
         roots = []
-        for X in X_range:
+        for X in np.atleast_1d(X_range):
             psi = np.arctan(X)  # arctan of dimensionless returns radians
 
             # Only omega is a symbol after this
