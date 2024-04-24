@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 import sympy as sym
 from astropy import units as u
@@ -17,8 +19,37 @@ def solve_resonant_for_x(
     X_range: u.Quantity[u.dimensionless_unscaled],
     verbose: bool = False,
 ) -> u.Quantity[u.dimensionless_unscaled]:
+    """
+    Given Cpdr object and a 0d/1d array of omega, solve resonant cpdr for each omega.
+    Typical usage: let omega be lower / upper frequency cutoffs so that this will return
+    the values of X at which new solutions to the resonant cpdr enter / exit the region
+    of interest bounded by [omega_lc, omega_uc].
+
+    Parameters
+    ----------
+    cpdr: Cpdr
+        A Cpdr object.
+    omega: u.Quantity[u.rad / u.s]
+        A 0d/1d array of values in omega, for which we would like to solve the resonant
+        Cpdr to find corresponding solutions in X.
+    X_range: u.Quantity[u.rad / u.s]
+        An initial discretisation in X. For each omega, we produce values for the
+        resonant cpdr for all X in X_range and look for changes in sign (indicating the
+        presence of a root). A root finding algorithm then determines the precise
+        location of the root.
+    verbose: bool
+        Controls print statements.
+
+    Returns
+    -------
+    u.Quantity[u.dimensionless_unscaled]
+        A (flat) list of solutions in X.
+    """
+
     roots = []
+
     for om in np.atleast_1d(omega):
+
         X = cpdr.symbolic.syms.get("X")
         psi = cpdr.symbolic.syms.get("psi")
 
@@ -37,7 +68,7 @@ def solve_resonant_for_x(
         cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
 
         # We want to perform a pairwise comparison of consecutive elements and
-        # look for a chance of sign (from 1 to -1 or vice versa).
+        # look for a change of sign (from 1 to -1 or vice versa).
         # We can do this efficiently by adding an ndarray containing the first
         # element of each pair to an ndarray containing the second element of
         # each pair.
@@ -71,17 +102,36 @@ def solve_resonant_for_x(
     return u.Quantity(np.tan(roots), u.dimensionless_unscaled)
 
 
-def split_domain(X_min, X_max, splits):
-    # Patition (X_min, X_max) into subdomains according to splits.
-    # We could simplify this if splits already included X_min and X_max, which would
-    # likely require them to be added during solve_resonant_for_x.
-    domains = []
+@u.quantity_input
+def split_domain(
+    X_min: float, X_max: float, splits: u.Quantity[u.dimensionless_unscaled]
+) -> List[u.Quantity[u.dimensionless_unscaled]]:
+    """
+    Patition the domain [X_min, X_max] into subdomains according to splits.
+    We could simplify this if splits already included X_min and X_max, which would
+    likely require them to be added during solve_resonant_for_x.
+
+    Parameters
+    ----------
+    X_min : float
+        Lower bound
+    X_max : float
+        Upper bound
+    splits: u.Quantity[u.dimensionless_unscaled]
+        Values between [X_min, X_max] to be used for partitioning the domain.
+
+    Returns
+    -------
+    subdomains : List[u.Quantity[u.dimensionless_unscaled]]
+        A list of subdomains in the form [[X_min, a], [a, b], [b, c], ... , [z, X_max]].
+    """
+    subdomains = []
     if splits.size == 0:
         # No roots, so our whole domain is just [X_min, X_max]
-        domains.append(u.Quantity([X_min, X_max], u.dimensionless_unscaled))
+        subdomains.append(u.Quantity([X_min, X_max], u.dimensionless_unscaled))
     else:
         # First subdomain is X_min to our smallest root...
-        domains.append(u.Quantity([X_min, splits[0]], u.dimensionless_unscaled))
+        subdomains.append(u.Quantity([X_min, splits[0]], u.dimensionless_unscaled))
 
         # Grab all other subdomains in this loop
         # nd.iter returns ndarray elements and strips units :(
@@ -90,16 +140,34 @@ def split_domain(X_min, X_max, splits):
             while not it.finished:
                 lower = it.value
                 upper = it.value if (it.iternext()) else X_max
-                domains.append(u.Quantity([lower, upper], u.dimensionless_unscaled))
+                subdomains.append(u.Quantity([lower, upper], u.dimensionless_unscaled))
 
-    return domains
+    return subdomains
 
 
 def count_roots_per_subdomain(
     cpdr: Cpdr,
-    domains,
-):
-    # Now check how many roots exist in each subdomain.
+    domains: List[u.Quantity[u.dimensionless_unscaled]],
+) -> List[float]:
+    """
+    Check how many roots exist in each subdomain. Note that this only samples from two
+    points within each subdomain (near the endpoints), so is not an exhaustive check!
+    For subdomain without a fixed number of roots (likely indicating a singularity),
+    this returns np.nan for that subdomain.
+
+    Parameters
+    ----------
+    cpdr : Cpdr
+        A Cpdr object.
+    domains: List[u.Quantity[u.dimensionless_unscaled]]
+        A list of subdomains (see func split_domain).
+
+    Returns
+    -------
+    List[float]
+        The (fixed?) number of roots within each subdomain. Note: we use `float` instead
+        of `int` since np.nan is `float`.
+    """
     num_roots = []
     for subdomain in domains:
         left_roots = cpdr.solve_resonant(subdomain[0] * (1 + 1e-4))[0]
@@ -153,7 +221,7 @@ def main():
     plasma_over_gyro_ratio = 1.5
 
     energy = 1.0 * u.MeV
-    alpha = Angle(70.84, u.deg)
+    alpha = Angle(70.8, u.deg)
     resonance = 0
     freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
 
