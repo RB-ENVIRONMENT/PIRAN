@@ -11,7 +11,44 @@ from piran.plasmapoint import PlasmaPoint
 
 
 def main():
+    """
+    We plot three things in this script, each relevant to singularity-finding:
 
+    1. Resonant CPDR (i.e. the resonance condition substituted into the
+       dispersion relation, yielding a function in X and omega).
+    2. The derivative of the Resonant CPDR w.r.t. omega
+    3. The derivative of the Resonant CPDR w.r.r. X
+
+    Singularities occur when both (1) and (2) are 0. This is accompanied by a change in
+    the number of real roots of the Resonant CPDR as X varies, UNLESS (3) is also 0 (we
+    think). It may not be possible for the latter condition to occur in practice, but we
+    haven't done the analysis to prove this one way or another.
+
+    With this in mind, we have three+ possible routes to locating singularities:
+
+    a. Solve (1) for some subset of X in [X_min, X_max] and look for (unexpected)
+       changes in the number of real roots. We can already define regions in
+       [X_min, X_max] where we expect the number of real roots to be otherwise fixed.
+       Having found a rough location where the roots change, perform binary search to
+       isolate the singularity.
+
+    b. Produce a minimiser for minimising the distance between any two roots of (1).
+       If this is ever zero, we've found a root! Note that this *could* include complex
+       roots which might produce negative distance and aid our minimiser?
+       This would likely need to be a pairwise operation on every pair of roots within
+       a given range of X, which would potentially be computationally intensive.
+
+    c. Solve (2) for some subset of X. Plug (X, omega) values back into (1) and look for
+       a change of sign in (1) (indicating an intersection of (1) and (2)).
+       This will potentially require 'following' multiple branches of solutions to (2).
+       This will not necessarily hold if (3) is also 0 when (1) and (2) are 0!
+
+    d. (Attempted & failed) minimise `abs(1) + C * abs(2)` for some appropriate scale
+        factor C. I tried this and didn't get very far: choosing C is a bit of a fudge
+        and we're unlikely to ever precisely hit the singularity because of this.
+        Out-of-the-box scipy optimisers offered mixed results, and none of them liked
+        the scale of the numbers here (e.g. 10^20 is about as close as I could get to 0)
+    """
     # ================ Parameters =====================
 
     MESH_GRANULARITY = 1001
