@@ -244,3 +244,41 @@ class TestCpdr:
         assert np.isnan(roots[0][1].k)
         assert np.isnan(roots[0][1].k_par)
         assert np.isnan(roots[0][1].k_perp)
+
+    def test_find_resonant_parallel_wavenumber_1(self):
+        """Capture ValueError in find_resonant_parallel_wavenumber."""
+        mlat_deg = Angle(0 * u.deg)
+        l_shell = 4.5
+        mag_point = MagPoint(mlat_deg, l_shell)
+
+        particles = ("e", "p+")
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+
+        n_particles = len(particles)
+        cpdr_sym = CpdrSymbolic(n_particles)
+
+        energy = 1.0 << u.MeV
+        alpha = Angle(89.5, u.deg)
+        resonance = -1
+        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        cpdr = Cpdr(
+            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+        )
+
+        # For the following resonant triplet we get:
+        # result1 = -1.4738870959263295e-06 rad / s
+        # result2 = 1127.069779406036 rad / s
+        # in find_resonant_parallel_wavenumber().
+        # This means that with abs_tol=1e-6 we get k_par_is_pos=k_par_is_neg=False
+        # and ValueError("None of them is root") is raised.
+        X = 0.0 << u.dimensionless_unscaled
+        omega = 20773.61527263705 << u.rad / u.s
+        k = 0.0002288927620211241 << u.rad / u.m
+
+        with pytest.raises(ValueError):
+            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-6)
+
+        # With the default abs_tol it should not raise a ValueError.
+        k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k)
+        assert math.isclose(k_par.value, k.value)
