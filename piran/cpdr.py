@@ -386,6 +386,7 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
         omega: Quantity[u.rad / u.s],
         k: Quantity[u.rad / u.m],
+        abs_tol: float = 1e-5,
     ) -> Quantity[u.rad / u.m]:
         """
         Given triplet X, omega and k, solution to the resonant cpdr,
@@ -406,6 +407,9 @@ class Cpdr:
             Wave frequency.
         k : Quantity[u.rad / u.m]
             Wavenumber.
+        abs_tol : float = 1e-5
+            Absolute tolerance for deciding whether positive or
+            negative k_par is a solution to the resonance condition.
 
         Returns
         -------
@@ -424,8 +428,8 @@ class Cpdr:
         result1 = omega - k_par * v_par - reson * gyrofreq / gamma  # [0, pi/2]
         result2 = omega + k_par * v_par - reson * gyrofreq / gamma  # (pi/2, pi]
 
-        k_par_is_pos = math.isclose(result1.value, 0.0, abs_tol=1e-6)
-        k_par_is_neg = math.isclose(result2.value, 0.0, abs_tol=1e-6)
+        k_par_is_pos = math.isclose(result1.value, 0.0, abs_tol=abs_tol)
+        k_par_is_neg = math.isclose(result2.value, 0.0, abs_tol=abs_tol)
 
         if k_par_is_pos and not k_par_is_neg:
             # only positive k_par is root
