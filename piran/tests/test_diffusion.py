@@ -57,3 +57,23 @@ class TestDiffusion:
         integral = simpson(eval_psd, x=omega_range)
         assert math.isclose(integral, wave_amplitude.value**2, rel_tol=1e-7)
 
+    def test_get_phi_squared_1(self):
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(self.mag_point, self.particles, plasma_over_gyro_ratio)
+        energy = 1.0 << u.MeV
+        alpha = Angle(70, u.deg)
+        resonance = -1
+        wave_amplitude = (100 << u.pT).to(u.T)
+
+        cpdr = Cpdr(self.cpdr_sym, plasma_point, energy, alpha, resonance, self.freq_cutoff_params)
+
+        X = [0.1, 0.5, 0.9] << u.dimensionless_unscaled
+        resonant_root = cpdr.solve_resonant(X)
+
+        phi_squared_1 = get_phi_squared(cpdr, resonant_root[0][0])
+        phi_squared_2 = get_phi_squared(cpdr, resonant_root[1][0])
+        phi_squared_3 = get_phi_squared(cpdr, resonant_root[2][0])
+
+        assert math.isclose(phi_squared_1, 0.497342, rel_tol=1e-6)
+        assert math.isclose(phi_squared_2, 0.440568, rel_tol=1e-6)
+        assert math.isclose(phi_squared_3, 0.340022, rel_tol=1e-6)
