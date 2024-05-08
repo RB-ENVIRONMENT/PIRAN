@@ -35,8 +35,17 @@ def get_power_spectral_density(
     lower_cutoff = cpdr.omega_lc
     upper_cutoff = cpdr.omega_uc
 
-    error = np.sum(erf([(mean_omega - lower_cutoff) / delta_omega, (upper_cutoff - mean_omega) / delta_omega]))
-    normalisation_constant = (wave_amplitude**2 / delta_omega) * (2 / np.sqrt(np.pi)) / error  # A_squared
+    error = np.sum(
+        erf(
+            [
+                (mean_omega - lower_cutoff) / delta_omega,
+                (upper_cutoff - mean_omega) / delta_omega,
+            ]
+        )
+    )
+    normalisation_constant = (
+        (wave_amplitude**2 / delta_omega) * (2 / np.sqrt(np.pi)) / error
+    )  # A_squared
 
     power_spectral_density = normalisation_constant * cpdr.wave_freqs.eval(omega)
     return power_spectral_density
@@ -85,12 +94,11 @@ def get_phi_squared(
     J = jv([resonance - 1, resonance, resonance + 1], point)
 
     term1 = ((mu**2 - L) / (mu**2 - S)) * J[2] + ((mu**2 - R) / (mu**2 - S)) * J[0]
-    term2 = (mu**2 * np.sin(psi)**2 - P) / (2 * mu**2)
+    term2 = (mu**2 * np.sin(psi) ** 2 - P) / (2 * mu**2)
     term3 = (1 / np.tan(alpha)) * np.sin(psi) * np.cos(psi) * J[1]
-    term4 = ((R - L) / (2 * (mu**2 - S)))**2
-    term5 = ((P - mu**2 * np.sin(psi)**2) / mu**2)**2
-    term6 = (P * np.cos(psi) / mu**2)**2
+    term4 = ((R - L) / (2 * (mu**2 - S))) ** 2
+    term5 = ((P - mu**2 * np.sin(psi) ** 2) / mu**2) ** 2
+    term6 = (P * np.cos(psi) / mu**2) ** 2
 
-    phi_squared = (term1 * term2 + term3)**2 / (term4 * term5 + term6)
+    phi_squared = (term1 * term2 + term3) ** 2 / (term4 * term5 + term6)
     return phi_squared
-
