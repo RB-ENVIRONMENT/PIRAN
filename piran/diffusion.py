@@ -72,30 +72,25 @@ def get_phi_squared(
     phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Phi_{n,k}^2.
     """
-    resonance = cpdr.resonance
-    alpha = cpdr.alpha
-    X = resonant_root.X
-    psi = np.arctan(X)
-    p_perp = cpdr.p_perp
-    mass = cpdr.plasma.particles[0].mass
-    gyrofreq = cpdr.plasma.gyro_freq[0]
-    k = resonant_root.k
-    k_perp = resonant_root.k_perp
-    omega = resonant_root.omega
-    mu = const.c * np.abs(k) / omega
-    L = cpdr.stix.L(omega)
-    S = cpdr.stix.S(omega)
-    R = cpdr.stix.R(omega)
-    P = cpdr.stix.P(omega)
+    psi = np.arctan(resonant_root.X)
+    mu = const.c * np.abs(resonant_root.k) / resonant_root.omega
+    L = cpdr.stix.L(resonant_root.omega)
+    S = cpdr.stix.S(resonant_root.omega)
+    R = cpdr.stix.R(resonant_root.omega)
+    P = cpdr.stix.P(resonant_root.omega)
 
-    point = k_perp * p_perp / (mass * gyrofreq)
+    point = (
+        resonant_root.k_perp
+        * cpdr.p_perp
+        / (cpdr.plasma.particles[0].mass * cpdr.plasma.gyro_freq[0])
+    )
 
     # Bessel function of the first kind
-    J = jv([resonance - 1, resonance, resonance + 1], point)
+    J = jv([cpdr.resonance - 1, cpdr.resonance, cpdr.resonance + 1], point)
 
     term1 = ((mu**2 - L) / (mu**2 - S)) * J[2] + ((mu**2 - R) / (mu**2 - S)) * J[0]
     term2 = (mu**2 * np.sin(psi) ** 2 - P) / (2 * mu**2)
-    term3 = (1 / np.tan(alpha)) * np.sin(psi) * np.cos(psi) * J[1]
+    term3 = (1 / np.tan(cpdr.alpha)) * np.sin(psi) * np.cos(psi) * J[1]
     term4 = ((R - L) / (2 * (mu**2 - S))) ** 2
     term5 = ((P - mu**2 * np.sin(psi) ** 2) / mu**2) ** 2
     term6 = (P * np.cos(psi) / mu**2) ** 2
