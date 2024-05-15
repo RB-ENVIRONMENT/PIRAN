@@ -99,6 +99,33 @@ class TestDiffusion:
         assert math.isclose(phi_squared_2, 0.418072, rel_tol=1e-6)
         assert math.isclose(phi_squared_3, 0.283105, rel_tol=1e-6)
 
+    def test_get_phi_squared_2(self):
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(
+            self.mag_point, self.particles, plasma_over_gyro_ratio
+        )
+        energy = 1.0 << u.MeV
+        alpha = Angle(83, u.deg)
+        resonance = -1
+
+        cpdr = Cpdr(
+            self.cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            self.freq_cutoff_params,
+        )
+
+        X = [0.1] << u.dimensionless_unscaled
+        resonant_root = cpdr.solve_resonant(X)
+
+        phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
+        phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
+
+        assert math.isclose(phi_squared_11, 0.460906, rel_tol=1e-6)
+        assert math.isclose(phi_squared_12, 0.489358, rel_tol=1e-6)
+
     def test_get_singular_term_1(self):
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(
