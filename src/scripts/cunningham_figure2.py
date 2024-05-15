@@ -1,3 +1,5 @@
+# Description
+# -----------
 # This script reproduces the results from Figure 2 in Cunningham, 2023.
 # To run use the `-p` option to pass the directory with the .dat
 # file from Cunningham paper (it is expected that the files are name
@@ -10,6 +12,13 @@
 # format as the one in the .dat files.
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
+
+# Revision History
+# ----------------
+# v1.0.1 (2024-05-15):
+# Increase number of points in X_range.
+# Annotate figures with package and script version numbers.
+# Print X_max and resonance cone upper limit.
 import argparse
 from importlib.metadata import version
 from pathlib import Path
