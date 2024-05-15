@@ -72,7 +72,10 @@ def get_phi_squared(
     phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Phi_{n,k}^2.
     """
-    psi = np.arctan(resonant_root.X)
+    if resonant_root.k_par >= 0.0:
+        psi = np.arctan(resonant_root.X)
+    else:
+        psi = (np.pi << u.rad) - np.arctan(resonant_root.X)
     mu = const.c * np.abs(resonant_root.k) / resonant_root.omega
     L = cpdr.stix.L(resonant_root.omega)
     S = cpdr.stix.S(resonant_root.omega)
