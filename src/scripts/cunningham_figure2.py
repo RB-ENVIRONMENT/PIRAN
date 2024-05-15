@@ -11,6 +11,7 @@
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
 import argparse
+from importlib.metadata import version
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -29,6 +30,8 @@ from piran.normalisation import (
 )
 from piran.plasmapoint import PlasmaPoint
 
+script_version = "1.0.1"
+
 
 def plot_figure2(
     norm_ratios,
@@ -45,6 +48,14 @@ def plot_figure2(
             "text.usetex": False,
             "font.size": 12,
         }
+    )
+    plt.annotate(
+        f"piran: {version('piran')}\nscript: {script_version}",
+        xy=(0.0, 0.0),
+        xycoords="figure fraction",
+        horizontalalignment="left",
+        verticalalignment="bottom",
+        fontsize=8,
     )
 
     x_lim_min = x_ticks[0]
