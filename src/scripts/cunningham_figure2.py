@@ -211,6 +211,7 @@ def main():
         resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
         epsilon = 0.9999  # Glauert & Horne 2005 paragraph 23
         X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
+        print(f"{omega_ratio=}, {X_max=}, {X_upper=}")
 
         # For Glauert's norm factor use a uniform distribution
         # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
