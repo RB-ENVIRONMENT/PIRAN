@@ -109,8 +109,8 @@ def get_singular_term(
     The term is v_par - d(omega) / d(k_par) evaluated at signed k_par.
     More specifically, the term is v_par - (- (dD/dk) / (dD/domega) ) * (1 / cos(psi)),
     with cos(psi) = ± 1 / sqrt(1 + X^2).
-    cos(psi) = + 1 / sqrt(1 + X^2) if k_par in [0, 90]
-    cos(psi) = - 1 / sqrt(1 + X^2) if k_par in (90, 180].
+    cos(psi) = + 1 / sqrt(1 + X^2) if psi in [0, 90] (or equivalently, k_par pos)
+    cos(psi) = - 1 / sqrt(1 + X^2) if psi in (90, 180] (or equivalently, k_par neg).
 
     Parameters
     ----------
