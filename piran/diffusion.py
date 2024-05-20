@@ -108,7 +108,7 @@ def get_singular_term(
     resonant_root: ResonantRoot,
 ) -> u.Quantity[u.m / u.s]:
     """
-    Calculate the denominator from the last term in equation 5 in Glauert & Horne 2005.
+    Calculate the denominator from the last term in equation 11 in Glauert & Horne 2005.
     The term is v_par - d(omega) / d(k_par) evaluated at signed k_par.
     More specifically, the term is v_par - (- (dD/dk) / (dD/domega) ) * (1 / cos(psi)),
     with cos(psi) = ± 1 / sqrt(1 + X^2).
