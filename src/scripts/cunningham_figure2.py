@@ -1,3 +1,5 @@
+# Description
+# -----------
 # This script reproduces the results from Figure 2 in Cunningham, 2023.
 # To run use the `-p` option to pass the directory with the .dat
 # file from Cunningham paper (it is expected that the files are name
@@ -10,7 +12,15 @@
 # format as the one in the .dat files.
 # Finally passing the `-o` argument will overlay Cunningham's results
 # from the .dat file in our plots.
+
+# Revision History
+# ----------------
+# v1.0.1 (2024-05-15):
+# Increase number of points in X_range.
+# Annotate figures with package and script version numbers.
+# Print X_max and resonance cone upper limit.
 import argparse
+from importlib.metadata import version
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -29,6 +39,8 @@ from piran.normalisation import (
 )
 from piran.plasmapoint import PlasmaPoint
 
+script_version = "1.0.1"
+
 
 def plot_figure2(
     norm_ratios,
@@ -45,6 +57,14 @@ def plot_figure2(
             "text.usetex": False,
             "font.size": 12,
         }
+    )
+    plt.annotate(
+        f"piran: {version('piran')}\nscript: {script_version}",
+        xy=(0.0, 0.0),
+        xycoords="figure fraction",
+        horizontalalignment="left",
+        verticalalignment="bottom",
+        fontsize=8,
     )
 
     x_lim_min = x_ticks[0]
@@ -149,13 +169,13 @@ def main():
     if args.figure == "a" or args.figure == "b":
         X_min = 0.00 << u.dimensionless_unscaled
         X_max = 1.00 << u.dimensionless_unscaled
-        X_npoints = 200
+        X_npoints = 1000
         xticks = [0.01, 0.10, 1.00]
         yticks = [0.1, 1.0, 10.0, 100.0]
     elif args.figure == "c" or args.figure == "d":
         X_min = 0.00 << u.dimensionless_unscaled
         X_max = 5.67 << u.dimensionless_unscaled
-        X_npoints = 1800
+        X_npoints = 5670
         xticks = [0.01, 0.10, 1.00, 10.00]
         yticks = [0.1, 1.0, 10.0, 100.0, 1000.0]
 
@@ -211,6 +231,7 @@ def main():
         resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
         epsilon = 0.9999  # Glauert & Horne 2005 paragraph 23
         X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
+        print(f"{omega_ratio=}, {X_max=}, {X_upper=}")
 
         # For Glauert's norm factor use a uniform distribution
         # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
