@@ -109,7 +109,8 @@ def get_singular_term(
 ) -> u.Quantity[u.m / u.s]:
     """
     Calculate the denominator from the last term in equation 11 in Glauert & Horne 2005.
-    The term is v_par - d(omega) / d(k_par) evaluated at signed k_par.
+    The term is v_par - d(omega) / d(k_par) evaluated at signed k_par and is returned
+    without taking its absolute value.
     More specifically, the term is v_par - (- (dD/dk) / (dD/domega) ) * (1 / cos(psi)),
     with cos(psi) = ± 1 / sqrt(1 + X^2).
     cos(psi) = + 1 / sqrt(1 + X^2) if psi in [0, 90] (or equivalently, k_par pos)
