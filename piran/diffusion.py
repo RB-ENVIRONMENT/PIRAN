@@ -178,7 +178,9 @@ def get_normalised_intensity(
     normalised_intensity :
         Normalised intensity |B_{k}^{norm}|^2
     """
-    normalised_intensity = power_spectral_density * wave_norm_angle_dist_eval / norm_factor
+    normalised_intensity = (
+        power_spectral_density * wave_norm_angle_dist_eval / norm_factor
+    )
 
     return normalised_intensity
 
@@ -221,12 +223,17 @@ def get_DnX_single_root(
     gyrofreq = cpdr.plasma.gyro_freq[0]
     alpha = cpdr.alpha
 
-    term1 = (charge**2 * resonant_root.omega**2) / (4 * np.pi * (1 + resonant_root.X**2))
-    term2 = (cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega) - np.sin(alpha)**2) / np.cos(alpha)
+    term1 = (charge**2 * resonant_root.omega**2) / (
+        4 * np.pi * (1 + resonant_root.X**2)
+    )
+    term2 = (
+        cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega)
+        - np.sin(alpha) ** 2
+    ) / np.cos(alpha)
     term3 = normalised_intensity * phi_squared / np.abs(singular_term)
 
     DnXaa = term1 * term2**2 * term3
     DnXap = DnXaa * np.sin(alpha) / term2
-    DnXpp = DnXaa * (np.sin(alpha) / term2)**2
+    DnXpp = DnXaa * (np.sin(alpha) / term2) ** 2
 
     return DnXaa, DnXap, DnXpp

@@ -164,7 +164,9 @@ class TestDiffusion:
         gx = 0.97041
         norm_factor = 1.754757e-17
 
-        normalised_intensity = get_normalised_intensity(power_spectral_density, gx, norm_factor)
+        normalised_intensity = get_normalised_intensity(
+            power_spectral_density, gx, norm_factor
+        )
         assert math.isclose(normalised_intensity.value, 8.339484e-09, rel_tol=1e-7)
 
     def test_get_DnX_single_root(self):
