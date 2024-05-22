@@ -182,3 +182,51 @@ def get_normalised_intensity(
 
     return normalised_intensity
 
+
+@u.quantity_input
+def get_DnX_single_root(
+    cpdr: Cpdr,
+    resonant_root: ResonantRoot,
+    normalised_intensity,
+    phi_squared: u.Quantity[u.dimensionless_unscaled],
+    singular_term: u.Quantity[u.m / u.s],
+):
+    """
+    Calculates the diffusion coefficients in pitch angle DnXaa,
+    mixed pitch angle-momentum DnXap and momentum DnXpp, for a
+    given resonant root, as defined in equations 11, 12 and 13
+    in Glauert & Horne 2005.
+
+    Parameters
+    ----------
+    cpdr : piran.cpdr.Cpdr
+        Cold plasma dispersion relation object.
+    resonant_root : piran.cpdr.ResonantRoot object
+        NamedTuple object containing a resonant root, i.e.,
+        root to both dispersion relation and resonance condition.
+    normalised_intensity :
+        Normalised intensity |B_{k}^{norm}|^2
+    phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
+        Phi_{n,k}^2.
+    singular_term : astropy.units.quantity.Quantity[u.m / u.s]
+        v_par - d(omega) / d(k_par)
+
+    Returns
+    -------
+    DnXaa, DnXap, DnXpp :
+        Pitch angle, mixed pitch angle-momentum and momentum diffusion
+        coefficients for a given resonant root.
+    """
+    charge = cpdr.plasma.particles[0].charge
+    gyrofreq = cpdr.plasma.gyro_freq[0]
+    alpha = cpdr.alpha
+
+    term1 = (charge**2 * resonant_root.omega**2) / (4 * np.pi * (1 + resonant_root.X**2))
+    term2 = (cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega) - np.sin(alpha)**2) / np.cos(alpha)
+    term3 = normalised_intensity * phi_squared / np.abs(singular_term)
+
+    DnXaa = term1 * term2**2 * term3
+    DnXap = DnXaa * np.sin(alpha) / term2
+    DnXpp = DnXaa * (np.sin(alpha) / term2)**2
+
+    return DnXaa, DnXap, DnXpp
