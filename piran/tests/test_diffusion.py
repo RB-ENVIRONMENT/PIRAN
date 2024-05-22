@@ -8,6 +8,7 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    get_normalised_intensity,
     get_phi_squared,
     get_power_spectral_density,
     get_singular_term,
@@ -156,3 +157,12 @@ class TestDiffusion:
         singular_term_12 = get_singular_term(cpdr, resonant_root[0][1])
         assert singular_term_12.unit == u.m / u.s
         assert math.isclose(singular_term_12.value, 154355842.6, rel_tol=1e-7)
+
+    def test_get_normalised_intensity_1(self):
+        power_spectral_density = 1.5079984e-25 << (u.T**2 * u.s / u.rad)
+        gx = 0.97041
+        norm_factor = 1.754757e-17
+
+        normalised_intensity = get_normalised_intensity(power_spectral_density, gx, norm_factor)
+        assert math.isclose(normalised_intensity.value, 8.339484e-09, rel_tol=1e-7)
+

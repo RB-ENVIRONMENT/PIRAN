@@ -141,3 +141,44 @@ def get_singular_term(
         singular_term = cpdr.v_par - (dD_dk / dD_dw) * np.sqrt(1 + X**2)
 
     return singular_term
+
+
+@u.quantity_input
+def get_normalised_intensity(
+    power_spectral_density: u.Quantity[u.T**2 * u.s / u.rad],
+    wave_norm_angle_dist_eval,
+    norm_factor,
+):
+    """
+    Calculates the normalised intensity |B_{k}^{norm}|^2.
+
+    Depending on the input parameters, this is either equation 4b
+    or 5b from Cunningham 2023. Equation 5b is used in Glauert & Horne 2005,
+    while equation 4b is the proposed method by Cunningham.
+    If we are calculating equation 5b, then `norm_factor` is computed by the
+    `compute_glauert_norm_factor()` function in the piran package, which returns
+    the N(omega) term in the denominator of 5b, while if we are calculating
+    equation 4b, then `norm_factor` shall be computed by piran's
+    `compute_cunningham_norm_factor()` function which returns the denominator
+    in 4b.
+    Note that `wave_norm_angle_dist_eval` must be normalised if we are calculating
+    equation 4b (Cunningham's proposed method).
+
+    Parameters
+    ----------
+    power_spectral_density : u.Quantity[u.T**2 * u.s / u.rad]
+        Power spectral density B^2(omega).
+    wave_norm_angle_dist_eval :
+        Wave normal angle distribution evaluated at X.
+    norm_factor :
+        Normalisation factor.
+
+    Returns
+    -------
+    normalised_intensity :
+        Normalised intensity |B_{k}^{norm}|^2
+    """
+    normalised_intensity = power_spectral_density * wave_norm_angle_dist_eval / norm_factor
+
+    return normalised_intensity
+
