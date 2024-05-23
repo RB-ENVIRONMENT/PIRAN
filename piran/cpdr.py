@@ -343,24 +343,35 @@ class Cpdr:
         self,
         omega: u.Quantity[u.rad / u.s],
         X_range: u.Quantity[u.dimensionless_unscaled],
+        endpoints: bool = False,
         verbose: bool = False,
     ) -> u.Quantity[u.dimensionless_unscaled]:
         """
-        Given Cpdr object and a 0d/1d array of omega, solve resonant cpdr for each omega.
-        Typical usage: let omega be lower / upper frequency cutoffs so that this will return
-        the values of X at which new solutions to the resonant cpdr enter / exit the region
-        of interest bounded by [omega_lc, omega_uc].
+        Given a 0d/1d array of omega, solve the resonant cpdr for each omega to obtain
+        solutions in X. It is not possible to know how many solutions in X are present
+        within a given range _a priori_, so an initial discretisation in X is required
+        as an input argument. A 'coarse' discretisation may not catch every possible
+        solution!
+
+        Typical usage: let omega be lower / upper frequency cutoffs so that this will
+        return the values of X at which new solutions to the resonant cpdr enter / exit
+        the region of interest bounded by [omega_lc, omega_uc].
 
         Parameters
         ----------
         omega: u.Quantity[u.rad / u.s]
-            A 0d/1d array of values in omega, for which we would like to solve the resonant
-            Cpdr to find corresponding solutions in X.
+            A 0d/1d array of values in omega, for which we would like to solve the
+            resonant Cpdr to find corresponding solutions in X.
         X_range: u.Quantity[u.rad / u.s]
             An initial discretisation in X. For each omega, we produce values for the
-            resonant cpdr for all X in X_range and look for changes in sign (indicating the
-            presence of a root). A root finding algorithm then determines the precise
-            location of the root.
+            resonant cpdr for all X in X_range and look for changes in sign (indicating
+            the presence of a root). A root finding algorithm then determines the
+            precise location of the root.
+        endpoints: bool
+            Controls whether endpoints of `X_range` should be included in the return
+            value. This should be `True` if used in conjunction with the `split_domain`
+            and `count_roots_per_subdomain` methods from the `helpers` module to
+            partition a domain in `X` according to Glauert&Horne 2005, Paragraph 23.
         verbose: bool
             Controls print statements.
 
@@ -369,6 +380,9 @@ class Cpdr:
         u.Quantity[u.dimensionless_unscaled]
             A (flat) list of solutions in X.
         """
+
+        # transform range in X to range in psi
+        psi_range = np.arctan(X_range)
 
         roots = []
 
@@ -384,9 +398,6 @@ class Cpdr:
 
             # lambdify our func in psi
             resonant_cpdr_in_psi_lambdified = sym.lambdify(psi, resonant_cpdr_in_psi)
-
-            # transform range in X to range in psi
-            psi_range = np.arctan(X_range)
 
             # evaluate func for all psi and store sign of result
             cpdr_signs = np.sign(resonant_cpdr_in_psi_lambdified(psi_range))
@@ -422,8 +433,14 @@ class Cpdr:
                         f"Root at: {root_result.root * 180 / np.pi}\n"
                     )
 
-        # Convert back to X and return
-        return u.Quantity(np.tan(roots), u.dimensionless_unscaled)
+        # Finalise solution array, including endpoints if specified in input args.
+        # Append u.dimensionless_unscaled units in either case.
+        solns_in_X = (
+            [X_range[0], np.tan(roots), X_range[-1]] if endpoints else np.tan(roots)
+        )
+        solns_in_X <<= u.dimensionless_unscaled
+
+        return solns_in_X
 
     def solve_cpdr(
         self,
