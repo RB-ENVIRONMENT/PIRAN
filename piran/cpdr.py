@@ -384,14 +384,20 @@ class Cpdr:
         # transform range in X to range in psi
         psi_range = np.arctan(X_range)
 
+        # Grab symbols for X and psi
+        X = self.__symbolic.syms.get("X")
+        psi = self.__symbolic.syms.get("psi")
+
         roots = []
 
         for om in np.atleast_1d(omega):
 
-            X = self.__symbolic.syms.get("X")
-            psi = self.__symbolic.syms.get("psi")
-
-            # Only psi is a symbol after this
+            # resonant cpdr contains both `X` and `psi` terms, which are linked by
+            # `X = tan(psi)`. We're looking for solns in `X`, but its easier to find
+            # solns in `psi`.
+            #
+            # Transform all `X` in resonant cpdr to `psi`, and substitute in the current
+            # fixed value for `omega`. Only `psi` is a symbol after this.
             resonant_cpdr_in_psi = self.__resonant_poly_in_omega.subs(
                 {X: sym.tan(psi), "omega": om.value}
             )
