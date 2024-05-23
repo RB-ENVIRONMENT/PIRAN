@@ -72,46 +72,41 @@ def get_real_and_positive_roots(values, tol=1e-8):
 
 
 @u.quantity_input
-def split_domain(
-    X_min: float, X_max: float, splits: u.Quantity[u.dimensionless_unscaled]
+def split_array(
+    array: u.Quantity[u.dimensionless_unscaled],
 ) -> List[u.Quantity[u.dimensionless_unscaled]]:
     """
-    Patition the domain [X_min, X_max] into subdomains according to splits.
-    We could simplify this if splits already included X_min and X_max, which would
-    likely require them to be added during solve_resonant_for_x.
+    Partition the array [a, b, c, ... , x, y, z] into a list of distinct buckets of the
+    form [[a, b], [b, c], ... , [x, y], [y, z]].
 
     Parameters
     ----------
-    X_min : float
-        Lower bound
-    X_max : float
-        Upper bound
-    splits: u.Quantity[u.dimensionless_unscaled]
-        Values between [X_min, X_max] to be used for partitioning the domain.
+    array: u.Quantity[u.dimensionless_unscaled]
+        An ordered list of values to be used as endpoints for distinct buckets.
 
     Returns
     -------
     subdomains : List[u.Quantity[u.dimensionless_unscaled]]
-        A list of subdomains in the form [[X_min, a], [a, b], [b, c], ... , [z, X_max]].
+        A list of distinct buckets in the form [[a, b], [b, c], ... , [x, y], [y, z]].
     """
-    subdomains = []
-    if splits.size == 0:
-        # No roots, so our whole domain is just [X_min, X_max]
-        subdomains.append(u.Quantity([X_min, X_max], u.dimensionless_unscaled))
-    else:
-        # First subdomain is X_min to our smallest root...
-        subdomains.append(u.Quantity([X_min, splits[0]], u.dimensionless_unscaled))
+    buckets = []
 
-        # Grab all other subdomains in this loop
-        # nd.iter returns ndarray elements and strips units :(
-        it = np.nditer(splits)
-        with it:
-            while not it.finished:
-                lower = it.value
-                upper = it.value if (it.iternext()) else X_max
-                subdomains.append(u.Quantity([lower, upper], u.dimensionless_unscaled))
+    # If input array consists of 0 or 1 points, we have nothing to do...
+    if array.size < 2:
+        return array
 
-    return subdomains
+    # Iterate over pairwise elements of the array and create distinct buckets.
+    # nd.iter returns ndarray elements and strips units :(
+    it = np.nditer(array)
+    with it:
+        while not it.finished:
+            lower = it.value
+
+            if it.iternext():
+                upper = it.value
+                buckets.append(u.Quantity([lower, upper], u.dimensionless_unscaled))
+
+    return buckets
 
 
 def count_roots_per_subdomain(
