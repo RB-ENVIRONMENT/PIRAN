@@ -43,7 +43,7 @@ def main():
         )
     )
 
-    print(f"{X_l=}\n" f"{X_u=}\n" f"{X_all=}\n")
+    print(f"{X_l=}\n{X_u=}\n{X_all=}\n")
 
     # Split the array X_all into a list of distinct buckets
     buckets = split_array(X_all)
