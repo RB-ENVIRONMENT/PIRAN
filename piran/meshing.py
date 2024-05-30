@@ -45,33 +45,33 @@ def split_array(
     return buckets
 
 
-def count_roots_per_subdomain(
+def count_roots_per_bucket(
     cpdr: Cpdr,
-    domains: List[u.Quantity[u.dimensionless_unscaled]],
+    buckets: List[u.Quantity[u.dimensionless_unscaled]],
 ) -> List[float]:
     """
-    Check how many roots exist in each subdomain. Note that this only samples from two
-    points within each subdomain (near the endpoints), so is not an exhaustive check!
-    For subdomain without a fixed number of roots (likely indicating a singularity),
-    this returns np.nan for that subdomain.
+    Check how many roots exist in each bucket. Note that this only samples from two
+    points within each bucket (near the endpoints), so is not an exhaustive check!
+    For bucket without a fixed number of roots (likely indicating a singularity), this
+    returns np.nan for that bucket.
 
     Parameters
     ----------
     cpdr : Cpdr
         A Cpdr object.
-    domains: List[u.Quantity[u.dimensionless_unscaled]]
-        A list of subdomains (see func split_domain).
+    buckets: List[u.Quantity[u.dimensionless_unscaled]]
+        A list of buckets (see func split_array).
 
     Returns
     -------
     List[float]
-        The (fixed?) number of roots within each subdomain. Note: we use `float` instead
-        of `int` since np.nan is `float`.
+        The (fixed?) number of roots within each bucket. Note: we use `float` instead of
+        `int` since np.nan is `float`.
     """
     num_roots = []
-    for subdomain in domains:
-        left_roots = cpdr.solve_resonant(subdomain[0] * (1 + 1e-4))[0]
-        right_roots = cpdr.solve_resonant(subdomain[1] * (1 - 1e-4))[0]
+    for bucket in buckets:
+        left_roots = cpdr.solve_resonant(bucket[0] * (1 + 1e-4))[0]
+        right_roots = cpdr.solve_resonant(bucket[1] * (1 - 1e-4))[0]
 
         num_left_roots = len(left_roots)
         num_right_roots = len(right_roots)
@@ -80,7 +80,7 @@ def count_roots_per_subdomain(
         # subdomain. If not, uh-oh...
         if num_left_roots != num_right_roots:
             print(
-                f"Roots not fixed in {subdomain=}\n"
+                f"Roots not fixed in {bucket=}\n"
                 f"{num_left_roots=}\n"
                 f"{num_right_roots=}\n"
             )
@@ -98,7 +98,7 @@ def count_roots_per_subdomain(
                 num_roots.append(1)
             else:
                 print(
-                    f"Roots not fixed in {subdomain=}\n"
+                    f"Roots not fixed in {bucket=}\n"
                     f"{num_left_roots=}\n"
                     f"{num_right_roots=}\n"
                 )
