@@ -48,6 +48,7 @@ def split_array(
 def count_roots_per_bucket(
     cpdr: Cpdr,
     buckets: List[u.Quantity[u.dimensionless_unscaled]],
+    eps: float = 1e-4,
 ) -> List[float]:
     """
     Check how many roots exist in each bucket. Note that this only samples from two
@@ -57,10 +58,19 @@ def count_roots_per_bucket(
 
     Parameters
     ----------
-    cpdr : Cpdr
+    cpdr: Cpdr
         A Cpdr object.
     buckets: List[u.Quantity[u.dimensionless_unscaled]]
         A list of buckets (see func split_array).
+    eps: float
+        A floating point value used to determine the points at which we sample each
+        bucket. For a bucket (A, B), we sample at A * (1 + eps) and B * (1 - eps).
+        This is designed to ensure that we sample 'near', but not precisely at, the
+        endpoints of our buckets. These endpoints are expected to have been calculated
+        using `solve_resonant_for_x` such that they are the values at which we expect
+        the number of roots of the resonant cpdr to change; sampling 'near' these avoids
+        any ambiguity that we might see as a result of evaluating the resonant cpdr at a
+        point where the number of resonant roots is discontinuous.
 
     Returns
     -------
@@ -70,8 +80,16 @@ def count_roots_per_bucket(
     """
     num_roots = []
     for bucket in buckets:
-        left_roots = cpdr.solve_resonant(bucket[0] * (1 + 1e-4))[0]
-        right_roots = cpdr.solve_resonant(bucket[1] * (1 - 1e-4))[0]
+
+        left_point = bucket[0] * (1 + eps)
+        right_point = bucket[1] * (1 - eps)
+
+        if not (bucket[0] <= left_point <= right_point <= bucket[1]):
+            msg = f"Unexpected ordering of sample points in {bucket=} using {eps=}"
+            raise ValueError(msg)
+
+        left_roots = cpdr.solve_resonant(left_point)[0]
+        right_roots = cpdr.solve_resonant(right_point)[0]
 
         num_left_roots = len(left_roots)
         num_right_roots = len(right_roots)
