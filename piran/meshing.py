@@ -233,8 +233,12 @@ def solve_resonant_for_x(
                     f"Root at: {root_result.root * 180 / np.pi}\n"
                 )
 
-    # Finalise solution array, including endpoints if specified in input args.
-    # Append u.dimensionless_unscaled units in either case.
+    # Finalise solution array by:
+    # sorting (expected by `split_array`),
+    # including endpoints if specified in input args,
+    # appending u.dimensionless_unscaled units.
+
+    roots.sort()
 
     if endpoints:
         solns_in_X = np.empty(len(roots) + 2)
