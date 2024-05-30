@@ -3,8 +3,9 @@ from typing import List
 import numpy as np
 import sympy as sym
 from astropy import units as u
-from cpdr import Cpdr
 from scipy.optimize import root_scalar
+
+from piran.cpdr import Cpdr
 
 
 @u.quantity_input
@@ -156,7 +157,7 @@ def solve_resonant_for_x(
     omega: u.Quantity[u.rad / u.s]
         A 0d/1d array of values in omega, for which we would like to solve the resonant
         Cpdr to find corresponding solutions in X.
-    X_range: u.Quantity[u.rad / u.s]
+    X_range: u.Quantity[u.dimensionless_unscaled]
         An initial discretisation in X. For each omega, we produce values for the
         resonant cpdr for all X in X_range and look for changes in sign (indicating the
         presence of a root). A root finding algorithm then determines the precise
@@ -234,9 +235,15 @@ def solve_resonant_for_x(
 
     # Finalise solution array, including endpoints if specified in input args.
     # Append u.dimensionless_unscaled units in either case.
-    solns_in_X = (
-        [X_range[0], np.tan(roots), X_range[-1]] if endpoints else np.tan(roots)
-    )
+
+    if endpoints:
+        solns_in_X = np.empty(len(roots) + 2)
+        solns_in_X[0] = X_range[0].value
+        solns_in_X[1:-1] = np.tan(roots)
+        solns_in_X[-1] = X_range[-1].value
+    else:
+        solns_in_X = np.tan(roots)
+
     solns_in_X <<= u.dimensionless_unscaled
 
     return solns_in_X
