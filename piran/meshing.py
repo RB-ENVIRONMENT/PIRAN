@@ -110,14 +110,17 @@ def count_roots_per_bucket(
 
         # Special case: if we have 1 'root', check for NaN!
         if num_left_roots == 1:
-            left_root_is_nan = bool(left_roots[0].count(np.nan))
-            right_root_is_nan = bool(right_roots[0].count(np.nan))
+            left_root_is_nan = np.isnan(left_roots[0].omega)
+            right_root_is_nan = np.isnan(right_roots[0].omega)
 
             if left_root_is_nan and right_root_is_nan:
                 num_roots.append(0)
             elif not (left_root_is_nan or right_root_is_nan):
                 num_roots.append(1)
             else:
+                # We shouldn't ever get here.
+                # A change in the number of roots indicates a singularity, but a
+                # singularity requires two roots and we're specifically in a 1-root case
                 print(
                     f"Roots not fixed in {bucket=}\n"
                     f"{num_left_roots=}\n"
