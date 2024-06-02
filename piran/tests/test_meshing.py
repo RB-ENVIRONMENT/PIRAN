@@ -135,6 +135,16 @@ class TestMeshing:
         assert num_roots[0] == 1
         assert np.isnan(num_roots[1])  # singularity detected!
 
+        # There's a singularity _somewhere_ in our second bucket between 0.23727 and 1.
+        # Lets try truncating our second bucket at X = 0.5 and see if this removes the
+        # singularity.
+        # NOTE: This is NOT expected usage of this API - I just want to test a 'regular'
+        # bucket with 2 roots too and don't have another example to hand!
+
+        buckets[1][1] = 0.5 << u.dimensionless_unscaled
+        num_roots = count_roots_per_bucket(cpdr, buckets)
+        assert num_roots[1] == 2
+
     def test_split_array_with_insufficient_values(self):
         """
         Check that split_array raises an exception when the input array contains fewer
