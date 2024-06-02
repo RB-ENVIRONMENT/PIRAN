@@ -28,9 +28,11 @@ def split_array(
     """
     buckets = []
 
-    # If input array consists of 0 or 1 points, we have nothing to do...
-    if array.size < 2:
-        return array
+    # Input array should consist of at least 3 elements
+    # (or this function serves no purpose).
+    if array.size <= 2:
+        msg = "Input array contains too few elements (expected 3 or more)"
+        raise ValueError(msg)
 
     # Iterate over pairwise elements of the array and create distinct buckets.
     # nd.iter returns ndarray elements and strips units :(
