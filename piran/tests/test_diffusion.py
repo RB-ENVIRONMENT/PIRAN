@@ -8,6 +8,8 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    get_DnX_single_root,
+    get_normalised_intensity,
     get_phi_squared,
     get_power_spectral_density,
     get_singular_term,
@@ -156,3 +158,50 @@ class TestDiffusion:
         singular_term_12 = get_singular_term(cpdr, resonant_root[0][1])
         assert singular_term_12.unit == u.m / u.s
         assert math.isclose(singular_term_12.value, 154355842.6, rel_tol=1e-7)
+
+    def test_get_normalised_intensity_1(self):
+        power_spectral_density = 1.5079984e-25 << (u.T**2 * u.s / u.rad)
+        gx = 0.97041
+        norm_factor = 1.754757e-17
+
+        normalised_intensity = get_normalised_intensity(
+            power_spectral_density, gx, norm_factor
+        )
+        assert math.isclose(normalised_intensity.value, 8.339484e-09, rel_tol=1e-7)
+
+    def test_get_DnX_single_root(self):
+        plasma_over_gyro_ratio = 1.5
+        plasma_point = PlasmaPoint(
+            self.mag_point, self.particles, plasma_over_gyro_ratio
+        )
+        energy = 1.0 << u.MeV
+        alpha = Angle(83, u.deg)
+        resonance = -1
+
+        cpdr = Cpdr(
+            self.cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            self.freq_cutoff_params,
+        )
+
+        X = [0.1] << u.dimensionless_unscaled
+        resonant_root = cpdr.solve_resonant(X)
+
+        normalised_intensity = 8.339484e-09
+        phi_squared = 0.460906 << u.dimensionless_unscaled
+        singular_term = -54012493.87 << (u.m / u.s)
+
+        DnXaa, DnXap, DnXpp = get_DnX_single_root(
+            cpdr,
+            resonant_root[0][0],
+            normalised_intensity,
+            phi_squared,
+            singular_term,
+        )
+
+        assert math.isclose(DnXaa.value, 1.1892186e-45, rel_tol=1e-7)
+        assert math.isclose(DnXap.value, -4.1240996e-46, rel_tol=1e-7)
+        assert math.isclose(DnXpp.value, 1.4301994e-46, rel_tol=1e-7)

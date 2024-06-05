@@ -141,3 +141,99 @@ def get_singular_term(
         singular_term = cpdr.v_par - (dD_dk / dD_dw) * np.sqrt(1 + X**2)
 
     return singular_term
+
+
+@u.quantity_input
+def get_normalised_intensity(
+    power_spectral_density: u.Quantity[u.T**2 * u.s / u.rad],
+    wave_norm_angle_dist_eval,
+    norm_factor,
+):
+    """
+    Calculates the normalised intensity |B_{k}^{norm}|^2.
+
+    Depending on the input parameters, this is either equation 4b
+    or 5b from Cunningham 2023. Equation 5b is used in Glauert & Horne 2005,
+    while equation 4b is the proposed method by Cunningham.
+    If we are calculating equation 5b, then `norm_factor` is computed by the
+    `compute_glauert_norm_factor()` function in the piran package, which returns
+    the N(omega) term in the denominator of 5b, while if we are calculating
+    equation 4b, then `norm_factor` shall be computed by piran's
+    `compute_cunningham_norm_factor()` function which returns the denominator
+    in 4b.
+    Note that `wave_norm_angle_dist_eval` must be normalised if we are calculating
+    equation 4b (Cunningham's proposed method).
+
+    Parameters
+    ----------
+    power_spectral_density : u.Quantity[u.T**2 * u.s / u.rad]
+        Power spectral density B^2(omega).
+    wave_norm_angle_dist_eval :
+        Wave normal angle distribution evaluated at X.
+    norm_factor :
+        Normalisation factor.
+
+    Returns
+    -------
+    normalised_intensity :
+        Normalised intensity |B_{k}^{norm}|^2
+    """
+    normalised_intensity = (
+        power_spectral_density * wave_norm_angle_dist_eval / norm_factor
+    )
+
+    return normalised_intensity
+
+
+@u.quantity_input
+def get_DnX_single_root(
+    cpdr: Cpdr,
+    resonant_root: ResonantRoot,
+    normalised_intensity,
+    phi_squared: u.Quantity[u.dimensionless_unscaled],
+    singular_term: u.Quantity[u.m / u.s],
+):
+    """
+    Calculates the diffusion coefficients in pitch angle DnXaa,
+    mixed pitch angle-momentum DnXap and momentum DnXpp, for a
+    given resonant root, as defined in equations 11, 12 and 13
+    in Glauert & Horne 2005.
+
+    Parameters
+    ----------
+    cpdr : piran.cpdr.Cpdr
+        Cold plasma dispersion relation object.
+    resonant_root : piran.cpdr.ResonantRoot object
+        NamedTuple object containing a resonant root, i.e.,
+        root to both dispersion relation and resonance condition.
+    normalised_intensity :
+        Normalised intensity |B_{k}^{norm}|^2
+    phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
+        Phi_{n,k}^2.
+    singular_term : astropy.units.quantity.Quantity[u.m / u.s]
+        v_par - d(omega) / d(k_par)
+
+    Returns
+    -------
+    DnXaa, DnXap, DnXpp :
+        Pitch angle, mixed pitch angle-momentum and momentum diffusion
+        coefficients for a given resonant root.
+    """
+    charge = cpdr.plasma.particles[0].charge
+    gyrofreq = cpdr.plasma.gyro_freq[0]
+    alpha = cpdr.alpha
+
+    term1 = (charge**2 * resonant_root.omega**2) / (
+        4 * np.pi * (1 + resonant_root.X**2)
+    )
+    term2 = (
+        cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega)
+        - np.sin(alpha) ** 2
+    ) / np.cos(alpha)
+    term3 = normalised_intensity * phi_squared / np.abs(singular_term)
+
+    DnXaa = term1 * term2**2 * term3
+    DnXap = DnXaa * np.sin(alpha) / term2
+    DnXpp = DnXaa * (np.sin(alpha) / term2) ** 2
+
+    return DnXaa, DnXap, DnXpp
