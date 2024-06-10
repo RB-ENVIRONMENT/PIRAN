@@ -192,16 +192,16 @@ class TestMeshing:
 
         bucket1 = u.Quantity([2, 1], u.dimensionless_unscaled)
 
-        # This test should fail because the ordering of elements in the bucket [2, 1] is
-        # wrong
+        # This test should raise an exception because the ordering of elements in the
+        # bucket [2, 1] is wrong
         with pytest.raises(ValueError):
             count_roots_per_bucket(cpdr, [bucket1])
 
         bucket2 = u.Quantity([0.5, 0.5001], u.dimensionless_unscaled)
 
-        # This test should fail because the elements in the bucket [0.5, 0.501] are
-        # sufficiently close together, and our eps=1e-8 is sufficiently small, that the
-        # ordering of sample points 'near' each endpoints overlaps.
+        # This test should raise an exception because the elements in the bucket
+        # [0.5, 0.501] are sufficiently close together, and our eps=1e-4 is sufficiently
+        # large, that the ordering of sample points 'near' each endpoints overlaps.
         # This probably highlights that we should try implementing something better in
         # this function...
         with pytest.raises(ValueError):
