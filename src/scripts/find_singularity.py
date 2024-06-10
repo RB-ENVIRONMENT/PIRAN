@@ -51,8 +51,6 @@ def main():
     """
     # ================ Parameters =====================
 
-    MESH_GRANULARITY = 1001
-
     # Plotting selections
     PLOT_RESO_CPDR = True
     PLOT_RESO_CPDR_DOMEGA = True
@@ -60,6 +58,7 @@ def main():
 
     PLOT_TOTAL = PLOT_RESO_CPDR + PLOT_RESO_CPDR_DOMEGA + PLOT_RESO_CPDR_DX
 
+    # Plasma parameters
     mlat_deg = Angle(0 * u.deg)
     l_shell = 4.5
 
@@ -71,18 +70,32 @@ def main():
     resonance = 0
     freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
 
+    # Wave angle discretisation
+    MESH_GRANULARITY = 1001
+
     X_min = 0.0
     X_max = 1
-    X_npoints = MESH_GRANULARITY
     X_range = u.Quantity(
-        np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+        np.linspace(X_min, X_max, MESH_GRANULARITY), unit=u.dimensionless_unscaled
     )
+
     # =================================================
 
+    # CPDR object + constituents
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
     cpdr_sym = CpdrSymbolic(len(particles))
     cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+
+    ## Wave frequency discretisation (must come after creation of cpdr)
+    omega_range = u.Quantity(
+        np.linspace(
+            cpdr.omega_lc.value,
+            cpdr.omega_uc.value,
+            MESH_GRANULARITY,
+        ),
+        u.rad / u.s,
+    )
 
     X_sym = cpdr.symbolic.syms.get("X")
     psi_sym = cpdr.symbolic.syms.get("psi")
@@ -97,15 +110,6 @@ def main():
         [(psi_sym, omega_sym)], sym.Abs(reso_cpdr_domega)
     )
     reso_cpdr_dx_lambda = sym.lambdify([(psi_sym, omega_sym)], sym.Abs(reso_cpdr_dx))
-
-    omega_range = u.Quantity(
-        np.linspace(
-            cpdr.omega_lc.value,
-            cpdr.omega_uc.value,
-            MESH_GRANULARITY,
-        ),
-        u.rad / u.s,
-    )
 
     xgrid, ygrid = np.meshgrid(X_range.value, omega_range.value)
     xy = np.stack([xgrid, ygrid])
