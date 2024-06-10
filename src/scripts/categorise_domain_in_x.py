@@ -37,10 +37,8 @@ def main():
 
     X_l = solve_resonant_for_x(cpdr, cpdr.omega_lc, X_range)
     X_u = solve_resonant_for_x(cpdr, cpdr.omega_uc, X_range)
-    X_all = np.sort(
-        solve_resonant_for_x(
-            cpdr, u.Quantity([cpdr.omega_uc, cpdr.omega_lc]), X_range, True
-        )
+    X_all = solve_resonant_for_x(
+        cpdr, u.Quantity([cpdr.omega_uc, cpdr.omega_lc]), X_range, True
     )
 
     print(f"{X_l=}\n{X_u=}\n{X_all=}\n")
