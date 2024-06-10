@@ -17,7 +17,7 @@ def main():
     1. Resonant CPDR (i.e. the resonance condition substituted into the
        dispersion relation, yielding a function in X and omega).
     2. The derivative of the Resonant CPDR w.r.t. omega
-    3. The derivative of the Resonant CPDR w.r.r. X
+    3. The derivative of the Resonant CPDR w.r.t. X
 
     Singularities occur when both (1) and (2) are 0. This is accompanied by a change in
     the number of real roots of the Resonant CPDR as X varies, UNLESS (3) is also 0 (we
@@ -117,31 +117,18 @@ def main():
     idx = 0
     fig, axs = plt.subplots(1, PLOT_TOTAL)
 
+    opts = {"interpolation": "bilinear", "origin": "lower", "cmap": "gray"}
+
     # axs not subscriptable if PLOT_TOTAL is 1... grrr...
     if PLOT_TOTAL == 1:
         if PLOT_RESO_CPDR:
-            axs.imshow(
-                np.log(reso_cpdr_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs.imshow(np.log(reso_cpdr_lambda(xy)), **opts)
             axs.set_title("Resonant CPDR")
         elif PLOT_RESO_CPDR_DOMEGA:
-            axs.imshow(
-                np.log(reso_cpdr_domega_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs.imshow(np.log(reso_cpdr_domega_lambda(xy)), **opts)
             axs.set_title("d(Resonant CPDR)/d$\omega$")
         elif PLOT_RESO_CPDR_DX:
-            axs.imshow(
-                np.log(reso_cpdr_dx_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs.imshow(np.log(reso_cpdr_dx_lambda(xy)), **opts)
             axs.set_title("d(Resonant CPDR)/d$X$")
 
         axs.set_xlabel("$X$")
@@ -157,30 +144,15 @@ def main():
 
     else:
         if PLOT_RESO_CPDR:
-            axs[idx].imshow(
-                np.log(reso_cpdr_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs[idx].imshow(np.log(reso_cpdr_lambda(xy)), **opts)
             axs[idx].set_title("Resonant CPDR")
             idx = idx + 1
         if PLOT_RESO_CPDR_DOMEGA:
-            axs[idx].imshow(
-                np.log(reso_cpdr_domega_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs[idx].imshow(np.log(reso_cpdr_domega_lambda(xy)), **opts)
             axs[idx].set_title("d(Resonant CPDR)/d$\omega$")
             idx = idx + 1
         if PLOT_RESO_CPDR_DX:
-            axs[idx].imshow(
-                np.log(reso_cpdr_dx_lambda(xy)),
-                interpolation="bilinear",
-                origin="lower",
-                cmap="gray",
-            )
+            axs[idx].imshow(np.log(reso_cpdr_dx_lambda(xy)), **opts)
             axs[idx].set_title("d(Resonant CPDR)/d$X$")
             idx = idx + 1
 
