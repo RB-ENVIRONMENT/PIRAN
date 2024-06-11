@@ -200,7 +200,7 @@ class TestMeshing:
         bucket2 = u.Quantity([0.5, 0.5001], u.dimensionless_unscaled)
 
         # This test should raise an exception because the elements in the bucket
-        # [0.5, 0.501] are sufficiently close together, and our eps=1e-4 is sufficiently
+        # [0.5, 0.5001] are sufficiently close together, and our eps=1e-4 is sufficiently
         # large, that the ordering of sample points 'near' each endpoints overlaps.
         # This probably highlights that we should try implementing something better in
         # this function...
