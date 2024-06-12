@@ -188,6 +188,9 @@ def main():
         container["DnXap"].append(DnXap_this_res)
         container["DnXpp"].append(DnXpp_this_res)
 
+    with open(f"results_{alpha.deg:.2f}deg.json", "w") as outfile:
+        json.dump(container, outfile, indent=4)
+
 
 if __name__ == "__main__":
     main()
