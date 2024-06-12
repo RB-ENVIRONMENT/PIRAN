@@ -1,7 +1,7 @@
 import argparse
 import json
-from importlib import metadata
 import pathlib
+from importlib import metadata
 
 import numpy as np
 from astropy import constants as const
@@ -113,11 +113,15 @@ def main():
         DnXap_this_res = []
         DnXpp_this_res = []
 
-        cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+        cpdr = Cpdr(
+            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+        )
 
         # Depends only on energy and mass. Will be the same for different resonances.
         container["momentum"] = cpdr.momentum.value
-        container["rest_mass_energy_Joule"] = (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
+        container["rest_mass_energy_Joule"] = (
+            (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
+        )
 
         resonant_roots = cpdr.solve_resonant(X_range)
         for roots_this_x in resonant_roots:
@@ -131,7 +135,9 @@ def main():
                     continue
 
                 # See par.23 in Glauert & Horne 2005
-                resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(root.omega)
+                resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(
+                    root.omega
+                )
                 X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
                 if root.X.value > X_upper.value:
                     continue
@@ -148,7 +154,7 @@ def main():
                         root.omega,
                         X_range_glauert,
                         wave_norm_angle_dist,
-                        method="simpson"
+                        method="simpson",
                     )
                 elif method == 1:
                     if root.X.value == 0.0:
@@ -161,7 +167,9 @@ def main():
                         [root.X] << root.X.unit,
                     )[0]
 
-                power_spectral_density = get_power_spectral_density(cpdr, wave_amplitude, root.omega)
+                power_spectral_density = get_power_spectral_density(
+                    cpdr, wave_amplitude, root.omega
+                )
                 normalised_intensity = get_normalised_intensity(
                     power_spectral_density, eval_gx, norm_factor
                 )
