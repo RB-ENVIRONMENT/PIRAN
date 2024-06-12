@@ -1,8 +1,10 @@
 import argparse
 import json
+from importlib import metadata
 import pathlib
 
 import numpy as np
+from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
@@ -84,6 +86,28 @@ def main():
     if method == 1:
         integral_gx = simpson(wave_norm_angle_dist.eval(X_range), x=X_range)
 
+    container = {}
+    container["version"] = metadata.version("piran")
+    container["particles"] = particles
+    container["rel_kin_energy_MeV"] = energy.to(u.MeV).value
+    container["pitch_angle"] = alpha.deg
+    container["plasma_over_gyro_ratio"] = plasma_over_gyro_ratio
+    container["mlat"] = mlat_deg.value
+    container["l_shell"] = l_shell
+    container["resonances"] = resonances
+    container["X_min"] = X_min.value
+    container["X_max"] = X_max.value
+    container["X_npoints"] = X_npoints
+    container["X_range"] = X_range.value.tolist()
+    container["X_m"] = X_m.value
+    container["X_w"] = X_w.value
+    container["freq_cutoff_params"] = freq_cutoff_params
+    container["wave_amplitude"] = wave_amplitude.value
+    container["method"] = method
+    container["DnXaa"] = []
+    container["DnXap"] = []
+    container["DnXpp"] = []
+
     for resonance in resonances:
         DnXaa_this_res = []
         DnXap_this_res = []
@@ -91,6 +115,9 @@ def main():
 
         cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
+        # Depends only on energy and mass. Will be the same for different resonances.
+        container["momentum"] = cpdr.momentum.value
+        container["rest_mass_energy_Joule"] = (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
 
         resonant_roots = cpdr.solve_resonant(X_range)
         for roots_this_x in resonant_roots:
@@ -156,6 +183,11 @@ def main():
             DnXaa_this_res.append(DnXaa_this_X)
             DnXap_this_res.append(DnXap_this_X)
             DnXpp_this_res.append(DnXpp_this_X)
+
+        container["DnXaa"].append(DnXaa_this_res)
+        container["DnXap"].append(DnXap_this_res)
+        container["DnXpp"].append(DnXpp_this_res)
+
 
 if __name__ == "__main__":
     main()
