@@ -1,3 +1,45 @@
+# Create an `input.json` file with the following:
+# | Name                     | Data type        | Example                 | Unit | Info                                |
+# |--------------------------|------------------|-------------------------|------|-------------------------------------|
+# | "particles"              | Array of Strings | ["e", "p+"]             |      |                                     |
+# | "energy"                 | Number           | 1.0                     | MeV  | Relativistic kinetic energy         |
+# | "pitch_angle"            | Number           | 60.0                    | deg  |                                     |
+# | "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                     |
+# | "mlat"                   | Number           | 0.0                     | deg  |                                     |
+# | "l_shell"                | Number           | 4.5                     |      |                                     |
+# | "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                     |
+# | "X_min"                  | Number           | 0.0                     |      |                                     |
+# | "X_max"                  | Number           | 1.0                     |      |                                     |
+# | "X_npoints"              | Number           | 1000                    |      |                                     |
+# | "X_m"                    | Number           | 0.0                     |      | Peak                                |
+# | "X_w"                    | Number           | 0.577                   |      | Angular width                       |
+# | "freq_cutoff_params"     | Array of Numbers | [0.35, 0.15, -1.5, 1.5] |      | See par.30 Glauert and Horne 2005   |
+# | "wave_amplitude"         | Number           | 1e-10                   | T    |                                     |
+# | "method"                 | Number           | 0                       |      | 0 for Glauert, 1 for Cunningham     |
+#
+# for example:
+# {
+#     "particles": ["e", "p+"],
+#     "energy": 1.0,
+#     "pitch_angle": 60.0,
+#     "plasma_over_gyro_ratio": 1.5,
+#     "mlat": 0.0,
+#     "l_shell": 4.5,
+#     "resonances": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
+#     "X_min": 0.0,
+#     "X_max": 1.0,
+#     "X_npoints": 2000,
+#     "X_m": 0.0,
+#     "X_w": 0.577,
+#     "freq_cutoff_params": [0.35, 0.15, -1.5, 1.5],
+#     "wave_amplitude": 1e-10,
+#     "method": 0
+# }
+#
+# and run the script as: `python path/to/diffusion_coefficients.py -i path/to/input.json`
+#
+# The script will create a file `results_??.??deg.json` in the current working directory,
+# where ??.?? is the pitch angle in degrees for this run.
 import argparse
 import json
 import pathlib
