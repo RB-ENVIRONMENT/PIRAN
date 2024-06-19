@@ -29,8 +29,8 @@ def main():
     a. Solve (1) for some subset of X in [X_min, X_max] and look for (unexpected)
        changes in the number of real roots. We can already define regions in
        [X_min, X_max] where we expect the number of real roots to be otherwise fixed.
-       Having found a rough location where the roots change, perform binary search to
-       isolate the singularity.
+       Having found a rough location where the roots change, perform binary search
+       (bisection method) to isolate the singularity.
 
     b. Produce a minimiser for minimising the distance between any two roots of (1).
        If this is ever zero, we've found a root! Note that this *could* include complex
@@ -115,58 +115,40 @@ def main():
     xy = np.stack([xgrid, ygrid])
 
     idx = 0
-    fig, axs = plt.subplots(1, PLOT_TOTAL)
+    fig, axs = plt.subplots(
+        nrows=1,
+        ncols=PLOT_TOTAL,
+        sharey=True,
+        squeeze=False,
+        figsize=(6 * PLOT_TOTAL, 5),
+    )
 
     opts = {"interpolation": "bilinear", "origin": "lower", "cmap": "gray"}
 
-    # axs not subscriptable if PLOT_TOTAL is 1... grrr...
-    if PLOT_TOTAL == 1:
-        if PLOT_RESO_CPDR:
-            axs.imshow(np.log(reso_cpdr_lambda(xy)), **opts)
-            axs.set_title("Resonant CPDR")
-        elif PLOT_RESO_CPDR_DOMEGA:
-            axs.imshow(np.log(reso_cpdr_domega_lambda(xy)), **opts)
-            axs.set_title("d(Resonant CPDR)/d$\omega$")
-        elif PLOT_RESO_CPDR_DX:
-            axs.imshow(np.log(reso_cpdr_dx_lambda(xy)), **opts)
-            axs.set_title("d(Resonant CPDR)/d$X$")
+    if PLOT_RESO_CPDR:
+        axs[0, idx].imshow(np.log(reso_cpdr_lambda(xy)), **opts)
+        axs[0, idx].set_title("Resonant CPDR")
+        idx = idx + 1
+    if PLOT_RESO_CPDR_DOMEGA:
+        axs[0, idx].imshow(np.log(reso_cpdr_domega_lambda(xy)), **opts)
+        axs[0, idx].set_title("d(Resonant CPDR)/d$\omega$")
+        idx = idx + 1
+    if PLOT_RESO_CPDR_DX:
+        axs[0, idx].imshow(np.log(reso_cpdr_dx_lambda(xy)), **opts)
+        axs[0, idx].set_title("d(Resonant CPDR)/d$X$")
+        idx = idx + 1
 
-        axs.set_xlabel("$X$")
-        axs.set_ylabel("$\omega$")
-        axs.set_xticks(
+    for ax in axs.flatten():
+        ax.set_xlabel("$X$")
+        ax.set_ylabel("$\omega$")
+        ax.set_xticks(
             range(0, MESH_GRANULARITY, int(MESH_GRANULARITY / 10)),
             [f"{X:.2f}" for X in X_range[:: int(MESH_GRANULARITY / 10)]],
         )
-        axs.set_yticks(
+        ax.set_yticks(
             range(0, MESH_GRANULARITY, int(MESH_GRANULARITY / 10)),
             [f"{w:.2E}" for w in omega_range[:: int(MESH_GRANULARITY / 10)].value],
         )
-
-    else:
-        if PLOT_RESO_CPDR:
-            axs[idx].imshow(np.log(reso_cpdr_lambda(xy)), **opts)
-            axs[idx].set_title("Resonant CPDR")
-            idx = idx + 1
-        if PLOT_RESO_CPDR_DOMEGA:
-            axs[idx].imshow(np.log(reso_cpdr_domega_lambda(xy)), **opts)
-            axs[idx].set_title("d(Resonant CPDR)/d$\omega$")
-            idx = idx + 1
-        if PLOT_RESO_CPDR_DX:
-            axs[idx].imshow(np.log(reso_cpdr_dx_lambda(xy)), **opts)
-            axs[idx].set_title("d(Resonant CPDR)/d$X$")
-            idx = idx + 1
-
-        for ax in axs:
-            ax.set_xlabel("$X$")
-            ax.set_ylabel("$\omega$")
-            ax.set_xticks(
-                range(0, MESH_GRANULARITY, int(MESH_GRANULARITY / 10)),
-                [f"{X:.2f}" for X in X_range[:: int(MESH_GRANULARITY / 10)]],
-            )
-            ax.set_yticks(
-                range(0, MESH_GRANULARITY, int(MESH_GRANULARITY / 10)),
-                [f"{w:.2E}" for w in omega_range[:: int(MESH_GRANULARITY / 10)].value],
-            )
 
     plt.show()
 
