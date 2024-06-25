@@ -8,6 +8,7 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    get_diffusion_coefficients,
     get_DnX_single_root,
     get_normalised_intensity,
     get_phi_squared,
@@ -205,3 +206,10 @@ class TestDiffusion:
         assert math.isclose(DnXaa.value, 1.1892186e-45, rel_tol=1e-7)
         assert math.isclose(DnXap.value, -4.1240996e-46, rel_tol=1e-7)
         assert math.isclose(DnXpp.value, 1.4301994e-46, rel_tol=1e-7)
+
+    def test_get_diffusion_coefficients(self):
+        X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
+        DnX = [0, 1, 2, 3, 4, 5]
+        res = get_diffusion_coefficients(X, DnX)
+
+        assert math.isclose(res, 1.666, rel_tol=1e-3)
