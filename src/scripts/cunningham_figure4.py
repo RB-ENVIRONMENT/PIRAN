@@ -84,7 +84,7 @@ def plot_figure4(
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
 
     xticks = list(range(0, 91, 15))
-    yticks = [10**(-n) for n in range(6, 1, -1)]
+    yticks = [10 ** (-n) for n in range(6, 1, -1)]
 
     x_lim_min = xticks[0]
     x_lim_max = xticks[-1]
@@ -208,8 +208,8 @@ def plot_figure4(
         #     alpha=0.4,
         # )
 
-    plt.text(20, 10**(-4.2), r"$\omega_{pe}/\omega_{ce}=1.5$")
-    plt.text(41, 10**(-5.5), r"$\omega_{pe}/\omega_{ce}=10$")
+    plt.text(20, 10 ** (-4.2), r"$\omega_{pe}/\omega_{ce}=1.5$")
+    plt.text(41, 10 ** (-5.5), r"$\omega_{pe}/\omega_{ce}=10$")
 
     plt.minorticks_on()
     plt.xticks(xticks, [str(v) for v in xticks])
