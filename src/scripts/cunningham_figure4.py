@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -39,3 +40,84 @@ def calc_Daa_over_p_squared(pathname):
     yy = [z[1] for z in sorted_vals]
 
     return (xx, yy)
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="Cunningham_2023_Figure4",
+        description="Reproduce Figure 4 from Cunningham, 2023",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        default=None,
+        help="Path to Cunningham's dat file for Figure4.",
+    )
+    parser.add_argument(
+        "--c1",
+        default=None,
+        help="Path to directory with results*.json files for Cunningham 1.5 ratio",
+    )
+    parser.add_argument(
+        "--c2",
+        default=None,
+        help="Path to directory with results*.json files for Cunningham 10 ratio",
+    )
+    parser.add_argument(
+        "--g1",
+        default=None,
+        help="Path to directory with results*.json files for Glauert 1.5 ratio",
+    )
+    parser.add_argument(
+        "--g2",
+        default=None,
+        help="Path to directory with results*.json files for Glauert 10 ratio",
+    )
+    parser.add_argument(
+        "-s",
+        "--save",
+        action="store_true",
+        default=False,
+        help="Pass this argument to save the figure on disk.",
+    )
+    args = parser.parse_args()
+
+    # Load data from Cunningham paper
+    if args.path is not None:
+        cunningham_dat_filepath = Path(args.path)
+        if not cunningham_dat_filepath.is_file():
+            msg = f"Incorrect path for Cunningham's dat file: {cunningham_dat_filepath}"
+            raise Exception(msg)
+
+        cunningham_figure_data = np.loadtxt(
+            cunningham_dat_filepath,
+            dtype=np.float64,
+            delimiter=None,
+            comments=";",
+        )
+    else:
+        cunningham_figure_data = None
+
+    # Our results
+    if args.c1 is not None:
+        piran_cunn_1 = calc_Daa_over_p_squared(args.c1)  # Cunningham ratio 1.5
+    else:
+        piran_cunn_1 = None
+
+    if args.c2 is not None:
+        piran_cunn_2 = calc_Daa_over_p_squared(args.c2)  # Cunningham ratio 10
+    else:
+        piran_cunn_2 = None
+
+    if args.g1 is not None:
+        piran_glau_1 = calc_Daa_over_p_squared(args.g1)  # Glauert & Horne ratio 1.5
+    else:
+        piran_glau_1 = None
+
+    if args.g2 is not None:
+        piran_glau_2 = calc_Daa_over_p_squared(args.g2)  # Glauert & Horne ratio 10
+    else:
+        piran_glau_2 = None
+
+
+if __name__ == "__main__":
+    main()
