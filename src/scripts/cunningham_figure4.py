@@ -1,3 +1,26 @@
+# This script reproduces the results from Figure 4 in Cunningham, 2023.
+#
+# To run use the `--path` option to pass the filepath of the .dat
+# file from Cunningham's paper (Figure4a.dat).
+# It is expected that the file contains results for Glauert and Horne's
+# method, the method proposed by Cunningham and Kennel and
+# Engelmann both for plasma over gyrofrequency ratio of 1.5 and 10.
+#
+# Use `--c1`, `--c2`, `--g1` and `--g2` to pass the directories where
+# the `results*.json` files produced by the `diffusion_coefficients.py`
+# script are located, for Cunningham with 1.5 ratio, Cunningham with 10 ratio,
+# Glauert with 1.5 ratio and Glauert with 10 ratio respectively.
+#
+# If you pass the optional `-s` argument the figure will be saved
+# on disk in the current working directory as "PIRAN_Figure4.png".
+#
+# e.g.
+# python src/scripts/cunningham_figure4.py \
+#     --path "PATH/TO/Figure4a.dat" \
+#     --c1 "PATH/TO/cunningham_1.5" \
+#     --c2 "PATH/TO/cunningham_10.0" \
+#     --g1 "PATH/TO/glauert_1.5" \
+#     --g2 "PATH/TO/glauert_10.0"
 import argparse
 import json
 from pathlib import Path
