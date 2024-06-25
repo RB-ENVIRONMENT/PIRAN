@@ -2,6 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from piran.diffusion import get_diffusion_coefficients
@@ -40,6 +41,171 @@ def calc_Daa_over_p_squared(pathname):
     yy = [z[1] for z in sorted_vals]
 
     return (xx, yy)
+
+
+def plot_figure4(
+    piran_cunn_1,
+    piran_cunn_2,
+    piran_glau_1,
+    piran_glau_2,
+    cunningham_figure_data,
+    save,
+):
+    plt.rcParams.update(
+        {
+            "text.usetex": False,
+            "font.size": 12,
+        }
+    )
+
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+
+    xticks = list(range(0, 91, 15))
+    yticks = [10**(-n) for n in range(6, 1, -1)]
+
+    x_lim_min = xticks[0]
+    x_lim_max = xticks[-1]
+
+    y_lim_min = yticks[0]
+    y_lim_max = yticks[-1]
+
+    # PIRAN frequency ratio 1.5 (Glauert & Horne)
+    if piran_glau_1 is not None:
+        xval = piran_glau_1[0]
+        yval = piran_glau_1[1]
+        plt.semilogy(
+            xval,
+            yval,
+            color="k",
+            linestyle="-",
+            alpha=1.0,
+            label="PIRAN (Glauert & Horne)",
+        )
+
+    # PIRAN frequency ratio 10.0 (Glauert & Horne)
+    if piran_glau_2 is not None:
+        xval = piran_glau_2[0]
+        yval = piran_glau_2[1]
+        plt.semilogy(
+            xval,
+            yval,
+            color="k",
+            linestyle="--",
+            alpha=1.0,
+        )
+
+    # PIRAN frequency ratio 1.5 (Cunningham)
+    if piran_cunn_1 is not None:
+        xval = piran_cunn_1[0]
+        yval = piran_cunn_1[1]
+        plt.semilogy(
+            xval,
+            yval,
+            color="r",
+            linestyle="-",
+            alpha=1.0,
+            label="PIRAN (Cunningham)",
+        )
+
+    # PIRAN frequency ratio 10.0 (Cunningham)
+    if piran_cunn_2 is not None:
+        xval = piran_cunn_2[0]
+        yval = piran_cunn_2[1]
+        plt.semilogy(
+            xval,
+            yval,
+            color="r",
+            linestyle="--",
+            alpha=1.0,
+        )
+
+    if cunningham_figure_data is not None:
+        overlay_x = cunningham_figure_data[:, 0]
+
+        # Glauert and Horne frequency ratio 1.5
+        overlay_y_glau1 = cunningham_figure_data[:, 1]
+        plt.semilogy(
+            overlay_x,
+            overlay_y_glau1,
+            color="k",
+            linestyle="-",
+            alpha=0.4,
+            label="Glauert & Horne",
+        )
+
+        # Cunningham frequency ratio 1.5
+        overlay_y_cunn1 = cunningham_figure_data[:, 2]
+        plt.semilogy(
+            overlay_x,
+            overlay_y_cunn1,
+            color="r",
+            linestyle="-",
+            alpha=0.4,
+            label="Cunningham",
+        )
+
+        # # Kennel and Engelmann frequency ratio 1.5
+        # overlay_y_kenn1 = cunningham_figure_data[:, 3]
+        # plt.semilogy(
+        #     overlay_x,
+        #     overlay_y_kenn1,
+        #     color="b",
+        #     linestyle="-",
+        #     alpha=0.4,
+        #     label="Kennel & Engelmann",
+        # )
+
+        # Glauert and Horne frequency ratio 10.0
+        overlay_y_glau2 = cunningham_figure_data[:, 4]
+        plt.semilogy(
+            overlay_x,
+            overlay_y_glau2,
+            color="k",
+            linestyle="--",
+            alpha=0.4,
+        )
+
+        # Cunningham frequency ratio 10.0
+        overlay_y_cunn2 = cunningham_figure_data[:, 5]
+        plt.semilogy(
+            overlay_x,
+            overlay_y_cunn2,
+            color="r",
+            linestyle="--",
+            alpha=0.4,
+        )
+
+        # # Kennel and Engelmann frequency ratio 10.0
+        # overlay_y_kenn2 = cunningham_figure_data[:, 6]
+        # plt.semilogy(
+        #     overlay_x,
+        #     overlay_y_kenn2,
+        #     color="b",
+        #     linestyle="--",
+        #     alpha=0.4,
+        # )
+
+    plt.text(20, 10**(-4.2), r"$\omega_{pe}/\omega_{ce}=1.5$")
+    plt.text(41, 10**(-5.5), r"$\omega_{pe}/\omega_{ce}=10$")
+
+    plt.minorticks_on()
+    plt.xticks(xticks, [str(v) for v in xticks])
+    # plt.yticks(yticks, [str(v) for v in yticks])
+    plt.tick_params("x", which="both", top=True, labeltop=False)
+    plt.tick_params("y", which="both", right=True, labelright=False)
+    plt.xlim(x_lim_min, x_lim_max)
+    plt.ylim(y_lim_min, y_lim_max)
+    plt.xlabel("Local pitch angle (degrees)")
+    plt.ylabel(r"$D_{\alpha\alpha} / p^2$")
+    plt.legend(loc="upper left")
+    plt.title("KE=1MeV Harmonics [-5, 5]")
+    plt.tight_layout()
+
+    if save:
+        plt.savefig("PIRAN_Figure4.png", dpi=150)
+    else:
+        plt.show()
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -117,6 +283,15 @@ def main():
         piran_glau_2 = calc_Daa_over_p_squared(args.g2)  # Glauert & Horne ratio 10
     else:
         piran_glau_2 = None
+
+    plot_figure4(
+        piran_cunn_1,
+        piran_cunn_2,
+        piran_glau_1,
+        piran_glau_2,
+        cunningham_figure_data,
+        args.save,
+    )
 
 
 if __name__ == "__main__":
