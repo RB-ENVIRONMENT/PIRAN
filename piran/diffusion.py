@@ -268,8 +268,8 @@ def get_diffusion_coefficients(
     $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
     resonance.
     """
-    if (X_range.shape != DnX_single_res.shape):
-      raise ValueError("Input arrays should have the same shape")
+    if X_range.shape != DnX_single_res.shape:
+        raise ValueError("Input arrays should have the same shape")
 
     integrand = np.multiply(X_range, DnX_single_res)
     integral = simpson(integrand, x=X_range)
