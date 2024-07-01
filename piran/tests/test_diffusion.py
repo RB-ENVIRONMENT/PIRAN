@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
@@ -213,3 +214,10 @@ class TestDiffusion:
         res = get_diffusion_coefficients(X, DnX)
 
         assert math.isclose(res, 1.666, rel_tol=1e-3)
+
+        # raise error when X and DnX do not have the same shape
+        X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
+        DnX = np.array([0, 1, 2, 3, 4])
+
+        with pytest.raises(ValueError):
+            get_diffusion_coefficients(X, DnX)
