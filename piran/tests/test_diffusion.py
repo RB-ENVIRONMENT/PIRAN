@@ -209,7 +209,7 @@ class TestDiffusion:
 
     def test_get_diffusion_coefficients(self):
         X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
-        DnX = [0, 1, 2, 3, 4, 5]
+        DnX = np.array([0, 1, 2, 3, 4, 5])
         res = get_diffusion_coefficients(X, DnX)
 
         assert math.isclose(res, 1.666, rel_tol=1e-3)
