@@ -246,8 +246,8 @@ def get_diffusion_coefficients(
     DnX_single_res,
 ):
     """
-    Given an array of wave normal angles and an array of diffusion
-    coefficients for a specific resonance (equations 11, 12 or 13), calculate
+    Given an array of wave normal angles and an an identically-sized
+    array of outputs from Equation 11, 12, or 13, calculate
     $\int_{X_min}^{X_max} X D_{\alpha \alpha}^{nX} dX$, i.e. the integral part
     from equations 8, 9 or 10 in Glauert & Horne 2005. No summation over
     different resonances happens in this function.
