@@ -7,7 +7,7 @@
 # - Glauert and Horne,
 # - Cunningham,
 # - Kennel and Engelmann,
-# 
+#
 # for plasma over gyrofrequencies ratios of both 1.5 and 10.
 #
 # Use `--c1`, `--c2`, `--g1` and `--g2` to pass the directories where
