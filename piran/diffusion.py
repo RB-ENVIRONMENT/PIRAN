@@ -1,6 +1,7 @@
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
+from scipy.integrate import simpson
 from scipy.special import erf, jv
 
 from piran.cpdr import Cpdr, ResonantRoot
@@ -237,3 +238,40 @@ def get_DnX_single_root(
     DnXpp = DnXaa * (np.sin(alpha) / term2) ** 2
 
     return DnXaa, DnXap, DnXpp
+
+
+@u.quantity_input
+def get_diffusion_coefficients(
+    X_range: u.Quantity[u.dimensionless_unscaled],
+    DnX_single_res,
+):
+    """
+    Given an array of wave normal angles and an an identically-sized
+    array of outputs from Equation 11, 12, or 13, calculate
+    $\int_{X_min}^{X_max} X D_{\alpha \alpha}^{nX} dX$, i.e. the integral part
+    from equations 8, 9 or 10 in Glauert & Horne 2005. No summation over
+    different resonances happens in this function.
+    Note: For the integration we use Simpson's rule.
+
+    Parameters
+    ----------
+    X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
+        Array of wave normal angles.
+    DnX_single_res :
+        Array of diffusion coefficients for a specific resonance,
+        one per X (i.e. calculated values from equations 11, 12 or 13
+        in Glauert & Horne 2005).
+
+    Returns
+    -------
+    Either $D_{\alpha \alpha}$ or $D_{\alpha p}$ ($D_{p \alpha}$) or
+    $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
+    resonance.
+    """
+    if X_range.shape != DnX_single_res.shape:
+        raise ValueError("Input arrays should have the same shape")
+
+    integrand = np.multiply(X_range, DnX_single_res)
+    integral = simpson(integrand, x=X_range)
+
+    return integral
