@@ -2,9 +2,13 @@
 #
 # To run use the `--path` option to pass the filepath of the .dat
 # file from Cunningham's paper (Figure4a.dat).
-# It is expected that the file contains results for Glauert and Horne's
-# method, the method proposed by Cunningham and Kennel and
-# Engelmann both for plasma over gyrofrequency ratio of 1.5 and 10.
+# The file should contain results for the methods proposed by:
+#
+# - Glauert and Horne,
+# - Cunningham,
+# - Kennel and Engelmann,
+# 
+# for plasma over gyrofrequencies ratios of both 1.5 and 10.
 #
 # Use `--c1`, `--c2`, `--g1` and `--g2` to pass the directories where
 # the `results*.json` files produced by the `diffusion_coefficients.py`
