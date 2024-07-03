@@ -117,7 +117,7 @@ def plot_figure4(
             xval,
             yval,
             color="k",
-            linestyle="--",
+            linestyle="-",
             alpha=1.0,
         )
 
@@ -142,7 +142,7 @@ def plot_figure4(
             xval,
             yval,
             color="r",
-            linestyle="--",
+            linestyle="-",
             alpha=1.0,
         )
 
@@ -157,7 +157,7 @@ def plot_figure4(
             color="k",
             linestyle="-",
             alpha=0.4,
-            label="Glauert & Horne",
+            label="C2023 v2.0.0 (Glauert & Horne)",
         )
 
         # Cunningham frequency ratio 1.5
@@ -168,7 +168,7 @@ def plot_figure4(
             color="r",
             linestyle="-",
             alpha=0.4,
-            label="Cunningham",
+            label="C2023 v2.0.0 (Cunningham)",
         )
 
         # # Kennel and Engelmann frequency ratio 1.5
@@ -179,7 +179,7 @@ def plot_figure4(
         #     color="b",
         #     linestyle="-",
         #     alpha=0.4,
-        #     label="Kennel & Engelmann",
+        #     label="C2023 v2.0.0 (Kennel & Engelmann)",
         # )
 
         # Glauert and Horne frequency ratio 10.0
@@ -188,7 +188,7 @@ def plot_figure4(
             overlay_x,
             overlay_y_glau2,
             color="k",
-            linestyle="--",
+            linestyle="-",
             alpha=0.4,
         )
 
@@ -198,7 +198,7 @@ def plot_figure4(
             overlay_x,
             overlay_y_cunn2,
             color="r",
-            linestyle="--",
+            linestyle="-",
             alpha=0.4,
         )
 
@@ -208,12 +208,12 @@ def plot_figure4(
         #     overlay_x,
         #     overlay_y_kenn2,
         #     color="b",
-        #     linestyle="--",
+        #     linestyle="-",
         #     alpha=0.4,
         # )
 
-    plt.text(20, 10 ** (-4.2), r"$\omega_{pe}/\omega_{ce}=1.5$")
-    plt.text(41, 10 ** (-5.5), r"$\omega_{pe}/\omega_{ce}=10$")
+    plt.text(20, 10 ** (-4.2), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=1.5$")
+    plt.text(41, 10 ** (-5.5), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=10$")
 
     plt.minorticks_on()
     plt.xticks(xticks, [str(v) for v in xticks])
@@ -223,7 +223,7 @@ def plot_figure4(
     plt.xlim(x_lim_min, x_lim_max)
     plt.ylim(y_lim_min, y_lim_max)
     plt.xlabel("Local pitch angle (degrees)")
-    plt.ylabel(r"$D_{\alpha\alpha} / p^2$")
+    plt.ylabel(r"$\text{D}_{\alpha\alpha} / \text{p}^2$")
     plt.legend(loc="upper left")
     plt.title("KE=1MeV Harmonics [-5, 5]")
     plt.tight_layout()
