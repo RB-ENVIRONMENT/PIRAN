@@ -245,7 +245,7 @@ def get_diffusion_coefficients(
     X_range: u.Quantity[u.dimensionless_unscaled],
     DnX_single_res,
 ):
-    """
+    r"""
     Given an array of wave normal angles and an an identically-sized
     array of outputs from Equation 11, 12, or 13, calculate
     $\int_{X_min}^{X_max} X D_{\alpha \alpha}^{nX} dX$, i.e. the integral part
