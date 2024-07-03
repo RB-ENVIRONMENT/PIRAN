@@ -303,6 +303,10 @@ def get_energy_diffusion_coefficient(
     energy_diff_coef :
         Energy diffusion coefficient $D_{EE}$.
     """
-    energy_diff_coef = momentum_diff_coef * (const.c.value**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy)) / (rel_kin_energy + rest_mass_energy)**2
+    energy_diff_coef = (
+        momentum_diff_coef
+        * (const.c.value**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
+        / (rel_kin_energy + rest_mass_energy) ** 2
+    )
 
     return energy_diff_coef
