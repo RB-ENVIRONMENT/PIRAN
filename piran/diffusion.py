@@ -245,7 +245,7 @@ def get_diffusion_coefficients(
     X_range: u.Quantity[u.dimensionless_unscaled],
     DnX_single_res,
 ):
-    """
+    r"""
     Given an array of wave normal angles and an an identically-sized
     array of outputs from Equation 11, 12, or 13, calculate
     $\int_{X_min}^{X_max} X D_{\alpha \alpha}^{nX} dX$, i.e. the integral part
@@ -275,3 +275,38 @@ def get_diffusion_coefficients(
     integral = simpson(integrand, x=X_range)
 
     return integral
+
+
+@u.quantity_input
+def get_energy_diffusion_coefficient(
+    rel_kin_energy: u.Quantity[u.J],
+    rest_mass_energy: u.Quantity[u.J],
+    momentum_diff_coef,
+):
+    """
+    Given relativistic kinetic energy, rest mass energy and
+    relativistic momentum diffusion coefficient calculate
+    the energy diffusion coefficient from equation 29 in
+    Glauert & Horne 2005.
+
+    Parameters
+    ----------
+    rel_kin_energy : astropy.units.quantity.Quantity.Quantity[Joule],
+        Relativistic kinetic energy.
+    rest_mass_energy : astropy.units.quantity.Quantity.Quantity[Joule],
+        Rest mass energy.
+    momentum_diff_coef :
+        Momentum diffusion coefficient $D_{pp}$.
+
+    Returns
+    -------
+    energy_diff_coef :
+        Energy diffusion coefficient $D_{EE}$.
+    """
+    energy_diff_coef = (
+        momentum_diff_coef
+        * (const.c.value**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
+        / (rel_kin_energy + rest_mass_energy) ** 2
+    )
+
+    return energy_diff_coef

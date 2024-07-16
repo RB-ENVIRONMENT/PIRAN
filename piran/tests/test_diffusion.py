@@ -11,6 +11,7 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
     get_diffusion_coefficients,
     get_DnX_single_root,
+    get_energy_diffusion_coefficient,
     get_normalised_intensity,
     get_phi_squared,
     get_power_spectral_density,
@@ -221,3 +222,16 @@ class TestDiffusion:
 
         with pytest.raises(ValueError):
             get_diffusion_coefficients(X, DnX)
+
+    def test_get_energy_diffusion_coefficient(self):
+        rel_kin_energy = 1.602177e-15 << u.J
+        rest_mass_energy = 8.187106e-14 << u.J
+        momentum_diff_coef = 7.073597e-50
+
+        Dee = get_energy_diffusion_coefficient(
+            rel_kin_energy,
+            rest_mass_energy,
+            momentum_diff_coef,
+        )
+
+        assert math.isclose(Dee, 2.41705e-34, rel_tol=1e-5)

@@ -1,12 +1,11 @@
-# This script reproduces the results from Figure 4 in Cunningham, 2023.
+# This script reproduces the results from Figure 5a in Cunningham, 2023.
 #
 # To run use the `--path` option to pass the filepath of the .dat
-# file from Cunningham's paper (Figure4a.dat).
+# file from Cunningham's paper (Figure5a.dat).
 # The file should contain results for the methods proposed by:
 #
 # - Glauert and Horne,
 # - Cunningham,
-# - Kennel and Engelmann,
 #
 # for plasma over gyrofrequencies ratios of both 1.5 and 10.
 #
@@ -16,11 +15,11 @@
 # Glauert with 1.5 ratio and Glauert with 10 ratio respectively.
 #
 # If you pass the optional `-s` argument the figure will be saved
-# on disk in the current working directory as "PIRAN_Figure4.png".
+# on disk in the current working directory as "PIRAN_Figure5a.png".
 #
 # e.g.
-# python src/scripts/cunningham_figure4.py \
-#     --path "PATH/TO/Figure4a.dat" \
+# python src/scripts/cunningham_figure5a.py \
+#     --path "PATH/TO/Figure5a.dat" \
 #     --c1 "PATH/TO/cunningham_1.5" \
 #     --c2 "PATH/TO/cunningham_10.0" \
 #     --g1 "PATH/TO/glauert_1.5" \
@@ -70,7 +69,7 @@ def calc_Daa_over_p_squared(pathname):
     return (xx, yy)
 
 
-def plot_figure4(
+def plot_figure5a(
     piran_cunn_1,
     piran_cunn_2,
     piran_glau_1,
@@ -171,19 +170,8 @@ def plot_figure4(
             label="C2023 v2.0.0 (Cunningham)",
         )
 
-        # # Kennel and Engelmann frequency ratio 1.5
-        # overlay_y_kenn1 = cunningham_figure_data[:, 3]
-        # plt.semilogy(
-        #     overlay_x,
-        #     overlay_y_kenn1,
-        #     color="b",
-        #     linestyle="-",
-        #     alpha=0.4,
-        #     label="C2023 v2.0.0 (Kennel & Engelmann)",
-        # )
-
         # Glauert and Horne frequency ratio 10.0
-        overlay_y_glau2 = cunningham_figure_data[:, 4]
+        overlay_y_glau2 = cunningham_figure_data[:, 3]
         plt.semilogy(
             overlay_x,
             overlay_y_glau2,
@@ -193,7 +181,7 @@ def plot_figure4(
         )
 
         # Cunningham frequency ratio 10.0
-        overlay_y_cunn2 = cunningham_figure_data[:, 5]
+        overlay_y_cunn2 = cunningham_figure_data[:, 4]
         plt.semilogy(
             overlay_x,
             overlay_y_cunn2,
@@ -202,18 +190,8 @@ def plot_figure4(
             alpha=0.4,
         )
 
-        # # Kennel and Engelmann frequency ratio 10.0
-        # overlay_y_kenn2 = cunningham_figure_data[:, 6]
-        # plt.semilogy(
-        #     overlay_x,
-        #     overlay_y_kenn2,
-        #     color="b",
-        #     linestyle="-",
-        #     alpha=0.4,
-        # )
-
-    plt.text(20, 10 ** (-4.2), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=1.5$")
-    plt.text(41, 10 ** (-5.5), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=10$")
+    plt.text(10, 10 ** (-3.9), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=1.5$")
+    plt.text(60, 10 ** (-5.5), r"$\omega_{\text{pe}}/\omega_{\text{ce}}=10$")
 
     plt.minorticks_on()
     plt.xticks(xticks, [str(v) for v in xticks])
@@ -224,26 +202,26 @@ def plot_figure4(
     plt.ylim(y_lim_min, y_lim_max)
     plt.xlabel("Local pitch angle (degrees)")
     plt.ylabel(r"$\text{D}_{\alpha\alpha} / \text{p}^2$")
-    plt.legend(loc="upper left")
-    plt.title("KE=1MeV Harmonics [-5, 5]")
+    plt.legend(loc="lower left")
+    plt.title("KE=10keV Harmonics [-5, 5]")
     plt.tight_layout()
 
     if save:
-        plt.savefig("PIRAN_Figure4.png", dpi=150)
+        plt.savefig("PIRAN_Figure5a.png", dpi=150)
     else:
         plt.show()
 
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="Cunningham_2023_Figure4",
-        description="Reproduce Figure 4 from Cunningham, 2023",
+        prog="Cunningham_2023_Figure5a",
+        description="Reproduce Figure 5a from Cunningham, 2023",
     )
     parser.add_argument(
         "-p",
         "--path",
         default=None,
-        help="Path to Cunningham's dat file for Figure4.",
+        help="Path to Cunningham's dat file for Figure5a.",
     )
     parser.add_argument(
         "--c1",
@@ -311,7 +289,7 @@ def main():
     else:
         piran_glau_2 = None
 
-    plot_figure4(
+    plot_figure5a(
         piran_cunn_1,
         piran_cunn_2,
         piran_glau_1,
