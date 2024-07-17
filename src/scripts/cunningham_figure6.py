@@ -88,7 +88,7 @@ def format_figure(fig, ax, ratio, Xmax):
     ax.set_xticks(xticks, labels=[str(v) for v in xticks])
     ax.set_yticks(yticks, labels=[str(v) for v in yticks])
 
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda y, _: "{:g}".format(y)))
     ax.yaxis.set_major_formatter(LogFormatterMathtext())
 
     ax.tick_params("x", which="both", top=True, labeltop=False)
@@ -203,7 +203,7 @@ def main():
 
     # In the following, we remove very small values so that the figures
     # look almost the same as Cunningham's.
-    tol = 10**(-12)
+    tol = 10 ** (-12)
 
     # Plot Cunningham's data
     if cunningham_figure_data is not None:
@@ -238,7 +238,9 @@ def main():
             ids = np.where(yy < tol)[0]
             xx = np.delete(xx, ids)
             yy = np.delete(yy, ids)
-            plot_figure(ax, xx, yy, "k", "", "+", 0.4, r"Glauert & Horne $n_{\text{max}}=300$")
+            plot_figure(
+                ax, xx, yy, "k", "", "+", 0.4, r"Glauert & Horne $n_{\text{max}}=300$"
+            )
 
     # Plot our data
     # PIRAN Glauert
