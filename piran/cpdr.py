@@ -386,7 +386,7 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
         omega: Quantity[u.rad / u.s],
         k: Quantity[u.rad / u.m],
-        rel_tol: float = 1e-09,
+        rel_tol: float = 1e-05,
     ) -> Quantity[u.rad / u.m]:
         """
         Given triplet X, omega and k, solution to the resonant cpdr,
@@ -407,7 +407,7 @@ class Cpdr:
             Wave frequency.
         k : Quantity[u.rad / u.m]
             Wavenumber.
-        rel_tol : float = 1e-09
+        rel_tol : float = 1e-05
             Relative tolerance for deciding whether positive or
             negative k_par is a solution to the resonance condition.
 
