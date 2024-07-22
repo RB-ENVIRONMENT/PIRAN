@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import Angle
-from  matplotlib import ticker
 
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
@@ -61,7 +60,9 @@ def format_figure(fig, ax):
     ax.set_xlabel(r"Normalized frequency ($\omega / \omega_{\text{ce}}$)")
     ax.set_ylabel(r"$X_{\text{rc}} = \tan(\theta_{\text{rc}})$")
 
-    ax.set_title("Resonance cone angle for various plasma parameters\nCold proton plasma")
+    ax.set_title(
+        "Resonance cone angle for various plasma parameters\nCold proton plasma"
+    )
 
     fig.tight_layout()
 
@@ -128,7 +129,7 @@ def main():
     # Plot Cunningham's data
     for ii in range(len(ratio)):
         xx = cunningham_figure_data[:, 0]
-        yy = cunningham_figure_data[:, ii+1]
+        yy = cunningham_figure_data[:, ii + 1]
 
         # Find the indices where the value is -1 and delete them
         minus_one_ids = np.where(yy == -1.0)[0]
@@ -136,7 +137,15 @@ def main():
         xx = np.delete(xx, minus_one_ids)
         yy = np.delete(yy, minus_one_ids)
 
-        plot_figure1a(ax, xx, yy, color[ii], "-", 0.4, rf"C2023 $\omega_{{\text{{pe}}}}$/$\omega_{{\text{{ce}}}}$={ratio[ii]}")
+        plot_figure1a(
+            ax,
+            xx,
+            yy,
+            color[ii],
+            "-",
+            0.4,
+            rf"C2023 $\omega_{{\text{{pe}}}}$/$\omega_{{\text{{ce}}}}$={ratio[ii]}",
+        )
 
     # Plot values calculated using PIRAN
     for ii in range(len(ratio)):
@@ -159,7 +168,15 @@ def main():
             X_rc = np.sqrt(resonance_cone_angle)
             yy[jj] = X_rc
 
-        plot_figure1a(ax, xx, yy, color[ii], "-", 1.0, rf"PIRAN $\omega_{{\text{{pe}}}}$/$\omega_{{\text{{ce}}}}$={ratio[ii]}")
+        plot_figure1a(
+            ax,
+            xx,
+            yy,
+            color[ii],
+            "-",
+            1.0,
+            rf"PIRAN $\omega_{{\text{{pe}}}}$/$\omega_{{\text{{ce}}}}$={ratio[ii]}",
+        )
 
     # Format the figure, add legend, labels etc.
     format_figure(fig, ax)
