@@ -7,7 +7,7 @@ from typing import Callable
 
 from astropy import units as u
 
-_unit_check_enabled = False
+_unit_check_enabled = True
 
 
 def check_units(func: Callable) -> Callable:
