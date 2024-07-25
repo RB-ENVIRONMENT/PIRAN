@@ -277,7 +277,7 @@ class TestCpdr:
         k = 0.0002288927620211241 << u.rad / u.m
 
         with pytest.raises(ValueError):
-            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-6)
+            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-12)
 
         # With the default abs_tol it should not raise a ValueError.
         k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k)
