@@ -10,6 +10,7 @@ from plasmapy.formulary.frequencies import wc_, wp_
 from plasmapy.particles import ParticleList, ParticleListLike
 
 from piran.magpoint import MagPoint
+from piran.validators import check_units
 
 
 class IllegalArgumentError(ValueError):
@@ -33,7 +34,7 @@ class PlasmaPoint:
     number_density : astropy.units.Quantity[1 / u.m**3] | None, default=None
     """
 
-    @u.quantity_input
+    @check_units
     def __init__(
         self,
         magpoint: MagPoint,
@@ -100,13 +101,13 @@ class PlasmaPoint:
     def plasma_charge(self):
         return self.__plasma_charge
 
-    @u.quantity_input
+    @check_units
     def __compute_gyro_freq(self) -> Quantity[u.rad / u.s]:
         B = self.magpoint.flux_density
         gf = [wc_(B, p, signed=True) for p in self.particles]
         return Quantity(gf)
 
-    @u.quantity_input
+    @check_units
     def __compute_plasma_freq(self) -> Quantity[u.rad / u.s]:
         if (
             len(self.particles) == 2

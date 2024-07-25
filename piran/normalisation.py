@@ -5,9 +5,10 @@ from scipy.integrate import simpson, trapezoid
 
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
+from piran.validators import check_units
 
 
-@u.quantity_input
+@check_units
 def compute_glauert_norm_factor(
     cpdr: Cpdr,
     omega: u.Quantity[u.rad / u.s],
@@ -77,7 +78,7 @@ def compute_glauert_norm_factor(
     return norm_factor
 
 
-@u.quantity_input
+@check_units
 def compute_cunningham_norm_factor(
     cpdr,
     omega,

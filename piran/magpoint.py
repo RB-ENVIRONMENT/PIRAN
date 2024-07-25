@@ -7,6 +7,8 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
 
+from piran.validators import check_units
+
 
 class MagPoint:
     """
@@ -33,7 +35,7 @@ class MagPoint:
         to tesla metres cubed.
     """
 
-    @u.quantity_input
+    @check_units
     def __init__(
         self,
         mlat: Quantity[u.rad],
