@@ -18,6 +18,7 @@ from piran.diffusion import (
     get_singular_term,
 )
 from piran.magpoint import MagPoint
+from piran.normalisation import UNIT_NF
 from piran.plasmapoint import PlasmaPoint
 
 
@@ -165,7 +166,7 @@ class TestDiffusion:
     def test_get_normalised_intensity_1(self):
         power_spectral_density = 1.5079984e-25 << (u.T**2 * u.s / u.rad)
         gx = 0.97041
-        norm_factor = 1.754757e-17
+        norm_factor = 1.754757e-17 << UNIT_NF
 
         normalised_intensity = get_normalised_intensity(
             power_spectral_density, gx, norm_factor

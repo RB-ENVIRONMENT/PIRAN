@@ -5,6 +5,10 @@ from scipy.integrate import simpson
 from scipy.special import erf, jv
 
 from piran.cpdr import Cpdr, ResonantRoot
+from piran.normalisation import UNIT_NF
+
+UNIT_PSD = u.T**2 * u.s / u.rad
+UNIT_BKN = u.T**2 * u.m**3 / u.rad**3
 
 
 @u.quantity_input
@@ -12,7 +16,7 @@ def get_power_spectral_density(
     cpdr: Cpdr,
     wave_amplitude: u.Quantity[u.T],
     omega: u.Quantity[u.rad / u.s],
-) -> u.Quantity[u.T**2 * u.s / u.rad]:
+) -> u.Quantity[UNIT_PSD]:
     """
     Calculate the power spectral density B_squared(omega) term
     from equation 5 in Glauert & Horne 2005, in units T^2 * s / rad.
@@ -146,10 +150,10 @@ def get_singular_term(
 
 @u.quantity_input
 def get_normalised_intensity(
-    power_spectral_density: u.Quantity[u.T**2 * u.s / u.rad],
+    power_spectral_density: u.Quantity[UNIT_PSD],
     wave_norm_angle_dist_eval,
-    norm_factor,
-):
+    norm_factor: u.Quantity[UNIT_NF],
+) -> u.Quantity[UNIT_BKN]:
     """
     Calculates the normalised intensity |B_{k}^{norm}|^2.
 
