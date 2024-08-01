@@ -6,7 +6,7 @@ from scipy.integrate import simpson, trapezoid
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 
-__NORM_FACTOR_UNITS = u.rad**2 / u.m**3
+UNIT_NF = u.rad**2 * u.s / u.m**3
 
 
 @u.quantity_input
@@ -16,7 +16,7 @@ def compute_glauert_norm_factor(
     X_range: u.Quantity[u.dimensionless_unscaled],
     wave_norm_angle_dist: Gaussian,
     method="simpson",
-) -> u.Quantity[__NORM_FACTOR_UNITS]:
+) -> u.Quantity[UNIT_NF]:
     """
     Calculate the normalisation factor from
     Glauert & Horne 2005 (equation 15).
@@ -81,7 +81,7 @@ def compute_glauert_norm_factor(
 
     norm_factor = integral * (1 / (2 * np.pi**2))
 
-    return norm_factor << __NORM_FACTOR_UNITS
+    return norm_factor << UNIT_NF
 
 
 @u.quantity_input
@@ -89,7 +89,7 @@ def compute_cunningham_norm_factor(
     cpdr,
     omega,
     X_range,
-) -> u.Quantity[__NORM_FACTOR_UNITS]:
+) -> u.Quantity[UNIT_NF]:
     """
     Calculate the normalisation factor from
     Cunningham 2023 (denominator of equation 4b).
@@ -137,4 +137,4 @@ def compute_cunningham_norm_factor(
         )
     norm_factor /= 2 * np.pi**2
 
-    return norm_factor << __NORM_FACTOR_UNITS
+    return norm_factor << UNIT_NF
