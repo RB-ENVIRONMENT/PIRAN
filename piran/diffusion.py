@@ -34,7 +34,7 @@ def get_power_spectral_density(
 
     Returns
     -------
-    power_spectral_density : astropy.units.quantity.Quantity[u.T**2 * u.s / u.rad]
+    power_spectral_density : astropy.units.quantity.Quantity[UNIT_PSD]
         Power spectral density.
     """
     delta_omega = cpdr.wave_freqs._width
@@ -173,16 +173,16 @@ def get_normalised_intensity(
 
     Parameters
     ----------
-    power_spectral_density : u.Quantity[u.T**2 * u.s / u.rad]
+    power_spectral_density : astropy.units.quantity.Quantity[UNIT_PSD]
         Power spectral density B^2(omega).
     wave_norm_angle_dist_eval :
         Wave normal angle distribution evaluated at X.
-    norm_factor :
+    norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
         Normalisation factor.
 
     Returns
     -------
-    normalised_intensity :
+    normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
         Normalised intensity |B_{k}^{norm}|^2
     """
     normalised_intensity = (
@@ -213,7 +213,7 @@ def get_DnX_single_root(
     resonant_root : piran.cpdr.ResonantRoot object
         NamedTuple object containing a resonant root, i.e.,
         root to both dispersion relation and resonance condition.
-    normalised_intensity :
+    normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
         Normalised intensity |B_{k}^{norm}|^2
     phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Phi_{n,k}^2.
@@ -222,7 +222,7 @@ def get_DnX_single_root(
 
     Returns
     -------
-    DnXaa, DnXap, DnXpp :
+    DnXaa, DnXap, DnXpp : tuple
         Pitch angle, mixed pitch angle-momentum and momentum diffusion
         coefficients for a given resonant root.
         Note that since these are wrapped in a tuple, it appears that the
@@ -267,16 +267,17 @@ def get_diffusion_coefficients(
     ----------
     X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Array of wave normal angles.
-    DnX_single_res :
+    DnX_single_res : astropy.units.quantity.Quantity[UNIT_DIFF]
         Array of diffusion coefficients for a specific resonance,
         one per X (i.e. calculated values from equations 11, 12 or 13
         in Glauert & Horne 2005).
 
     Returns
     -------
-    Either $D_{\alpha \alpha}$ or $D_{\alpha p}$ ($D_{p \alpha}$) or
-    $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
-    resonance.
+    integral : astropy.units.quantity.Quantity[UNIT_DIFF[]]
+        Either $D_{\alpha \alpha}$ or $D_{\alpha p}$ ($D_{p \alpha}$) or
+        $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
+        resonance.
     """
     if X_range.shape != DnX_single_res.shape:
         raise ValueError("Input arrays should have the same shape")
@@ -309,12 +310,12 @@ def get_energy_diffusion_coefficient(
         Relativistic kinetic energy.
     rest_mass_energy : astropy.units.quantity.Quantity.Quantity[Joule],
         Rest mass energy.
-    momentum_diff_coef :
+    momentum_diff_coef : astropy.units.quantity.Quantity[UNIT_DIFF]
         Momentum diffusion coefficient $D_{pp}$.
 
     Returns
     -------
-    energy_diff_coef :
+    energy_diff_coef : astropy.units.quantity.Quantity[u.J**2 / u.s]
         Energy diffusion coefficient $D_{EE}$.
     """
     energy_diff_coef = (

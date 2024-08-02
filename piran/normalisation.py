@@ -35,7 +35,7 @@ def compute_glauert_norm_factor(
 
     Returns
     -------
-    norm_factor : np.floating
+    norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
     """
     # Given omega and X_range calculate wave number k,
     # solution to the dispersion relation.
@@ -105,7 +105,7 @@ def compute_cunningham_norm_factor(
 
     Returns
     -------
-    norm_factor : numpy.ndarray[numpy.float64]
+    norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
     """
     # Given omega and X_range calculate wave number k,
     # solution to the dispersion relation.
