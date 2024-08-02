@@ -6,7 +6,7 @@ from scipy.integrate import simpson, trapezoid
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
 
-UNIT_NF = u.rad**2 * u.s / u.m**3
+UNIT_NF = u.s / u.m**3
 
 
 @u.quantity_input

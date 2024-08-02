@@ -1,6 +1,7 @@
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
+from astropy.coordinates import Angle
 from scipy.integrate import simpson
 from scipy.special import erf, jv
 
@@ -8,7 +9,8 @@ from piran.cpdr import Cpdr, ResonantRoot
 from piran.normalisation import UNIT_NF
 
 UNIT_PSD = u.T**2 * u.s / u.rad
-UNIT_BKN = u.T**2 * u.m**3 / u.rad**3
+UNIT_BKN = u.T**2 * u.m**3 / u.rad
+UNIT_DIFF = (u.kg * u.m / u.s) ** 2 / u.s
 
 
 @u.quantity_input
@@ -194,10 +196,10 @@ def get_normalised_intensity(
 def get_DnX_single_root(
     cpdr: Cpdr,
     resonant_root: ResonantRoot,
-    normalised_intensity,
+    normalised_intensity: u.Quantity[UNIT_BKN],
     phi_squared: u.Quantity[u.dimensionless_unscaled],
     singular_term: u.Quantity[u.m / u.s],
-):
+) -> tuple[u.Quantity[UNIT_DIFF], u.Quantity[UNIT_DIFF], u.Quantity[UNIT_DIFF]]:
     """
     Calculates the diffusion coefficients in pitch angle DnXaa,
     mixed pitch angle-momentum DnXap and momentum DnXpp, for a
@@ -223,13 +225,17 @@ def get_DnX_single_root(
     DnXaa, DnXap, DnXpp :
         Pitch angle, mixed pitch angle-momentum and momentum diffusion
         coefficients for a given resonant root.
+        Note that since these are wrapped in a tuple, it appears that the
+        `@u.quantity_input` decorator does not actually check these! There is an
+        appropriate test in place in test_diffusion.py to check the validity of
+        these outputs.
     """
     charge = cpdr.plasma.particles[0].charge
     gyrofreq = cpdr.plasma.gyro_freq[0]
     alpha = cpdr.alpha
 
     term1 = (charge**2 * resonant_root.omega**2) / (
-        4 * np.pi * (1 + resonant_root.X**2)
+        4 * Angle(np.pi, u.rad) * (1 + resonant_root.X**2)
     )
     term2 = (
         cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega)

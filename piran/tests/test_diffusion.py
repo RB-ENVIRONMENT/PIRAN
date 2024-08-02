@@ -9,6 +9,8 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    UNIT_BKN,
+    UNIT_DIFF,
     get_diffusion_coefficients,
     get_DnX_single_root,
     get_energy_diffusion_coefficient,
@@ -194,7 +196,7 @@ class TestDiffusion:
         X = [0.1] << u.dimensionless_unscaled
         resonant_root = cpdr.solve_resonant(X)
 
-        normalised_intensity = 8.339484e-09
+        normalised_intensity = 8.339484e-09 << UNIT_BKN
         phi_squared = 0.460906 << u.dimensionless_unscaled
         singular_term = -54012493.87 << (u.m / u.s)
 
@@ -205,6 +207,19 @@ class TestDiffusion:
             phi_squared,
             singular_term,
         )
+
+        # `get_DnX_single_root` returns a tuple of `Quantity` objects.
+        # Unfortunately, `@u.quantity_input` seems to have no effect on a returned tuple, even if
+        # each element is a `Quantity`. Let's check the units in this test instead.
+        #
+        # Note that Glauert&Horne 2005 states that "all the diffusion coefficients have units of
+        # (momentum ** 2) / s" (paragraph 7). My reading of Eqns 1 - 4 is that they should differ by
+        # a factor of radians, but its clear from Eqns 11 - 13 that the dimensions of the calculated
+        # values will be the same (differing only by a dimensionless factor).
+        # Let's use (momentum ** 2) / s for everything - it seems to do the trick!
+        assert DnXaa.unit.is_equivalent(UNIT_DIFF)
+        assert DnXap.unit.is_equivalent(UNIT_DIFF)
+        assert DnXpp.unit.is_equivalent(UNIT_DIFF)
 
         assert math.isclose(DnXaa.value, 1.1892186e-45, rel_tol=1e-7)
         assert math.isclose(DnXap.value, -4.1240996e-46, rel_tol=1e-7)
