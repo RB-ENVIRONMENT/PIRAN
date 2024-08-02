@@ -295,8 +295,8 @@ def get_diffusion_coefficients(
 def get_energy_diffusion_coefficient(
     rel_kin_energy: u.Quantity[u.J],
     rest_mass_energy: u.Quantity[u.J],
-    momentum_diff_coef,
-):
+    momentum_diff_coef: u.Quantity[UNIT_DIFF],
+) -> u.Quantity[u.J**2 / u.s]:
     """
     Given relativistic kinetic energy, rest mass energy and
     relativistic momentum diffusion coefficient calculate
@@ -319,7 +319,7 @@ def get_energy_diffusion_coefficient(
     """
     energy_diff_coef = (
         momentum_diff_coef
-        * (const.c.value**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
+        * (const.c**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
         / (rel_kin_energy + rest_mass_energy) ** 2
     )
 

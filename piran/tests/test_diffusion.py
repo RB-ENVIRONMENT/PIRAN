@@ -242,7 +242,7 @@ class TestDiffusion:
     def test_get_energy_diffusion_coefficient(self):
         rel_kin_energy = 1.602177e-15 << u.J
         rest_mass_energy = 8.187106e-14 << u.J
-        momentum_diff_coef = 7.073597e-50
+        momentum_diff_coef = 7.073597e-50 << UNIT_DIFF
 
         Dee = get_energy_diffusion_coefficient(
             rel_kin_energy,
@@ -250,4 +250,4 @@ class TestDiffusion:
             momentum_diff_coef,
         )
 
-        assert math.isclose(Dee, 2.41705e-34, rel_tol=1e-5)
+        assert math.isclose(Dee.value, 2.41705e-34, rel_tol=1e-5)
