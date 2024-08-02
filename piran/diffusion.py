@@ -253,8 +253,8 @@ def get_DnX_single_root(
 @u.quantity_input
 def get_diffusion_coefficients(
     X_range: u.Quantity[u.dimensionless_unscaled],
-    DnX_single_res,
-):
+    DnX_single_res: u.Quantity[UNIT_DIFF],
+) -> u.Quantity[UNIT_DIFF]:
     r"""
     Given an array of wave normal angles and an an identically-sized
     array of outputs from Equation 11, 12, or 13, calculate
@@ -283,6 +283,10 @@ def get_diffusion_coefficients(
 
     integrand = np.multiply(X_range, DnX_single_res)
     integral = simpson(integrand, x=X_range)
+
+    # simpson strips units; let's add them back!
+    # This should be UNIT_DIFF, but let's perform a more robust check.
+    integral <<= integrand.unit * X_range.unit
 
     return integral
 

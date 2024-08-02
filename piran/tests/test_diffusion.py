@@ -227,14 +227,14 @@ class TestDiffusion:
 
     def test_get_diffusion_coefficients(self):
         X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
-        DnX = np.array([0, 1, 2, 3, 4, 5])
+        DnX = u.Quantity([0, 1, 2, 3, 4, 5], UNIT_DIFF)
         res = get_diffusion_coefficients(X, DnX)
 
-        assert math.isclose(res, 1.666, rel_tol=1e-3)
+        assert math.isclose(res.value, 1.666, rel_tol=1e-3)
 
         # raise error when X and DnX do not have the same shape
         X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
-        DnX = np.array([0, 1, 2, 3, 4])
+        DnX = u.Quantity([0, 1, 2, 3, 4], UNIT_DIFF)
 
         with pytest.raises(ValueError):
             get_diffusion_coefficients(X, DnX)
