@@ -54,7 +54,6 @@ def calc_Daa_over_p_squared(pathname):
             results = json.load(f)
 
         X_range = np.array(results["X_range"])
-        resonances = results["resonances"]
         DnXaa = results["DnXaa"]
         momentum = results["momentum"]
 
