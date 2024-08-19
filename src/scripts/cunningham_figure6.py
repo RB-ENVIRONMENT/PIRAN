@@ -59,9 +59,9 @@ def calc_Daa_over_p_squared(pathname):
         momentum = results["momentum"]
 
         Daa = 0.0
-        for i, resonance in enumerate(resonances):
-            DnXaa_this_res = np.array(DnXaa[i])
-            integral = get_diffusion_coefficients(X_range, DnXaa_this_res)
+        # Loop over resonances (n)
+        for DnXaa_this_res in DnXaa:
+            integral = get_diffusion_coefficients(X_range, np.array(DnXaa_this_res))
             Daa += integral
 
         energy.append(results["rel_kin_energy_MeV"])
