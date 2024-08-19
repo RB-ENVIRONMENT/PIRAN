@@ -148,15 +148,18 @@ def main():
         )
 
     # Plot values calculated using PIRAN
+    # Start by defining const parameters
+    xx = cunningham_figure_data[:, 0]
+
+    particles = ("e", "p+")
+    cpdr_sym = CpdrSymbolic(len(particles))
+
+    mlat_deg = Angle(0, u.deg)
+    l_shell = 4.5
+    mag_point = MagPoint(mlat_deg, l_shell)
+
+    # Loop over differing ratios
     for ii in range(len(ratio)):
-        xx = cunningham_figure_data[:, 0]
-
-        particles = ("e", "p+")
-        cpdr_sym = CpdrSymbolic(len(particles))
-
-        mlat_deg = Angle(0, u.deg)
-        l_shell = 4.5
-        mag_point = MagPoint(mlat_deg, l_shell)
         plasma_point = PlasmaPoint(mag_point, particles, ratio[ii])
 
         cpdr = Cpdr(cpdr_sym, plasma_point)
