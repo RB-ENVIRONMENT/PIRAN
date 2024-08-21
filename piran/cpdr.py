@@ -316,7 +316,7 @@ class Cpdr:
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                k = self.solve_cpdr(valid_omega, X.value) << u.rad / u.m
+                k = self.solve_cpdr(valid_omega, X)
                 k_par = self.find_resonant_parallel_wavenumber(
                     X << u.dimensionless_unscaled,
                     valid_omega << u.rad / u.s,
