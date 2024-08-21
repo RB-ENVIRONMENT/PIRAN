@@ -38,7 +38,7 @@ class TestStix:
 
         # Find (X, omega, k) CPDR roots
         for X in X_range:
-            k = self.cpdr.solve_cpdr(self.omega.value, X.value)
+            k = self.cpdr.solve_cpdr(self.omega, X)
             k <<= u.rad / u.m
 
             values_dict = {
