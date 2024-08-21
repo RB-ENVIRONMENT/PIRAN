@@ -238,7 +238,10 @@ def main():
         container["DnXap"].append(DnXap_this_res)
         container["DnXpp"].append(DnXpp_this_res)
 
-    with open(f"results_{alpha.deg:.2f}deg.json", "w") as outfile:
+    formatted_angle = f"{alpha.deg:.3f}"
+    formatted_energy = f"{energy.to(u.MeV).value:.10f}"
+    filename = f"results_{formatted_angle}deg_{formatted_energy}MeV.json"
+    with open(filename, "w") as outfile:
         json.dump(container, outfile, indent=4)
 
 
