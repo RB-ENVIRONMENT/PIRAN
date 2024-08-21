@@ -16,6 +16,7 @@ from piran.helpers import (
 )
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
+from piran.wavefilter import WaveFilter
 
 ResonantRoot = NamedTuple(
     "ResonantRoot",
@@ -52,6 +53,7 @@ class Cpdr:
         pitch_angle: Quantity[u.rad] | None = None,
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
+        wave_filter: WaveFilter = WaveFilter(),
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma
@@ -70,6 +72,9 @@ class Cpdr:
 
         # Stix parameters
         self.__stix = Stix(self.__plasma.plasma_freq, self.__plasma.gyro_freq)
+
+        # Wave mode filter
+        self.__wave_filter = wave_filter
 
         if (
             energy is not None
@@ -244,13 +249,7 @@ class Cpdr:
             k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
             valid_k_l = get_real_and_positive_roots(k_l)
 
-            if valid_k_l.size == 0:
-                k_sol.append(np.nan)
-            elif valid_k_l.size == 1:
-                k_sol.append((valid_k_l[0]))
-            else:
-                msg = "We got more than one real positive root for k."
-                raise ValueError(msg)
+            k_sol.append(self.__wave_filter.filter(valid_k_l))
 
         return k_sol
 
@@ -372,13 +371,7 @@ class Cpdr:
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l)
 
-        if valid_k_l.size == 0:
-            return np.nan
-        elif valid_k_l.size == 1:
-            return valid_k_l[0]
-        else:
-            msg = "We got more than one real positive root for k"
-            raise ValueError(msg)
+        return self.__wave_filter.filter(valid_k_l)
 
     @u.quantity_input
     def find_resonant_parallel_wavenumber(
