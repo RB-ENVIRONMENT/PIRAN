@@ -62,8 +62,8 @@ def compute_glauert_norm_factor(
         k = wave_numbers[i]
 
         evaluated_integrand[i] = (
-            eval_gx[i] * k**2 * np.abs(cpdr_domega_lamb(X, k)) * X
-        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k)))
+            eval_gx[i] * k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
+        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
 
     if method == "trapezoid":
         integral = trapezoid(evaluated_integrand, x=X_range)
@@ -79,9 +79,9 @@ def compute_glauert_norm_factor(
 
 @u.quantity_input
 def compute_cunningham_norm_factor(
-    cpdr,
-    omega,
-    X_range,
+    cpdr: Cpdr,
+    omega: u.Quantity[u.rad / u.s],
+    X_range: u.Quantity[u.dimensionless_unscaled],
 ):
     """
     Calculate the normalisation factor from
@@ -124,9 +124,9 @@ def compute_cunningham_norm_factor(
         X = X_range[i]
         k = wave_numbers[i]
 
-        norm_factor[i] = (k**2 * np.abs(cpdr_domega_lamb(X, k)) * X) / (
-            (1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k))
-        )
+        norm_factor[i] = (
+            k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
+        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
     norm_factor /= 2 * np.pi**2
 
     return norm_factor
