@@ -79,10 +79,10 @@ class TestCpdr:
 
         X = [0.0, 0.33333333333333337, 1.0, 100] * u.dimensionless_unscaled
         k = self.cpdr.solve_cpdr_for_norm_factor(omega, X)
-        assert math.isclose(k[0], 0.00011414445445389277)
-        assert math.isclose(k[1], 0.00011766325510931447)
-        assert math.isclose(k[2], 0.00014032247090573543)
-        assert math.isnan(k[3]) is True
+        assert math.isclose(k[0].value, 0.00011414445445389277)
+        assert math.isclose(k[1].value, 0.00011766325510931447)
+        assert math.isclose(k[2].value, 0.00014032247090573543)
+        assert math.isnan(k[3].value) is True
 
         # Raise valuer error (more than 1 real and positive root k)
         omega = 100000 << (u.rad / u.s)
