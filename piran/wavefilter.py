@@ -46,6 +46,7 @@ class DefaultFilter(WaveFilter):
 
 class WhistlerFilter(WaveFilter):
 
+    @u.quantity_input
     def filter(
         self,
         X: u.Quantity[u.dimensionless_unscaled],
