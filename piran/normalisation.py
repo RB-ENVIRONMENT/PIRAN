@@ -86,9 +86,9 @@ def compute_glauert_norm_factor(
 
 @u.quantity_input
 def compute_cunningham_norm_factor(
-    cpdr,
-    omega,
-    X_range,
+    cpdr: Cpdr,
+    omega: u.Quantity[u.rad / u.s],
+    X_range: u.Quantity[u.dimensionless_unscaled],
 ) -> u.Quantity[UNIT_NF]:
     """
     Calculate the normalisation factor from
