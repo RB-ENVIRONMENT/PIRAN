@@ -217,9 +217,9 @@ class TestDiffusion:
         # a factor of radians, but its clear from Eqns 11 - 13 that the dimensions of the calculated
         # values will be the same (differing only by a dimensionless factor).
         # Let's use (momentum ** 2) / s for everything - it seems to do the trick!
-        assert DnXaa.unit.is_equivalent(UNIT_DIFF)
-        assert DnXap.unit.is_equivalent(UNIT_DIFF)
-        assert DnXpp.unit.is_equivalent(UNIT_DIFF)
+        assert DnXaa.unit == UNIT_DIFF
+        assert DnXap.unit == UNIT_DIFF
+        assert DnXpp.unit == UNIT_DIFF
 
         assert math.isclose(DnXaa.value, 1.1892186e-45, rel_tol=1e-7)
         assert math.isclose(DnXap.value, -4.1240996e-46, rel_tol=1e-7)
