@@ -18,35 +18,52 @@ from piran.wavefilter import WaveFilter, WhistlerFilter
 def calculate_omega_L0(
     omega_p: u.Quantity[u.rad / u.s], omega_c: u.Quantity[u.rad / u.s]
 ) -> u.Quantity[u.rad / u.s]:
-    # Z-mode waves first appear when L=0.
-    # Rearranging L=0 yields a quadratic in omega with coefficients
-    # (-omega_p**2, -omega_c, 1)
-    #
-    # (Note that Gurnett&Bhattacharjee notation uses unsigned omega_c)
-    #
-    # We call the positive solution to this quadratic omega_L0.
-    #
-    # Near omega_L0...
-    # For omega < omega_L0 we expect to see one (Whistler) solution.
-    # For omega > omega_L0 we expect to see two solutions (Whistler and Z-mode).
-    #
-    # The ordering of omega_L0, omega_p, omega_c changes based on the plasma density.
-    #
-    # Two things are always true:
-    # - omega_c is FIXED (and assumed positive/unsigned in this case).
-    # - omega_p is always larger than omega_L0.
-    #
-    # But...
-    # For omega_p > sqrt(2)*omega_c we have omega_p > omega_L0 > omega_c
-    # For sqrt(2)*omega_c > omega_p > omega_c we have omega_p > omega_c > omega_L0
-    # For omega_c > omega_p we have omega_c > omega_p > omega_L0
-    #
-    # i.e in overdense cases (omega_p > omega_c), omega_L0 is larger than omega_c
-    # unless omega_p < sqrt(2)*omega_c.
-    #
-    # In underdense cases, omega_L0 is always smaller than omega_c.
-    #
-    # How do additional ions influence this?...
+    """
+    Whistler mode waves typically only 'overlap' with one other type of wave, Z-mode,
+    which can occur when omega is such that L > 0.
+
+    Let omega_L0 be the value of omega such that L = 0. By the defn of L this yields:
+
+    1 - ((omega_p ** 2) / (omega_L0 * (omega_L0 - omega_c))) = 0
+
+    NB. we're including the sign of the charge in omega_c here, which is negative
+        for electrons.
+
+    omega_c is fixed, so by inspection of the above both of the following are true:
+    - increasing omega_p corresponds to increasing (unsigned) omega_L0.
+    - omega_p > omega_L0.
+
+    By defn, for an overdense plasma we have omega_p > abs(omega_c)
+             for an underdense plasma we have omega_p < abs(omega_c)
+
+    But how does omega_L0 compare to omega_c in different cases?
+
+    Underdense plasma is easy: omega_L0 < omega_p < abs(omega_c).
+
+    For an overdense plasma, there are two different scenarios. It is intuitive to let
+    omega_L0 and omega_c coincide (i.e. omega_L0 = -omega_c), yielding
+
+    1 - ((omega_p ** 2) / (2 * (omega_c ** 2))) = 0
+
+    implying omega_p / abs(omega_c) = sqrt(2).
+
+    For the overdense plasma, we thus have:
+
+    omega_L0 < abs(omega_c) < omega_p if the plasma-over-gyro-ratio is < sqrt(2),
+    abs(omega_c) < omega_L0 < omega_p otherwise.
+
+    In "Introduction to Plasma Physics (Second Edition)" by Gurnett & Bhattacharjee,
+    Section 4.4.4, Figures 4.37 and 4.38 plot the overdense case with ratio < sqrt(2)
+    and the underdense case respectively.
+
+    The remaining overdense case (ratio > sqrt(2)) is arguably more general!
+
+    How do additional ions influence this analysis?...
+
+    If we want to calculate omega_L0 directly given omega_p and omega_c, rearranging
+    L=0 yields an easily-solved polynomial for omega_L0 as demonstrated in this
+    function. Only the positive solution is retained.
+    """
     L_quadratic = np.polynomial.Polynomial([-omega_p.value**2, -omega_c.value, 1])
     L0 = L_quadratic.roots()
     return L0[L0 > 0] << u.rad / u.s
