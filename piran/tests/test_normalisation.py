@@ -50,7 +50,9 @@ class TestNormalisationFactors:
         )
 
         expected = 8.53830973e-19
-        assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)
+        assert math.isclose(
+            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+        )
 
     def test_glauert_normalisation_2(self):
         X_min = 0.0 << u.dimensionless_unscaled
@@ -69,7 +71,9 @@ class TestNormalisationFactors:
         )
 
         expected = 8.53769363e-19
-        assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)
+        assert math.isclose(
+            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+        )
 
     def test_glauert_normalisation_3(self):
         X_min = 0.00 << u.dimensionless_unscaled
@@ -88,7 +92,9 @@ class TestNormalisationFactors:
         )
 
         expected = 8.87151913e-19
-        assert math.isclose(norm_factor_glauert, expected, rel_tol=1e-09, abs_tol=1e-27)
+        assert math.isclose(
+            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+        )
 
     def test_cunningham_normalisation_1(self):
         X_min = 0.0 << u.dimensionless_unscaled
@@ -108,12 +114,14 @@ class TestNormalisationFactors:
         # If an assertion fails, the test fails and the remaining asserts
         # are not evaluated.
         assert cnf[0] == 0.0
-        assert math.isclose(cnf[1], 6.14971590e-20, rel_tol=1e-09, abs_tol=1e-28)
-        assert math.isclose(cnf[20], 1.20262320e-18, rel_tol=1e-09, abs_tol=1e-26)
-        assert math.isclose(cnf[50], 2.71450691e-18, rel_tol=1e-09, abs_tol=1e-26)
-        assert math.isclose(cnf[80], 3.77673193e-18, rel_tol=1e-09, abs_tol=1e-26)
-        assert math.isclose(cnf[-1], 4.27878582e-18, rel_tol=1e-09, abs_tol=1e-26)
-        assert math.isclose(cnf.sum(), 2.49251344e-16, rel_tol=1e-09, abs_tol=1e-24)
+        assert math.isclose(cnf[1].value, 6.14971590e-20, rel_tol=1e-09, abs_tol=1e-28)
+        assert math.isclose(cnf[20].value, 1.20262320e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[50].value, 2.71450691e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[80].value, 3.77673193e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(cnf[-1].value, 4.27878582e-18, rel_tol=1e-09, abs_tol=1e-26)
+        assert math.isclose(
+            cnf.sum().value, 2.49251344e-16, rel_tol=1e-09, abs_tol=1e-24
+        )
 
         # Check the size of the array
         assert cnf.size == X_npoints
