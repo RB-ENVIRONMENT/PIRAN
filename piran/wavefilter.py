@@ -67,7 +67,8 @@ class WaveFilter(ABC):
         -------
         u.Quantity[u.rad / u.s]
             Any `k` for which `(X, omega, k)` satisfies the criteria defined within this
-            function (i.e. fits the desired wave mode).
+            function (i.e. fits the desired wave mode), or np.nan if there are no
+            satisfactory `k`.
         """
 
         raise NotImplementedError
