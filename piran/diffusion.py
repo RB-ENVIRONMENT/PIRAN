@@ -1,10 +1,16 @@
 import numpy as np
 from astropy import constants as const
 from astropy import units as u
+from astropy.coordinates import Angle
 from scipy.integrate import simpson
 from scipy.special import erf, jv
 
 from piran.cpdr import Cpdr, ResonantRoot
+from piran.normalisation import UNIT_NF
+
+UNIT_PSD = u.T**2 * u.s / u.rad
+UNIT_BKN = u.T**2 * u.m**3 / u.rad
+UNIT_DIFF = (u.kg * u.m / u.s) ** 2 / u.s
 
 
 @u.quantity_input
@@ -12,7 +18,7 @@ def get_power_spectral_density(
     cpdr: Cpdr,
     wave_amplitude: u.Quantity[u.T],
     omega: u.Quantity[u.rad / u.s],
-) -> u.Quantity[u.T**2 * u.s / u.rad]:
+) -> u.Quantity[UNIT_PSD]:
     """
     Calculate the power spectral density B_squared(omega) term
     from equation 5 in Glauert & Horne 2005, in units T^2 * s / rad.
@@ -28,7 +34,7 @@ def get_power_spectral_density(
 
     Returns
     -------
-    power_spectral_density : astropy.units.quantity.Quantity[u.T**2 * u.s / u.rad]
+    power_spectral_density : astropy.units.quantity.Quantity[UNIT_PSD]
         Power spectral density.
     """
     delta_omega = cpdr.wave_freqs._width
@@ -146,10 +152,10 @@ def get_singular_term(
 
 @u.quantity_input
 def get_normalised_intensity(
-    power_spectral_density: u.Quantity[u.T**2 * u.s / u.rad],
+    power_spectral_density: u.Quantity[UNIT_PSD],
     wave_norm_angle_dist_eval,
-    norm_factor,
-):
+    norm_factor: u.Quantity[UNIT_NF],
+) -> u.Quantity[UNIT_BKN]:
     """
     Calculates the normalised intensity |B_{k}^{norm}|^2.
 
@@ -167,16 +173,16 @@ def get_normalised_intensity(
 
     Parameters
     ----------
-    power_spectral_density : u.Quantity[u.T**2 * u.s / u.rad]
+    power_spectral_density : astropy.units.quantity.Quantity[UNIT_PSD]
         Power spectral density B^2(omega).
     wave_norm_angle_dist_eval :
         Wave normal angle distribution evaluated at X.
-    norm_factor :
+    norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
         Normalisation factor.
 
     Returns
     -------
-    normalised_intensity :
+    normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
         Normalised intensity |B_{k}^{norm}|^2
     """
     normalised_intensity = (
@@ -190,10 +196,10 @@ def get_normalised_intensity(
 def get_DnX_single_root(
     cpdr: Cpdr,
     resonant_root: ResonantRoot,
-    normalised_intensity,
+    normalised_intensity: u.Quantity[UNIT_BKN],
     phi_squared: u.Quantity[u.dimensionless_unscaled],
     singular_term: u.Quantity[u.m / u.s],
-):
+) -> tuple[u.Quantity[UNIT_DIFF], u.Quantity[UNIT_DIFF], u.Quantity[UNIT_DIFF]]:
     """
     Calculates the diffusion coefficients in pitch angle DnXaa,
     mixed pitch angle-momentum DnXap and momentum DnXpp, for a
@@ -207,7 +213,7 @@ def get_DnX_single_root(
     resonant_root : piran.cpdr.ResonantRoot object
         NamedTuple object containing a resonant root, i.e.,
         root to both dispersion relation and resonance condition.
-    normalised_intensity :
+    normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
         Normalised intensity |B_{k}^{norm}|^2
     phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Phi_{n,k}^2.
@@ -216,16 +222,20 @@ def get_DnX_single_root(
 
     Returns
     -------
-    DnXaa, DnXap, DnXpp :
+    DnXaa, DnXap, DnXpp : tuple
         Pitch angle, mixed pitch angle-momentum and momentum diffusion
         coefficients for a given resonant root.
+        Note that since these are wrapped in a tuple, it appears that the
+        `@u.quantity_input` decorator does not actually check these! There is an
+        appropriate test in place in test_diffusion.py to check the validity of
+        these outputs.
     """
     charge = cpdr.plasma.particles[0].charge
     gyrofreq = cpdr.plasma.gyro_freq[0]
     alpha = cpdr.alpha
 
     term1 = (charge**2 * resonant_root.omega**2) / (
-        4 * np.pi * (1 + resonant_root.X**2)
+        4 * Angle(np.pi, u.rad) * (1 + resonant_root.X**2)
     )
     term2 = (
         cpdr.resonance * gyrofreq / (cpdr.gamma * resonant_root.omega)
@@ -243,8 +253,8 @@ def get_DnX_single_root(
 @u.quantity_input
 def get_diffusion_coefficients(
     X_range: u.Quantity[u.dimensionless_unscaled],
-    DnX_single_res,
-):
+    DnX_single_res: u.Quantity[UNIT_DIFF],
+) -> u.Quantity[UNIT_DIFF]:
     r"""
     Given an array of wave normal angles and an an identically-sized
     array of outputs from Equation 11, 12, or 13, calculate
@@ -257,22 +267,27 @@ def get_diffusion_coefficients(
     ----------
     X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Array of wave normal angles.
-    DnX_single_res :
+    DnX_single_res : astropy.units.quantity.Quantity[UNIT_DIFF]
         Array of diffusion coefficients for a specific resonance,
         one per X (i.e. calculated values from equations 11, 12 or 13
         in Glauert & Horne 2005).
 
     Returns
     -------
-    Either $D_{\alpha \alpha}$ or $D_{\alpha p}$ ($D_{p \alpha}$) or
-    $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
-    resonance.
+    integral : astropy.units.quantity.Quantity[UNIT_DIFF[]]
+        Either $D_{\alpha \alpha}$ or $D_{\alpha p}$ ($D_{p \alpha}$) or
+        $D_{pp}$, i.e. equations 8, 9 and 10 from Glauert 2005) for a single
+        resonance.
     """
     if X_range.shape != DnX_single_res.shape:
         raise ValueError("Input arrays should have the same shape")
 
     integrand = np.multiply(X_range, DnX_single_res)
     integral = simpson(integrand, x=X_range)
+
+    # simpson strips units; let's add them back!
+    # This should be UNIT_DIFF, but let's perform a more robust check.
+    integral <<= integrand.unit * X_range.unit
 
     return integral
 
@@ -281,8 +296,8 @@ def get_diffusion_coefficients(
 def get_energy_diffusion_coefficient(
     rel_kin_energy: u.Quantity[u.J],
     rest_mass_energy: u.Quantity[u.J],
-    momentum_diff_coef,
-):
+    momentum_diff_coef: u.Quantity[UNIT_DIFF],
+) -> u.Quantity[u.J**2 / u.s]:
     """
     Given relativistic kinetic energy, rest mass energy and
     relativistic momentum diffusion coefficient calculate
@@ -295,17 +310,17 @@ def get_energy_diffusion_coefficient(
         Relativistic kinetic energy.
     rest_mass_energy : astropy.units.quantity.Quantity.Quantity[Joule],
         Rest mass energy.
-    momentum_diff_coef :
+    momentum_diff_coef : astropy.units.quantity.Quantity[UNIT_DIFF]
         Momentum diffusion coefficient $D_{pp}$.
 
     Returns
     -------
-    energy_diff_coef :
+    energy_diff_coef : astropy.units.quantity.Quantity[u.J**2 / u.s]
         Energy diffusion coefficient $D_{EE}$.
     """
     energy_diff_coef = (
         momentum_diff_coef
-        * (const.c.value**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
+        * (const.c**2 * rel_kin_energy * (rel_kin_energy + 2 * rest_mass_energy))
         / (rel_kin_energy + rest_mass_energy) ** 2
     )
 

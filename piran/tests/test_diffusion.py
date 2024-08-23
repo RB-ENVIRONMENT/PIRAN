@@ -9,6 +9,8 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    UNIT_BKN,
+    UNIT_DIFF,
     get_diffusion_coefficients,
     get_DnX_single_root,
     get_energy_diffusion_coefficient,
@@ -18,6 +20,7 @@ from piran.diffusion import (
     get_singular_term,
 )
 from piran.magpoint import MagPoint
+from piran.normalisation import UNIT_NF
 from piran.plasmapoint import PlasmaPoint
 
 
@@ -165,7 +168,7 @@ class TestDiffusion:
     def test_get_normalised_intensity_1(self):
         power_spectral_density = 1.5079984e-25 << (u.T**2 * u.s / u.rad)
         gx = 0.97041
-        norm_factor = 1.754757e-17
+        norm_factor = 1.754757e-17 << UNIT_NF
 
         normalised_intensity = get_normalised_intensity(
             power_spectral_density, gx, norm_factor
@@ -193,7 +196,7 @@ class TestDiffusion:
         X = [0.1] << u.dimensionless_unscaled
         resonant_root = cpdr.solve_resonant(X)
 
-        normalised_intensity = 8.339484e-09
+        normalised_intensity = 8.339484e-09 << UNIT_BKN
         phi_squared = 0.460906 << u.dimensionless_unscaled
         singular_term = -54012493.87 << (u.m / u.s)
 
@@ -205,20 +208,33 @@ class TestDiffusion:
             singular_term,
         )
 
+        # `get_DnX_single_root` returns a tuple of `Quantity` objects.
+        # Unfortunately, `@u.quantity_input` seems to have no effect on a returned tuple, even if
+        # each element is a `Quantity`. Let's check the units in this test instead.
+        #
+        # Note that Glauert&Horne 2005 states that "all the diffusion coefficients have units of
+        # (momentum ** 2) / s" (paragraph 7). My reading of Eqns 1 - 4 is that they should differ by
+        # a factor of radians, but its clear from Eqns 11 - 13 that the dimensions of the calculated
+        # values will be the same (differing only by a dimensionless factor).
+        # Let's use (momentum ** 2) / s for everything - it seems to do the trick!
+        assert DnXaa.unit == UNIT_DIFF
+        assert DnXap.unit == UNIT_DIFF
+        assert DnXpp.unit == UNIT_DIFF
+
         assert math.isclose(DnXaa.value, 1.1892186e-45, rel_tol=1e-7)
         assert math.isclose(DnXap.value, -4.1240996e-46, rel_tol=1e-7)
         assert math.isclose(DnXpp.value, 1.4301994e-46, rel_tol=1e-7)
 
     def test_get_diffusion_coefficients(self):
         X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
-        DnX = np.array([0, 1, 2, 3, 4, 5])
+        DnX = u.Quantity([0, 1, 2, 3, 4, 5], UNIT_DIFF)
         res = get_diffusion_coefficients(X, DnX)
 
-        assert math.isclose(res, 1.666, rel_tol=1e-3)
+        assert math.isclose(res.value, 1.666, rel_tol=1e-3)
 
         # raise error when X and DnX do not have the same shape
         X = [0, 0.2, 0.4, 0.6, 0.8, 1.0] << u.dimensionless_unscaled
-        DnX = np.array([0, 1, 2, 3, 4])
+        DnX = u.Quantity([0, 1, 2, 3, 4], UNIT_DIFF)
 
         with pytest.raises(ValueError):
             get_diffusion_coefficients(X, DnX)
@@ -226,7 +242,7 @@ class TestDiffusion:
     def test_get_energy_diffusion_coefficient(self):
         rel_kin_energy = 1.602177e-15 << u.J
         rest_mass_energy = 8.187106e-14 << u.J
-        momentum_diff_coef = 7.073597e-50
+        momentum_diff_coef = 7.073597e-50 << UNIT_DIFF
 
         Dee = get_energy_diffusion_coefficient(
             rel_kin_energy,
@@ -234,4 +250,4 @@ class TestDiffusion:
             momentum_diff_coef,
         )
 
-        assert math.isclose(Dee, 2.41705e-34, rel_tol=1e-5)
+        assert math.isclose(Dee.value, 2.41705e-34, rel_tol=1e-5)
