@@ -129,7 +129,7 @@ def format_figure(fig, ax, energy, alpha, res, ratio):
     ax.set_ylim(ylim_min, ylim_max)
 
     ax.set_xlabel(r"$\omega$")
-    ax.set_ylabel(r"$n$")
+    ax.set_ylabel(r"$n^2$")
 
     title = "CMA diagram\n"
     title += rf"{energy:.1f}, $\alpha={alpha:.2f}$, n={res}, ratio={ratio}"
@@ -177,9 +177,10 @@ def plot_resonant_roots(ax, cpdr, X_range):
                 if is_resonant:
                     ax.scatter(
                         valid_omega,
-                        mu,
+                        mu**2,
                         marker=".",
-                        c="red"
+                        s=10,
+                        c="red",
                     )
 
 
@@ -194,8 +195,9 @@ def plot_cpdr_roots(ax, cpdr, X_range, omega_range):
 
                 ax.scatter(
                     omega,
-                    mu,
+                    mu**2,
                     marker=".",
+                    s=10,
                     c="red" if is_resonant else X.value,
                     cmap="viridis",
                     alpha=0.4,
@@ -266,8 +268,8 @@ def main():
     plot_resonant_roots(ax, cpdr, X_range)
     format_figure(fig, ax, energy, alpha, resonance, plasma_over_gyro_ratio)
 
-    # plt.show()
-    plt.savefig("cma1.png", dpi=300)
+    plt.show()
+    # plt.savefig("cma_diagram.png", dpi=300)
 
 
 if __name__ == "__main__":
