@@ -138,8 +138,8 @@ def format_figure(fig, ax, energy, alpha, res, ratio):
     fig.tight_layout()
 
 
-def draw_vertical_lines(ax, cpdr):
-    # Draw omega_c and omega_p lines
+def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
+    # Draw omega_c and omega_p lines (electron)
     omega_c_abs = np.abs(cpdr.plasma.gyro_freq[0]).value
     omega_p = cpdr.plasma.plasma_freq[0].value
 
@@ -153,11 +153,22 @@ def draw_vertical_lines(ax, cpdr):
     ax.axvline(x=omega_L0, color="k", linestyle=":")
     ax.axvline(x=omega_R0, color="k", linestyle=":")
 
+    # Draw proton gyrofrequency
+    omega_pp = cpdr.plasma.gyro_freq[1].value
+    ax.axvline(x=omega_pp, color="k", linestyle="-.")
+
+    # Draw lower and upper hybrid lines
+    ax.axvline(x=omega_lh, color="k", linestyle="-.")
+    ax.axvline(x=omega_uh, color="k", linestyle="-.")
+
     # Annotate
-    ax.text(omega_c_abs, 2*10**3, r"$\omega_c$")
-    ax.text(omega_p, 8*10**2, r"$\omega_p$")
+    ax.text(omega_c_abs, 2*10**3, r"$\omega_{ce}$")
+    ax.text(omega_p, 8*10**2, r"$\omega_{pe}$")
     ax.text(omega_L0, 4*10**2, r"$\omega_{L=0}$")
     ax.text(omega_R0, 5*10**3, r"$\omega_{R=0}$")
+    ax.text(omega_pp, 2.5*10**3, r"$\omega_{pp}$")
+    ax.text(omega_lh, 2.5*10**3, r"$\omega_{LH}$")
+    ax.text(omega_uh, 2.5*10**3, r"$\omega_{UH}$")
 
 
 def plot_resonant_roots(ax, cpdr, X_range):
@@ -260,10 +271,15 @@ def main():
     )
     print()
 
+    print("Upper hybrid frequency from Kurth 2015")
+    omega_uh = np.sqrt(cpdr.plasma.gyro_freq[0] ** 2 + cpdr.plasma.plasma_freq[0] ** 2)
+    print(f"omega_uh: {omega_uh:.1f}")
+    print()
+
     # Init figure and axes
     fig, ax = plt.subplots()
 
-    draw_vertical_lines(ax, cpdr)
+    draw_vertical_lines(ax, cpdr, omega_lh.value, omega_uh.value)
     plot_cpdr_roots(ax, cpdr, X_range, omega_range)
     plot_resonant_roots(ax, cpdr, X_range)
     format_figure(fig, ax, energy, alpha, resonance, plasma_over_gyro_ratio)
