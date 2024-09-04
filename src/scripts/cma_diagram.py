@@ -218,8 +218,8 @@ def main():
     freq_cutoff_params = (0.5, 0.5, -0.9999, 3.999)
 
     X_min = 0.0
-    X_max = 5.0
-    X_npoints = 50
+    X_max = 60.0
+    X_npoints = 60
     X_range = u.Quantity(
         np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
     )
