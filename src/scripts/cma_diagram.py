@@ -105,7 +105,7 @@ class Cpdr2(Cpdr):
 
 def format_figure(fig, ax, energy, alpha, res, ratio):
     xticks = [10**i for i in range(1, 7)]
-    yticks = [10**i for i in range(-2, 5)]
+    yticks = [10**i for i in range(-5, 9)]
 
     xlim_min = xticks[0]
     xlim_max = xticks[-1]
@@ -211,6 +211,8 @@ def plot_cpdr_roots(ax, cpdr, X_range, omega_range):
                     s=10,
                     c="red" if is_resonant else X.value,
                     cmap="viridis",
+                    vmin=X_range[0].value,
+                    vmax=X_range[-1].value,
                     alpha=0.4,
                 )
 
