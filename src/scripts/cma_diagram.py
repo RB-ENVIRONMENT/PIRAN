@@ -147,8 +147,8 @@ def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
     ax.axvline(x=omega_c_abs, color="k", linestyle="--")
 
     # Draw omega_L=0 and omega_R=0 lines
-    omega_L0 = (np.sqrt(omega_c_abs**2 + 4*omega_p**2) - omega_c_abs) / 2
-    omega_R0 = (np.sqrt(omega_c_abs**2 + 4*omega_p**2) + omega_c_abs) / 2
+    omega_L0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) - omega_c_abs) / 2
+    omega_R0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) + omega_c_abs) / 2
 
     ax.axvline(x=omega_L0, color="k", linestyle=":")
     ax.axvline(x=omega_R0, color="k", linestyle=":")
@@ -162,13 +162,13 @@ def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
     ax.axvline(x=omega_uh, color="k", linestyle="-.")
 
     # Annotate
-    ax.text(omega_c_abs, 2*10**3, r"$\omega_{ce}$")
-    ax.text(omega_p, 8*10**2, r"$\omega_{pe}$")
-    ax.text(omega_L0, 4*10**2, r"$\omega_{L=0}$")
-    ax.text(omega_R0, 5*10**3, r"$\omega_{R=0}$")
-    ax.text(omega_pp, 2.5*10**3, r"$\omega_{pp}$")
-    ax.text(omega_lh, 2.5*10**3, r"$\omega_{LH}$")
-    ax.text(omega_uh, 2.5*10**3, r"$\omega_{UH}$")
+    ax.text(omega_c_abs, 2 * 10**3, r"$\omega_{ce}$")
+    ax.text(omega_p, 8 * 10**2, r"$\omega_{pe}$")
+    ax.text(omega_L0, 4 * 10**2, r"$\omega_{L=0}$")
+    ax.text(omega_R0, 5 * 10**3, r"$\omega_{R=0}$")
+    ax.text(omega_pp, 2.5 * 10**3, r"$\omega_{pp}$")
+    ax.text(omega_lh, 2.5 * 10**3, r"$\omega_{LH}$")
+    ax.text(omega_uh, 2.5 * 10**3, r"$\omega_{UH}$")
 
 
 def plot_resonant_roots(ax, cpdr, X_range):
@@ -182,7 +182,9 @@ def plot_resonant_roots(ax, cpdr, X_range):
             k_list = cpdr.solve_cpdr2(valid_omega, X.value)
 
             for k_cand in k_list:
-                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(X, valid_omega << (u.rad / u.s), k_cand << (u.rad / u.m))
+                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(
+                    X, valid_omega << (u.rad / u.s), k_cand << (u.rad / u.m)
+                )
                 mu = const.c * abs(k) / valid_omega
 
                 if is_resonant:
@@ -201,7 +203,9 @@ def plot_cpdr_roots(ax, cpdr, X_range, omega_range):
             k_list = cpdr.solve_cpdr2(omega, X.value)
 
             for k_cand in k_list:
-                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(X, omega << (u.rad / u.s), k_cand << (u.rad / u.m))
+                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(
+                    X, omega << (u.rad / u.s), k_cand << (u.rad / u.m)
+                )
                 mu = const.c * abs(k) / omega
 
                 ax.scatter(
@@ -245,7 +249,9 @@ def main():
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
     cpdr = Cpdr2(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
-    omega_range = np.geomspace(cpdr.omega_lc.value, cpdr.omega_uc.value, num=omega_npoints, endpoint=True)
+    omega_range = np.geomspace(
+        cpdr.omega_lc.value, cpdr.omega_uc.value, num=omega_npoints, endpoint=True
+    )
 
     print(f"Plasma: {particles}")
     print(f"Energy: {energy}")
