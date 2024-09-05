@@ -32,11 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy import units as u
 
-from piran.diffusion import (
-    UNIT_DIFF,
-    get_diffusion_coefficients,
-    get_energy_diffusion_coefficient,
-)
+from piran.diffusion import UNIT_DIFF, get_energy_diffusion_coefficient
 
 
 def calc_DEE_over_E_squared(pathname):
@@ -51,17 +47,10 @@ def calc_DEE_over_E_squared(pathname):
         with open(file, "r") as f:
             results = json.load(f)
 
-        X_range = np.array(results["X_range"]) << u.dimensionless_unscaled
+        Dpp = results["Dpp"] << UNIT_DIFF
         alpha = results["pitch_angle"] << u.deg
-        DnXpp = results["DnXpp"]
         rest_mass_energy_J = results["rest_mass_energy_Joule"] << u.J
         rel_kin_energy_J = (results["rel_kin_energy_MeV"] << u.MeV).to(u.J)
-
-        Dpp = 0.0
-        # Loop over resonances (n)
-        for DnXpp_this_res in DnXpp:
-            integral = get_diffusion_coefficients(X_range, DnXpp_this_res << UNIT_DIFF)
-            Dpp += integral
 
         Dee = get_energy_diffusion_coefficient(
             rel_kin_energy_J, rest_mass_energy_J, Dpp
