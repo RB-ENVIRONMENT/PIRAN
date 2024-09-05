@@ -38,8 +38,9 @@
 #
 # and run the script as: `python path/to/diffusion_coefficients.py -i path/to/input.json`
 #
-# The script will create a file `results_??.??deg.json` in the current working directory,
-# where ??.?? is the pitch angle in degrees for this run.
+# The script will create a file `results_[ANGLE]deg_[ENERGY]MeV.json` in the
+# current working directory, where [ANGLE] is the pitch angle in degrees and
+# [ENERGY] the relativistic kinetic energy in MeV for this run.
 import argparse
 import json
 import pathlib
