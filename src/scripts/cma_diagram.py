@@ -48,6 +48,10 @@ class Cpdr2(Cpdr):
         omega,
         X,
     ):
+        """
+        Similar to solve_cpdr() but we return all real and
+        positive roots, even if we have more than one.
+        """
         # Substitute omega and X into CPDR.
         # Only k is a symbol after this.
         cpdr_in_k_omega = self.poly_in_k.subs(
@@ -72,6 +76,10 @@ class Cpdr2(Cpdr):
         k,
         rel_tol=1e-05,
     ):
+        """
+        Similar to find_resonant_parallel_wavenumber() but we do not
+        throw an error if neither k_par, nor -k_par are roots.
+        """
         if np.isnan(k):
             return np.nan << u.rad / u.m
 
@@ -141,14 +149,12 @@ def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
     # Draw omega_c and omega_p lines (electron)
     omega_c_abs = np.abs(cpdr.plasma.gyro_freq[0]).value
     omega_p = cpdr.plasma.plasma_freq[0].value
-
     ax.axvline(x=omega_p, color="k", linestyle="--")
     ax.axvline(x=omega_c_abs, color="k", linestyle="--")
 
     # Draw omega_L=0 and omega_R=0 lines
     omega_L0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) - omega_c_abs) / 2
     omega_R0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) + omega_c_abs) / 2
-
     ax.axvline(x=omega_L0, color="k", linestyle=":")
     ax.axvline(x=omega_R0, color="k", linestyle=":")
 
@@ -242,7 +248,7 @@ def main():
     particles = ("e", "p+")
     plasma_over_gyro_ratio = 0.75
 
-    energy = 1.0 * u.MeV
+    energy = 1.0 << u.MeV
     alpha = Angle(50, u.deg)
     resonance = -5
     freq_cutoff_params = (0.5, 0.5, -0.9999, 3.999)
@@ -262,6 +268,7 @@ def main():
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
     cpdr = Cpdr2(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
+    # Geometric sequence between lower and upper cutoffs
     omega_range = np.geomspace(
         cpdr.omega_lc.value, cpdr.omega_uc.value, num=omega_npoints, endpoint=True
     )
