@@ -17,32 +17,31 @@ from piran.plasmapoint import PlasmaPoint
 class Cpdr2(Cpdr):
     def solve_resonant2(
         self,
-        X_range,
+        X,
     ):
-        for X in np.atleast_1d(X_range):
-            psi = np.arctan(X)  # arctan of dimensionless returns radians
+        psi = np.arctan(X)  # arctan of dimensionless returns radians
 
-            # Only omega is a symbol after this
-            resonant_cpdr_in_omega = self.resonant_poly_in_omega.subs(
-                {
-                    "X": X.value,
-                    "psi": psi.value,
-                }
-            )
+        # Only omega is a symbol after this
+        resonant_cpdr_in_omega = self.resonant_poly_in_omega.subs(
+            {
+                "X": X.value,
+                "psi": psi.value,
+            }
+        )
 
-            # Solve modified CPDR to obtain omega roots for given X
-            omega_l = np.roots(resonant_cpdr_in_omega.as_poly().all_coeffs())
+        # Solve modified CPDR to obtain omega roots for given X
+        omega_l = np.roots(resonant_cpdr_in_omega.as_poly().all_coeffs())
 
-            # Categorise roots
-            # Keep only real, positive and within bounds
-            valid_omega_l = get_real_and_positive_roots(omega_l)
-            valid_omega_l = [
-                x
-                for x in valid_omega_l
-                if self.omega_lc.value <= x <= self.omega_uc.value
-            ]
+        # Categorise roots
+        # Keep only real, positive and within bounds
+        valid_omega_l = get_real_and_positive_roots(omega_l)
+        valid_omega_l = [
+            x
+            for x in valid_omega_l
+            if self.omega_lc.value <= x <= self.omega_uc.value
+        ]
 
-            return valid_omega_l
+        return valid_omega_l
 
     def solve_cpdr2(
         self,
