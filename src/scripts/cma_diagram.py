@@ -104,7 +104,7 @@ class Cpdr2(Cpdr):
 
 def format_figure(fig, ax, energy, alpha, res, ratio):
     xticks = [10**i for i in range(1, 7)]
-    yticks = [10**i for i in range(-5, 9)]
+    yticks = [10**i for i in range(-2, 9)]
 
     xlim_min = xticks[0]
     xlim_max = xticks[-1]
@@ -128,7 +128,7 @@ def format_figure(fig, ax, energy, alpha, res, ratio):
     ax.set_ylim(ylim_min, ylim_max)
 
     ax.set_xlabel(r"$\omega$")
-    ax.set_ylabel(r"$n^2$")
+    ax.set_ylabel(r"$\mu^2$")
 
     title = "CMA diagram\n"
     title += rf"{energy:.1f}, $\alpha={alpha:.2f}$, n={res}, ratio={ratio}"
