@@ -172,53 +172,67 @@ def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
 
 
 def plot_resonant_roots(ax, cpdr, X_range):
+    xaxis_values = []
+    yaxis_values = []
+
     # Find resonant omegas and then k
     for X in X_range:
         valid_omegas = cpdr.solve_resonant2(X)
         if len(valid_omegas) == 0:
             continue
 
-        for valid_omega in valid_omegas:
-            k_list = cpdr.solve_cpdr2(valid_omega, X.value)
+        for omega in valid_omegas:
+            k_list = cpdr.solve_cpdr2(omega, X.value)
 
-            for k_cand in k_list:
-                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(
-                    X, valid_omega << (u.rad / u.s), k_cand << (u.rad / u.m)
+            for k in k_list:
+                _, is_resonant = cpdr.find_resonant_parallel_wavenumber2(
+                    X, omega << (u.rad / u.s), k << (u.rad / u.m)
                 )
-                mu = const.c * abs(k) / valid_omega
-
                 if is_resonant:
-                    ax.scatter(
-                        valid_omega,
-                        mu**2,
-                        marker=".",
-                        s=10,
-                        c="red",
-                    )
+                    mu = const.c * abs(k) / omega
+
+                    xaxis_values.append(omega)
+                    yaxis_values.append((mu**2).value)
+
+    ax.scatter(
+        xaxis_values,
+        yaxis_values,
+        marker=".",
+        s=40,
+        c="red",
+    )
 
 
-def plot_cpdr_roots(ax, cpdr, X_range, omega_range):
+def plot_cpdr_roots(fig, ax, cpdr, X_range, omega_range):
+    xaxis_values = []
+    yaxis_values = []
+    color_values = []
     for omega in omega_range:
         for X in X_range:
             k_list = cpdr.solve_cpdr2(omega, X.value)
 
-            for k_cand in k_list:
-                k, is_resonant = cpdr.find_resonant_parallel_wavenumber2(
-                    X, omega << (u.rad / u.s), k_cand << (u.rad / u.m)
-                )
+            for k in k_list:
                 mu = const.c * abs(k) / omega
 
-                ax.scatter(
-                    omega,
-                    mu**2,
-                    marker=".",
-                    s=10,
-                    c="red" if is_resonant else X.value,
-                    cmap="viridis",
-                    vmin=X_range[0].value,
-                    vmax=X_range[-1].value,
-                    alpha=0.4,
-                )
+                xaxis_values.append(omega)
+                yaxis_values.append((mu**2).value)
+                color_values.append(X.value)
+
+    im = ax.scatter(
+        xaxis_values,
+        yaxis_values,
+        marker=".",
+        s=20,
+        c=color_values,
+        cmap="viridis",
+        vmin=X_range[0].value,
+        vmax=X_range[-1].value,
+        # alpha=0.4,
+    )
+
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.ax.get_yaxis().labelpad = 10
+    cbar.ax.set_ylabel(r"Wave normal angle $X=\tan(\psi)$")
 
 
 def main():
@@ -288,7 +302,7 @@ def main():
     fig, ax = plt.subplots()
 
     draw_vertical_lines(ax, cpdr, omega_lh.value, omega_uh.value)
-    plot_cpdr_roots(ax, cpdr, X_range, omega_range)
+    plot_cpdr_roots(fig, ax, cpdr, X_range, omega_range)
     plot_resonant_roots(ax, cpdr, X_range)
     format_figure(fig, ax, energy, alpha, resonance, plasma_over_gyro_ratio)
 
