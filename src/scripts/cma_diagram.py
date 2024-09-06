@@ -36,9 +36,7 @@ class Cpdr2(Cpdr):
         # Keep only real, positive and within bounds
         valid_omega_l = get_real_and_positive_roots(omega_l)
         valid_omega_l = [
-            x
-            for x in valid_omega_l
-            if self.omega_lc.value <= x <= self.omega_uc.value
+            x for x in valid_omega_l if self.omega_lc.value <= x <= self.omega_uc.value
         ]
 
         return valid_omega_l
