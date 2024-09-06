@@ -203,7 +203,7 @@ def plot_resonant_roots(ax, cpdr, X_range):
         xaxis_values,
         yaxis_values,
         marker=".",
-        s=40,
+        s=14,
         c="red",
     )
 
@@ -227,7 +227,7 @@ def plot_cpdr_roots(fig, ax, cpdr, X_range, omega_range):
         xaxis_values,
         yaxis_values,
         marker=".",
-        s=20,
+        s=8,
         c=color_values,
         cmap="viridis",
         vmin=X_range[0].value,
