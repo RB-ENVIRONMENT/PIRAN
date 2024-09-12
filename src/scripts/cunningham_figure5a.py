@@ -30,9 +30,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy import units as u
-
-from piran.diffusion import UNIT_DIFF, get_diffusion_coefficients
 
 
 def calc_Daa_over_p_squared(pathname):
@@ -47,24 +44,17 @@ def calc_Daa_over_p_squared(pathname):
         with open(file, "r") as f:
             results = json.load(f)
 
-        X_range = np.array(results["X_range"]) << u.dimensionless_unscaled
-        alpha = results["pitch_angle"] << u.deg
-        DnXaa = results["DnXaa"]
+        Daa = results["Daa"]
+        alpha = results["pitch_angle"]
         momentum = results["momentum"]
-
-        Daa = 0.0
-        # Loop over resonances (n)
-        for DnXaa_this_res in DnXaa:
-            integral = get_diffusion_coefficients(X_range, DnXaa_this_res << UNIT_DIFF)
-            Daa += integral
 
         pitch_angle.append(alpha)
         Daa_over_p_squared.append(Daa / momentum**2)
 
     # Sort by pitch angle
     sorted_vals = sorted(zip(pitch_angle, Daa_over_p_squared), key=lambda z: z[0])
-    xx = [z[0].value for z in sorted_vals]
-    yy = [z[1].value for z in sorted_vals]
+    xx = [z[0] for z in sorted_vals]
+    yy = [z[1] for z in sorted_vals]
 
     return (xx, yy)
 

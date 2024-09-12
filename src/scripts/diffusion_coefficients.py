@@ -38,8 +38,9 @@
 #
 # and run the script as: `python path/to/diffusion_coefficients.py -i path/to/input.json`
 #
-# The script will create a file `results_??.??deg.json` in the current working directory,
-# where ??.?? is the pitch angle in degrees for this run.
+# The script will create a file `results_[ANGLE]deg_[ENERGY]MeV.json` in the
+# current working directory, where [ANGLE] is the pitch angle in degrees and
+# [ENERGY] the relativistic kinetic energy in MeV for this run.
 import argparse
 import json
 import pathlib
@@ -54,6 +55,8 @@ from scipy.integrate import simpson
 from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
+    UNIT_DIFF,
+    get_diffusion_coefficients,
     get_DnX_single_root,
     get_normalised_intensity,
     get_phi_squared,
@@ -149,6 +152,9 @@ def main():
     container["DnXaa"] = []
     container["DnXap"] = []
     container["DnXpp"] = []
+    container["Dnaa"] = []
+    container["Dnap"] = []
+    container["Dnpp"] = []
 
     for resonance in resonances:
         DnXaa_this_res = []
@@ -237,6 +243,22 @@ def main():
         container["DnXaa"].append(DnXaa_this_res)
         container["DnXap"].append(DnXap_this_res)
         container["DnXpp"].append(DnXpp_this_res)
+
+        # Calculate the integrals from equations 8, 9 and 10 in
+        # Glauert & Horne 2005, only for this resonance.
+        Dnaa_this_res = get_diffusion_coefficients(X_range, DnXaa_this_res << UNIT_DIFF)
+        Dnap_this_res = get_diffusion_coefficients(X_range, DnXap_this_res << UNIT_DIFF)
+        Dnpp_this_res = get_diffusion_coefficients(X_range, DnXpp_this_res << UNIT_DIFF)
+        container["Dnaa"].append(Dnaa_this_res.value)
+        container["Dnap"].append(Dnap_this_res.value)
+        container["Dnpp"].append(Dnpp_this_res.value)
+
+    # Sum the diffusion coefficients for all the resonances.
+    # This is essentially what is calculated in equations 8, 9
+    # and 10 in Glauert & Horne 2005.
+    container["Daa"] = np.sum(container["Dnaa"])
+    container["Dap"] = np.sum(container["Dnap"])
+    container["Dpp"] = np.sum(container["Dnpp"])
 
     formatted_angle = f"{alpha.deg:.3f}"
     formatted_energy = f"{energy.to(u.MeV).value:.10f}"
