@@ -16,7 +16,7 @@ from piran.helpers import (
 )
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
-from piran.wavefilter import TestFilter, WaveFilter
+from piran.wavefilter import WaveFilter, WhistlerFilter
 
 ResonantRoot = NamedTuple(
     "ResonantRoot",
@@ -53,7 +53,7 @@ class Cpdr:
         pitch_angle: Quantity[u.rad] | None = None,
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
-        wave_filter: WaveFilter = TestFilter(),
+        wave_filter: WaveFilter = WhistlerFilter(),
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma

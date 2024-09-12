@@ -9,6 +9,7 @@ from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
+from piran.wavefilter import TestFilter
 
 
 class TestCpdr:
@@ -29,7 +30,13 @@ class TestCpdr:
         resonance = 2
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         self.cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
     def test_cpdr_1(self):
@@ -134,7 +141,13 @@ class TestCpdr:
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X = [0.0, 0.3165829145728643] * u.dimensionless_unscaled
