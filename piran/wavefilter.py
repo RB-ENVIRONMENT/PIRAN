@@ -74,7 +74,7 @@ class WaveFilter(ABC):
         raise NotImplementedError
 
 
-class DefaultFilter(WaveFilter):
+class TestFilter(WaveFilter):
     """
     Filter solutions to the CPDR, raising an exception if we have more than one value
     of `k` for a given `(X, omega)` pair.
