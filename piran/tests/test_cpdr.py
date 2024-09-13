@@ -186,7 +186,13 @@ class TestCpdr:
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X = [0.0] << u.dimensionless_unscaled
@@ -217,7 +223,13 @@ class TestCpdr:
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         # Test k_par positive and negative
@@ -276,7 +288,13 @@ class TestCpdr:
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         # For the following resonant triplet we get:
