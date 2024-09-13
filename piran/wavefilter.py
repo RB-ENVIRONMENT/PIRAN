@@ -131,6 +131,6 @@ class WhistlerFilter(WaveFilter):
         # Calculate index of refraction for all k.
         # Exclude any k for which index of refraction does not exceed R.
         mu2 = (const.c * k / omega) ** 2
-        k = k[mu2 > stix.R(omega)]
+        k = k[mu2 >= stix.R(omega)]
 
         return k if k.size > 0 else np.nan << u.rad / u.m
