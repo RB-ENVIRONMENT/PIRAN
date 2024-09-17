@@ -10,6 +10,7 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.meshing import count_roots_per_bucket, solve_resonant_for_x, split_array
 from piran.plasmapoint import PlasmaPoint
+from piran.wavefilter import TestFilter
 
 
 class TestMeshing:
@@ -39,7 +40,13 @@ class TestMeshing:
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
         cpdr_sym = CpdrSymbolic(len(particles))
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X_all = solve_resonant_for_x(
@@ -91,7 +98,13 @@ class TestMeshing:
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
         cpdr_sym = CpdrSymbolic(len(particles))
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X_l = solve_resonant_for_x(cpdr, cpdr.omega_lc, X_range)
@@ -186,7 +199,13 @@ class TestMeshing:
         cpdr_sym = CpdrSymbolic(len(particles))
 
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
         # =================================================
 
