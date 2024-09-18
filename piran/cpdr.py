@@ -254,7 +254,9 @@ class Cpdr:
             if filtered_k.size == 1:
                 k_sol.append(filtered_k[0])
             else:
-                raise Exception("In solve_cpdr_for_norm_factor we got 0 or >1 solutions for k")
+                raise Exception(
+                    "In solve_cpdr_for_norm_factor we got 0 or >1 solutions for k"
+                )
 
         return k_sol
 
