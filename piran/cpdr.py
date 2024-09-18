@@ -215,7 +215,8 @@ class Cpdr:
         Optimised version, similar to solve_cpdr, but we lambdify in X
         after we substitute omega and is more efficient when we have
         a single value for omega and a range of X values (for example when
-        computing the normalisation factor).
+        computing the normalisation factor). We are also filtering directly
+        for wave modes of our interest here.
 
         Parameters
         ----------
@@ -248,10 +249,12 @@ class Cpdr:
             cpdr_in_k = cpdr_in_X_k(X.value)
             k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
             valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
+            filtered_k = self.filter(X, omega, valid_k_l)
 
-            k_sol.append(
-                self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
-            )
+            if filtered_k.size == 1:
+                k_sol.append(filtered_k[0])
+            else:
+                raise Exception("In solve_cpdr_for_norm_factor we got 0 or >1 solutions for k")
 
         return k_sol
 
@@ -316,22 +319,54 @@ class Cpdr:
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                k = self.solve_cpdr(valid_omega, X)
-                k_par = self.find_resonant_parallel_wavenumber(
-                    X << u.dimensionless_unscaled,
-                    valid_omega << u.rad / u.s,
-                    k << u.rad / u.m,
-                )
-                k_perp = k * np.sin(psi)
+                valid_k = self.solve_cpdr(valid_omega, X)
+                filtered_k = self.filter(X, valid_omega, valid_k)
 
-                root = ResonantRoot(
-                    X=X << u.dimensionless_unscaled,
-                    omega=valid_omega << u.rad / u.s,
-                    k=k << u.rad / u.m,
-                    k_par=k_par << u.rad / u.m,
-                    k_perp=k_perp << u.rad / u.m,
-                )
-                roots_tmp.append(root)
+                counter = 0
+                for k in filtered_k:
+                    k_par = self.find_resonant_parallel_wavenumber(
+                        X << u.dimensionless_unscaled,
+                        valid_omega << u.rad / u.s,
+                        k << u.rad / u.m,
+                    )
+                    k_perp = k * np.sin(psi)
+
+                    # k_par can be NaN if k is already Nan
+                    # or if the triplet (X, omega, k) is not
+                    # a resonant root.
+                    if np.isnan(k_par):
+                        continue
+
+                    root = ResonantRoot(
+                        X=X << u.dimensionless_unscaled,
+                        omega=valid_omega << u.rad / u.s,
+                        k=k << u.rad / u.m,
+                        k_par=k_par << u.rad / u.m,
+                        k_perp=k_perp << u.rad / u.m,
+                    )
+                    roots_tmp.append(root)
+                    counter += 1
+
+                # If none of the filtered k is a resonant root
+                # then we will hit the continue inside the conditional
+                # and therefore roots_tmp will be empty. Just append
+                # a ResonantRoot object with NaNs for k, k_par and k_perp
+                # for tracking purposes.
+                # If on the other hand more than one k ended up being a resonant
+                # root that is also in the selected wave mode, then throw an
+                # exception as we don't know how to continue.
+                if counter == 0:
+                    root = ResonantRoot(
+                        X=X << u.dimensionless_unscaled,
+                        omega=valid_omega << u.rad / u.s,
+                        k=np.nan << u.rad / u.m,
+                        k_par=np.nan << u.rad / u.m,
+                        k_perp=np.nan << u.rad / u.m,
+                    )
+                    roots_tmp.append(root)
+                elif counter > 1:
+                    raise Exception("In solve_resonant we got more than one solution")
+
             roots.append(roots_tmp)
 
         return roots
@@ -372,7 +407,7 @@ class Cpdr:
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
 
-        return self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
+        return valid_k_l
 
     @u.quantity_input
     def find_resonant_parallel_wavenumber(
@@ -436,4 +471,35 @@ class Cpdr:
         elif k_par_is_pos and k_par_is_neg:
             raise ValueError("Both are roots")
         else:
-            raise ValueError("None of them is root")
+            # raise ValueError("None of them is root")
+            # There is a chance that one of them is a root but because of the
+            # relative tolerance we discarded it. This has happened in the past
+            # and we had to rework this function and reduce the tolerance.
+            # Maybe we need to throw a warning and print also the values
+            # for result[12] so that we can verify later.
+            return np.nan << u.rad / u.m
+
+    @u.quantity_input
+    def filter(
+        self,
+        X: Quantity[u.dimensionless_unscaled],
+        omega: Quantity[u.rad / u.s],
+        k: Quantity[u.rad / u.m],
+    ) -> Quantity[u.rad / u.m]:
+        """
+
+        Parameters
+        ----------
+        X : Quantity[u.dimensionless_unscaled]
+            Wave normal angle (0d).
+        omega : Quantity[u.rad / u.s]
+            Wave frequency (0d).
+        k : Quantity[u.rad / u.m]
+            Wavenumber (1d array).
+
+        Returns
+        -------
+        k : Quantity[u.rad / u.m] (1d array)
+            Wavenumbers for the selected wave mode.
+        """
+        return self.__wave_filter.filter(X, omega, k, self.plasma, self.stix)
