@@ -133,4 +133,4 @@ class WhistlerFilter(WaveFilter):
         mu2 = (const.c * k / omega) ** 2
         k = k[mu2 >= stix.R(omega)]
 
-        return k if k.size > 0 else np.nan << u.rad / u.m
+        return k if k.size > 0 else [np.nan] << u.rad / u.m
