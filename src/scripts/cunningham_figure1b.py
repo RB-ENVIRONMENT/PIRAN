@@ -24,7 +24,7 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
-script_version = "1.0.0"
+script_version = "1.0.1"
 
 
 def format_figure(fig, ax):
@@ -171,9 +171,10 @@ def main():
             resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
             X_rc = np.sqrt(resonance_cone_angle).value
 
-            X_max = min(5.67, 0.9999 * X_rc)
-            k = cpdr.solve_cpdr(omega.value, X_max)
-            mu = const.c * k / omega
+            X_max = min(5.67, 0.9999 * X_rc) << u.dimensionless_unscaled
+            k = cpdr.solve_cpdr(omega, X_max)
+            filtered_k = cpdr.filter(X_max, omega, k)
+            mu = const.c * filtered_k / omega
             yy[jj] = mu.value
 
         plot_figure1b(
