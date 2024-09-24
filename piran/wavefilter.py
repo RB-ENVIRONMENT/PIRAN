@@ -95,7 +95,7 @@ class WhistlerFilter(WaveFilter):
 
         # Frequency for Whistlers does not exceed electron plasma- or gyro-frequency
         if omega > min(abs(plasma.gyro_freq[0]), abs(plasma.plasma_freq[0])):
-            return np.nan << u.rad / u.m
+            return [np.nan] << u.rad / u.m
 
         # The square of the index of refraction is:
         # - bounded by R below
