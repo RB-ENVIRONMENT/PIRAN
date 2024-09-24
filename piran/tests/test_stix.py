@@ -8,7 +8,6 @@ from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
-from piran.wavefilter import TestFilter
 
 
 class TestStix:
@@ -24,7 +23,7 @@ class TestStix:
         n_particles = len(particles)
         cpdr_sym = CpdrSymbolic(n_particles)
 
-        self.cpdr = Cpdr(cpdr_sym, plasma_point, wave_filter=TestFilter())
+        self.cpdr = Cpdr(cpdr_sym, plasma_point)
 
         omega_ratio = 0.1225
         self.omega = np.abs(self.cpdr.plasma.gyro_freq[0]) * omega_ratio
@@ -39,7 +38,7 @@ class TestStix:
 
         # Find (X, omega, k) CPDR roots
         for X in X_range:
-            k = self.cpdr.solve_cpdr(self.omega, X)
+            k = self.cpdr.solve_cpdr(self.omega, X)[0]
             k <<= u.rad / u.m
 
             values_dict = {
