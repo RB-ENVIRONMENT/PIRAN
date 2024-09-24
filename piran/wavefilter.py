@@ -106,6 +106,14 @@ class WhistlerFilter(WaveFilter):
         # Calculate index of refraction for all k.
         # Exclude any k for which index of refraction does not exceed R.
         mu2 = (const.c * k / omega) ** 2
-        k = k[mu2 >= stix.R(omega)]
+
+        # Due to floating point arithmetic we might get
+        # mu2 slightly smaller than R while this solution is still
+        # a whistler-mode wave. The following is equivalent to
+        # mu2 >= R - max(rel_tol * abs(R), abs_tol)
+        cmp1 = (mu2 >= stix.R(omega))
+        cmp2 = np.isclose(mu2, stix.R(omega), rtol=1e-04, atol=1e-09)
+
+        k = k[np.logical_or(cmp1, cmp2)]
 
         return k if k.size > 0 else [np.nan] << u.rad / u.m
