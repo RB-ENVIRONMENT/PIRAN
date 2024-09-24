@@ -74,31 +74,6 @@ class WaveFilter(ABC):
         raise NotImplementedError
 
 
-class TestFilter(WaveFilter):
-    """
-    Filter solutions to the CPDR, raising an exception if we have more than one value
-    of `k` for a given `(X, omega)` pair.
-    """
-
-    @u.quantity_input
-    def filter(
-        self,
-        X: u.Quantity[u.dimensionless_unscaled],
-        omega: u.Quantity[u.rad / u.s],
-        k: u.Quantity[u.rad / u.m],
-        plasma: PlasmaPoint,
-        stix: Stix,
-    ) -> u.Quantity[u.rad / u.m]:
-
-        if k.size == 0:
-            return np.nan << u.rad / u.m
-        elif k.size == 1:
-            return k[0]
-        else:
-            msg = "We got more than one real positive root for k"
-            raise ValueError(msg)
-
-
 class WhistlerFilter(WaveFilter):
     """
     Filter solutions to the CPDR to accept only Whistler mode waves.
