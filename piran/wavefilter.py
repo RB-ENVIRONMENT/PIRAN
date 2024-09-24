@@ -111,7 +111,7 @@ class WhistlerFilter(WaveFilter):
         # mu2 slightly smaller than R while this solution is still
         # a whistler-mode wave. The following is equivalent to
         # mu2 >= R - max(rel_tol * abs(R), abs_tol)
-        cmp1 = (mu2 >= stix.R(omega))
+        cmp1 = mu2 >= stix.R(omega)
         cmp2 = np.isclose(mu2, stix.R(omega), rtol=1e-04, atol=1e-09)
 
         k = k[np.logical_or(cmp1, cmp2)]
