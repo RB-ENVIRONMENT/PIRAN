@@ -22,7 +22,6 @@ from piran.diffusion import (
 from piran.magpoint import MagPoint
 from piran.normalisation import UNIT_NF
 from piran.plasmapoint import PlasmaPoint
-from piran.wavefilter import TestFilter
 
 
 class TestDiffusion:
@@ -52,7 +51,6 @@ class TestDiffusion:
             alpha,
             resonance,
             self.freq_cutoff_params,
-            TestFilter(),
         )
 
         # Check the value and unit for one omega
@@ -96,7 +94,6 @@ class TestDiffusion:
             alpha,
             resonance,
             self.freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.1, 0.5, 0.9] << u.dimensionless_unscaled
@@ -126,7 +123,6 @@ class TestDiffusion:
             alpha,
             resonance,
             self.freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.1] << u.dimensionless_unscaled
@@ -154,7 +150,6 @@ class TestDiffusion:
             alpha,
             resonance,
             self.freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.1] << u.dimensionless_unscaled
@@ -196,7 +191,6 @@ class TestDiffusion:
             alpha,
             resonance,
             self.freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.1] << u.dimensionless_unscaled
