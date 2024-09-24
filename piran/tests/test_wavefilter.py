@@ -227,4 +227,4 @@ class TestWaveFilter:
         assert len(resonant_roots) == 1
 
         # Check that it is the same soln as found via method 1
-        assert math.isclose(resonant_roots[0][0].k.value, k_after_filtering.value)
+        assert math.isclose(resonant_roots[0][0].k.value, k_after_filtering[0].value)
