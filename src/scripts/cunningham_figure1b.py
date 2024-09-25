@@ -174,7 +174,9 @@ def main():
             X_max = min(5.67, 0.9999 * X_rc) << u.dimensionless_unscaled
             k = cpdr.solve_cpdr(omega, X_max)
             filtered_k = cpdr.filter(X_max, omega, k)
-            mu = const.c * filtered_k / omega
+            if filtered_k.size > 1:
+                raise Exception("We didn't expect more than one elements in filtered_k")
+            mu = const.c * filtered_k[0] / omega
             yy[jj] = mu.value
 
         plot_figure1b(
