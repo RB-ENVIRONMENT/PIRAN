@@ -18,6 +18,7 @@ def compute_glauert_norm_factor(
     method="simpson",
 ) -> u.Quantity[UNIT_NF]:
     """
+    FIXME
     Calculate the normalisation factor from
     Glauert & Horne 2005 (equation 15).
 
@@ -103,6 +104,7 @@ def compute_cunningham_norm_factor(
     X_range: u.Quantity[u.dimensionless_unscaled],
 ) -> u.Quantity[UNIT_NF]:
     """
+    FIXME
     Calculate the normalisation factor from
     Cunningham 2023 (denominator of equation 4b).
 

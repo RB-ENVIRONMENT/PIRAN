@@ -210,6 +210,7 @@ class Cpdr:
         X_range: Quantity[u.dimensionless_unscaled],
     ) -> Sequence[Quantity[u.rad / u.m]]:
         """
+        FIXME
         Given wave frequency omega, solve the dispersion relation for each
         wave normal angle X=tan(psi) in X_range to get wave number k.
         Optimised version, similar to solve_cpdr, but we lambdify in X
@@ -266,6 +267,7 @@ class Cpdr:
         X_range: Quantity[u.dimensionless_unscaled],
     ) -> Sequence[Sequence[NamedTuple]]:
         """
+        FIXME
         Simultaneously solve the resonance condition and the dispersion relation
         to get root pairs of wave frequency omega and wave number k, including its
         parallel and perpendicular components, given tangent of wave normal angle
@@ -380,6 +382,7 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
     ) -> Quantity[u.rad / u.m]:
         """
+        FIXME
         Solve the cold plasma dispersion relation given wave frequency
         omega and wave normal angle X=tan(psi).
 
@@ -420,6 +423,7 @@ class Cpdr:
         rel_tol: float = 1e-05,
     ) -> Quantity[u.rad / u.m]:
         """
+        FIXME
         Given triplet X, omega and k, solution to the resonant cpdr,
         return k_par = k * cos(psi) or k_par = k * cos(pi - psi)
         according to the resonance condition,
@@ -489,7 +493,7 @@ class Cpdr:
         k: Quantity[u.rad / u.m],
     ) -> Quantity[u.rad / u.m]:
         """
-
+        FIXME
         Parameters
         ----------
         X : Quantity[u.dimensionless_unscaled]

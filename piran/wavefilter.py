@@ -76,6 +76,7 @@ class WaveFilter(ABC):
 
 class WhistlerFilter(WaveFilter):
     """
+    FIXME
     Filter solutions to the CPDR to accept only Whistler mode waves.
 
     For more info on the selection criteria used in this function, see:
