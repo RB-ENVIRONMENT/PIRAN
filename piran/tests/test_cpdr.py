@@ -9,6 +9,7 @@ from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
+from piran.wavefilter import TestFilter
 
 
 class TestCpdr:
@@ -29,7 +30,13 @@ class TestCpdr:
         resonance = 2
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         self.cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
     def test_cpdr_1(self):
@@ -79,10 +86,10 @@ class TestCpdr:
 
         X = [0.0, 0.33333333333333337, 1.0, 100] * u.dimensionless_unscaled
         k = self.cpdr.solve_cpdr_for_norm_factor(omega, X)
-        assert math.isclose(k[0], 0.00011414445445389277)
-        assert math.isclose(k[1], 0.00011766325510931447)
-        assert math.isclose(k[2], 0.00014032247090573543)
-        assert math.isnan(k[3]) is True
+        assert math.isclose(k[0].value, 0.00011414445445389277)
+        assert math.isclose(k[1].value, 0.00011766325510931447)
+        assert math.isclose(k[2].value, 0.00014032247090573543)
+        assert math.isnan(k[3].value) is True
 
         # Raise valuer error (more than 1 real and positive root k)
         omega = 100000 << (u.rad / u.s)
@@ -134,7 +141,13 @@ class TestCpdr:
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X = [0.0, 0.3165829145728643] * u.dimensionless_unscaled
@@ -173,7 +186,13 @@ class TestCpdr:
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         X = [0.0] << u.dimensionless_unscaled
@@ -204,7 +223,13 @@ class TestCpdr:
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         # Test k_par positive and negative
@@ -263,7 +288,13 @@ class TestCpdr:
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+            TestFilter(),
         )
 
         # For the following resonant triplet we get:
@@ -277,7 +308,7 @@ class TestCpdr:
         k = 0.0002288927620211241 << u.rad / u.m
 
         with pytest.raises(ValueError):
-            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-6)
+            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-12)
 
         # With the default abs_tol it should not raise a ValueError.
         k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k)

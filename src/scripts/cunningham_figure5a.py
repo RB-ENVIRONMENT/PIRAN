@@ -31,8 +31,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from piran.diffusion import get_diffusion_coefficients
-
 
 def calc_Daa_over_p_squared(pathname):
     """
@@ -46,17 +44,9 @@ def calc_Daa_over_p_squared(pathname):
         with open(file, "r") as f:
             results = json.load(f)
 
-        X_range = np.array(results["X_range"])
+        Daa = results["Daa"]
         alpha = results["pitch_angle"]
-        resonances = results["resonances"]
-        DnXaa = results["DnXaa"]
         momentum = results["momentum"]
-
-        Daa = 0.0
-        for i, resonance in enumerate(resonances):
-            DnXaa_this_res = np.array(DnXaa[i])
-            integral = get_diffusion_coefficients(X_range, DnXaa_this_res)
-            Daa += integral
 
         pitch_angle.append(alpha)
         Daa_over_p_squared.append(Daa / momentum**2)

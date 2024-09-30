@@ -17,6 +17,7 @@ from piran.helpers import (
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
 from piran.validators import check_units
+from piran.wavefilter import WaveFilter, WhistlerFilter
 
 ResonantRoot = NamedTuple(
     "ResonantRoot",
@@ -53,6 +54,7 @@ class Cpdr:
         pitch_angle: Quantity[u.rad] | None = None,
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
+        wave_filter: WaveFilter = WhistlerFilter(),
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma
@@ -71,6 +73,9 @@ class Cpdr:
 
         # Stix parameters
         self.__stix = Stix(self.__plasma.plasma_freq, self.__plasma.gyro_freq)
+
+        # Wave mode filter
+        self.__wave_filter = wave_filter
 
         if (
             energy is not None
@@ -204,7 +209,7 @@ class Cpdr:
         self,
         omega: Quantity[u.rad / u.s],
         X_range: Quantity[u.dimensionless_unscaled],
-    ) -> Sequence[float]:
+    ) -> Sequence[Quantity[u.rad / u.m]]:
         """
         Given wave frequency omega, solve the dispersion relation for each
         wave normal angle X=tan(psi) in X_range to get wave number k.
@@ -243,15 +248,11 @@ class Cpdr:
             # still works.
             cpdr_in_k = cpdr_in_X_k(X.value)
             k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
-            valid_k_l = get_real_and_positive_roots(k_l)
+            valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
 
-            if valid_k_l.size == 0:
-                k_sol.append(np.nan)
-            elif valid_k_l.size == 1:
-                k_sol.append((valid_k_l[0]))
-            else:
-                msg = "We got more than one real positive root for k."
-                raise ValueError(msg)
+            k_sol.append(
+                self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
+            )
 
         return k_sol
 
@@ -293,11 +294,9 @@ class Cpdr:
 
             # Categorise roots
             # Keep only real, positive and within bounds
-            valid_omega_l = get_real_and_positive_roots(omega_l)
+            valid_omega_l = get_real_and_positive_roots(omega_l) << u.rad / u.s
             valid_omega_l = [
-                x
-                for x in valid_omega_l
-                if self.__omega_lc.value <= x <= self.__omega_uc.value
+                x for x in valid_omega_l if self.__omega_lc <= x <= self.__omega_uc
             ]
 
             # If valid_omega_l is empty append NaN and continue
@@ -318,7 +317,7 @@ class Cpdr:
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                k = self.solve_cpdr(valid_omega, X.value) << u.rad / u.m
+                k = self.solve_cpdr(valid_omega, X)
                 k_par = self.find_resonant_parallel_wavenumber(
                     X << u.dimensionless_unscaled,
                     valid_omega << u.rad / u.s,
@@ -338,11 +337,12 @@ class Cpdr:
 
         return roots
 
+    @u.quantity_input
     def solve_cpdr(
         self,
-        omega: float,
-        X: float,
-    ) -> float:
+        omega: Quantity[u.rad / u.s],
+        X: Quantity[u.dimensionless_unscaled],
+    ) -> Quantity[u.rad / u.m]:
         """
         Solve the cold plasma dispersion relation given wave frequency
         omega and wave normal angle X=tan(psi).
@@ -362,8 +362,8 @@ class Cpdr:
         # Only k is a symbol after this.
         cpdr_in_k_omega = self.__poly_in_k.subs(
             {
-                "X": X,
-                "omega": omega,
+                "X": X.value,
+                "omega": omega.value,
             }
         )
 
@@ -371,15 +371,9 @@ class Cpdr:
         k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
 
         # Keep only real and positive roots
-        valid_k_l = get_real_and_positive_roots(k_l)
+        valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
 
-        if valid_k_l.size == 0:
-            return np.nan
-        elif valid_k_l.size == 1:
-            return valid_k_l[0]
-        else:
-            msg = "We got more than one real positive root for k"
-            raise ValueError(msg)
+        return self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
 
     @check_units
     def find_resonant_parallel_wavenumber(
@@ -387,7 +381,7 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
         omega: Quantity[u.rad / u.s],
         k: Quantity[u.rad / u.m],
-        abs_tol: float = 1e-5,
+        rel_tol: float = 1e-05,
     ) -> Quantity[u.rad / u.m]:
         """
         Given triplet X, omega and k, solution to the resonant cpdr,
@@ -408,8 +402,8 @@ class Cpdr:
             Wave frequency.
         k : Quantity[u.rad / u.m]
             Wavenumber.
-        abs_tol : float = 1e-5
-            Absolute tolerance for deciding whether positive or
+        rel_tol : float = 1e-05
+            Relative tolerance for deciding whether positive or
             negative k_par is a solution to the resonance condition.
 
         Returns
@@ -426,11 +420,13 @@ class Cpdr:
         v_par = self.v_par
         gamma = self.gamma
 
-        result1 = omega - k_par * v_par - reson * gyrofreq / gamma  # [0, pi/2]
-        result2 = omega + k_par * v_par - reson * gyrofreq / gamma  # (pi/2, pi]
+        # Rearrange resonance condition to produce scaled `1 = ...` equation
+        result1 = ((reson * gyrofreq / gamma) + (k_par * v_par)) / omega  # [0, pi/2)
+        result2 = ((reson * gyrofreq / gamma) - (k_par * v_par)) / omega  # (pi/2, pi]
 
-        k_par_is_pos = math.isclose(result1.value, 0.0, abs_tol=abs_tol)
-        k_par_is_neg = math.isclose(result2.value, 0.0, abs_tol=abs_tol)
+        # Compare to unity to determine signedness of k_par
+        k_par_is_pos = math.isclose(result1.value, 1.0, rel_tol=rel_tol)
+        k_par_is_neg = math.isclose(result2.value, 1.0, rel_tol=rel_tol)
 
         if k_par_is_pos and not k_par_is_neg:
             # only positive k_par is root
