@@ -7,12 +7,14 @@ from astropy import units as u
 
 
 class Stix:
+    @u.quantity_input
     def __init__(
         self, omega_p: u.Quantity[u.rad / u.s], omega_c: u.Quantity[u.rad / u.s]
     ) -> None:  # numpydoc ignore=GL08
         self.__omega_p = omega_p
         self.__omega_c = omega_c
 
+    @u.quantity_input
     def R(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -24,6 +26,7 @@ class Stix:
 
         return R
 
+    @u.quantity_input
     def L(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -35,6 +38,7 @@ class Stix:
 
         return L
 
+    @u.quantity_input
     def P(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -46,12 +50,15 @@ class Stix:
 
         return P
 
+    @u.quantity_input
     def S(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.R(omega) + self.L(omega)) / 2
 
+    @u.quantity_input
     def D(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.R(omega) - self.L(omega)) / 2
 
+    @u.quantity_input
     def dR(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -65,6 +72,7 @@ class Stix:
 
         return R
 
+    @u.quantity_input
     def dL(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -78,6 +86,7 @@ class Stix:
 
         return L
 
+    @u.quantity_input
     def dP(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
@@ -89,17 +98,21 @@ class Stix:
 
         return P
 
+    @u.quantity_input
     def dS(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         return (self.dR(omega) + self.dL(omega)) / 2
 
+    @u.quantity_input
     def dD(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         return (self.dR(omega) - self.dL(omega)) / 2
 
+    @u.quantity_input
     def A(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.S(omega) * X**2) + self.P(omega)
 
+    @u.quantity_input
     def B(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.dimensionless_unscaled]:
@@ -107,16 +120,19 @@ class Stix:
             (self.P(omega) * self.S(omega)) * (2 + X**2)
         )
 
+    @u.quantity_input
     def C(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.P(omega) * self.R(omega) * self.L(omega)) * (1 + X**2)
 
+    @u.quantity_input
     def dA(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.s / u.rad]:
         return (self.dS(omega) * X**2) + self.dP(omega)
 
+    @u.quantity_input
     def dB(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.s / u.rad]:
@@ -127,6 +143,7 @@ class Stix:
             * (2 + X**2)
         )
 
+    @u.quantity_input
     def dC(
         self, omega: u.Quantity[u.rad / u.s], X: u.Quantity[u.dimensionless_unscaled]
     ) -> u.Quantity[u.s / u.rad]:
@@ -136,6 +153,7 @@ class Stix:
             + self.P(omega) * self.R(omega) * self.dL(omega)
         ) * (1 + X**2)
 
+    @u.quantity_input
     def jacobian(
         self,
         omega: u.Quantity[u.rad / u.s],
@@ -155,6 +173,7 @@ class Stix:
             - (1 / omega)
         )
 
+    @u.quantity_input
     def dD_dk(
         self,
         omega: u.Quantity[u.rad / u.s],
@@ -165,6 +184,7 @@ class Stix:
 
         return (2 / k) * (2 * self.A(omega, X) * mu**4 - self.B(omega, X) * mu**2)
 
+    @u.quantity_input
     def dD_dw(
         self,
         omega: u.Quantity[u.rad / u.s],

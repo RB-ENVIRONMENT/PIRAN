@@ -44,6 +44,7 @@ class Cpdr:
         Frequency cutoff parameters (mean_factor, delta_factor, l_factor, u_factor)
     """
 
+    @u.quantity_input
     def __init__(
         self,
         symbolic: CpdrSymbolic,
@@ -202,6 +203,7 @@ class Cpdr:
     def wave_freqs(self):
         return self.__wave_freqs
 
+    @u.quantity_input
     def solve_cpdr_for_norm_factor(
         self,
         omega: Quantity[u.rad / u.s],
@@ -253,6 +255,7 @@ class Cpdr:
 
         return k_sol
 
+    @u.quantity_input
     def solve_resonant(
         self,
         X_range: Quantity[u.dimensionless_unscaled],
@@ -371,6 +374,7 @@ class Cpdr:
 
         return self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
 
+    @u.quantity_input
     def find_resonant_parallel_wavenumber(
         self,
         X: Quantity[u.dimensionless_unscaled],

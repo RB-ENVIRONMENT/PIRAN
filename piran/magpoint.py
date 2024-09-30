@@ -33,6 +33,7 @@ class MagPoint:
         to tesla metres cubed.
     """
 
+    @u.quantity_input
     def __init__(
         self,
         mlat: Quantity[u.rad],

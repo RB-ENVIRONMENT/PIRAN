@@ -9,6 +9,7 @@ from piran.gauss import Gaussian
 UNIT_NF = u.s / u.m**3
 
 
+@u.quantity_input
 def compute_glauert_norm_factor(
     cpdr: Cpdr,
     omega: u.Quantity[u.rad / u.s],
@@ -83,6 +84,7 @@ def compute_glauert_norm_factor(
     return norm_factor << UNIT_NF
 
 
+@u.quantity_input
 def compute_cunningham_norm_factor(
     cpdr: Cpdr,
     omega: u.Quantity[u.rad / u.s],

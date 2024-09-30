@@ -8,6 +8,7 @@ from scipy.optimize import root_scalar
 from piran.cpdr import Cpdr
 
 
+@u.quantity_input
 def split_array(
     array: u.Quantity[u.dimensionless_unscaled],
 ) -> List[u.Quantity[u.dimensionless_unscaled]]:
@@ -135,6 +136,7 @@ def count_roots_per_bucket(
     return num_roots
 
 
+@u.quantity_input
 def solve_resonant_for_x(
     cpdr: Cpdr,
     omega: u.Quantity[u.rad / u.s],
