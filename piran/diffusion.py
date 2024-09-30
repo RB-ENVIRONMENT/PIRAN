@@ -7,14 +7,12 @@ from scipy.special import erf, jv
 
 from piran.cpdr import Cpdr, ResonantRoot
 from piran.normalisation import UNIT_NF
-from piran.validators import check_units
 
 UNIT_PSD = u.T**2 * u.s / u.rad
 UNIT_BKN = u.T**2 * u.m**3 / u.rad
 UNIT_DIFF = (u.kg * u.m / u.s) ** 2 / u.s
 
 
-@check_units
 def get_power_spectral_density(
     cpdr: Cpdr,
     wave_amplitude: u.Quantity[u.T],
@@ -59,7 +57,6 @@ def get_power_spectral_density(
     return power_spectral_density
 
 
-@check_units
 def get_phi_squared(
     cpdr: Cpdr,
     resonant_root: ResonantRoot,
@@ -110,7 +107,6 @@ def get_phi_squared(
     return phi_squared
 
 
-@check_units
 def get_singular_term(
     cpdr: Cpdr,
     resonant_root: ResonantRoot,
@@ -151,7 +147,6 @@ def get_singular_term(
     return singular_term
 
 
-@check_units
 def get_normalised_intensity(
     power_spectral_density: u.Quantity[UNIT_PSD],
     wave_norm_angle_dist_eval,
@@ -193,7 +188,6 @@ def get_normalised_intensity(
     return normalised_intensity
 
 
-@check_units
 def get_DnX_single_root(
     cpdr: Cpdr,
     resonant_root: ResonantRoot,
@@ -251,7 +245,6 @@ def get_DnX_single_root(
     return DnXaa, DnXap, DnXpp
 
 
-@check_units
 def get_diffusion_coefficients(
     X_range: u.Quantity[u.dimensionless_unscaled],
     DnX_single_res: u.Quantity[UNIT_DIFF],
@@ -293,7 +286,6 @@ def get_diffusion_coefficients(
     return integral
 
 
-@check_units
 def get_energy_diffusion_coefficient(
     rel_kin_energy: u.Quantity[u.J],
     rest_mass_energy: u.Quantity[u.J],

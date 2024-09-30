@@ -3,10 +3,7 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
 
-from piran.validators import check_units
 
-
-@check_units
 def calc_lorentz_factor(
     E: Quantity[u.Joule],
     m: Quantity[u.kg],
@@ -28,7 +25,6 @@ def calc_lorentz_factor(
     return (E.to(u.Joule) / (m.to(u.kg) * const.c**2)) + 1
 
 
-@check_units
 def calc_momentum(
     gamma: Quantity[u.dimensionless_unscaled],
     mass: Quantity[u.kg],

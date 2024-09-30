@@ -16,7 +16,6 @@ from piran.helpers import (
 )
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
-from piran.validators import check_units
 from piran.wavefilter import WaveFilter, WhistlerFilter
 
 ResonantRoot = NamedTuple(
@@ -45,7 +44,6 @@ class Cpdr:
         Frequency cutoff parameters (mean_factor, delta_factor, l_factor, u_factor)
     """
 
-    @check_units
     def __init__(
         self,
         symbolic: CpdrSymbolic,
@@ -204,7 +202,6 @@ class Cpdr:
     def wave_freqs(self):
         return self.__wave_freqs
 
-    @check_units
     def solve_cpdr_for_norm_factor(
         self,
         omega: Quantity[u.rad / u.s],
@@ -256,7 +253,6 @@ class Cpdr:
 
         return k_sol
 
-    @check_units
     def solve_resonant(
         self,
         X_range: Quantity[u.dimensionless_unscaled],
@@ -375,7 +371,6 @@ class Cpdr:
 
         return self.__wave_filter.filter(X, omega, valid_k_l, self.plasma, self.stix)
 
-    @check_units
     def find_resonant_parallel_wavenumber(
         self,
         X: Quantity[u.dimensionless_unscaled],
