@@ -255,7 +255,7 @@ class Cpdr:
             if filtered_k.size == 1:
                 k_sol.append(filtered_k[0])
             else:
-                raise Exception(
+                raise AssertionError(
                     "In solve_cpdr_for_norm_factor we got 0 or >1 solutions for k"
                 )
 
@@ -369,7 +369,9 @@ class Cpdr:
                     )
                     roots_tmp.append(root)
                 elif counter > 1:
-                    raise Exception("In solve_resonant we got more than one solution")
+                    raise AssertionError(
+                        "In solve_resonant we got more than one solution"
+                    )
 
             roots.append(roots_tmp)
 
