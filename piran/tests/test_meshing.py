@@ -10,7 +10,6 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.meshing import count_roots_per_bucket, solve_resonant_for_x, split_array
 from piran.plasmapoint import PlasmaPoint
-from piran.wavefilter import TestFilter
 
 
 class TestMeshing:
@@ -46,7 +45,6 @@ class TestMeshing:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
         X_all = solve_resonant_for_x(
@@ -104,7 +102,6 @@ class TestMeshing:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
         X_l = solve_resonant_for_x(cpdr, cpdr.omega_lc, X_range)
@@ -205,7 +202,6 @@ class TestMeshing:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
         # =================================================
 

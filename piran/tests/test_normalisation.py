@@ -13,7 +13,6 @@ from piran.normalisation import (
     compute_glauert_norm_factor,
 )
 from piran.plasmapoint import PlasmaPoint
-from piran.wavefilter import TestFilter
 
 
 class TestNormalisationFactors:
@@ -29,7 +28,7 @@ class TestNormalisationFactors:
         n_particles = len(particles)
         cpdr_sym = CpdrSymbolic(n_particles)
 
-        self.cpdr = Cpdr(cpdr_sym, plasma_point, wave_filter=TestFilter())
+        self.cpdr = Cpdr(cpdr_sym, plasma_point)
 
         omega_ratio = 0.1225
         self.omega = np.abs(self.cpdr.plasma.gyro_freq[0]) * omega_ratio

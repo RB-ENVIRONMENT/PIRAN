@@ -74,33 +74,9 @@ class WaveFilter(ABC):
         raise NotImplementedError
 
 
-class TestFilter(WaveFilter):
-    """
-    Filter solutions to the CPDR, raising an exception if we have more than one value
-    of `k` for a given `(X, omega)` pair.
-    """
-
-    @u.quantity_input
-    def filter(
-        self,
-        X: u.Quantity[u.dimensionless_unscaled],
-        omega: u.Quantity[u.rad / u.s],
-        k: u.Quantity[u.rad / u.m],
-        plasma: PlasmaPoint,
-        stix: Stix,
-    ) -> u.Quantity[u.rad / u.m]:
-
-        if k.size == 0:
-            return np.nan << u.rad / u.m
-        elif k.size == 1:
-            return k[0]
-        else:
-            msg = "We got more than one real positive root for k"
-            raise ValueError(msg)
-
-
 class WhistlerFilter(WaveFilter):
     """
+    FIXME
     Filter solutions to the CPDR to accept only Whistler mode waves.
 
     For more info on the selection criteria used in this function, see:
@@ -120,7 +96,7 @@ class WhistlerFilter(WaveFilter):
 
         # Frequency for Whistlers does not exceed electron plasma- or gyro-frequency
         if omega > min(abs(plasma.gyro_freq[0]), abs(plasma.plasma_freq[0])):
-            return np.nan << u.rad / u.m
+            return [np.nan] << u.rad / u.m
 
         # The square of the index of refraction is:
         # - bounded by R below
@@ -131,6 +107,14 @@ class WhistlerFilter(WaveFilter):
         # Calculate index of refraction for all k.
         # Exclude any k for which index of refraction does not exceed R.
         mu2 = (const.c * k / omega) ** 2
-        k = k[mu2 >= stix.R(omega)]
 
-        return k if k.size > 0 else np.nan << u.rad / u.m
+        # Due to floating point arithmetic we might get
+        # mu2 slightly smaller than R while this solution is still
+        # a whistler-mode wave. The following is equivalent to
+        # mu2 >= R - max(rel_tol * abs(R), abs_tol)
+        cmp1 = mu2 >= stix.R(omega)
+        cmp2 = np.isclose(mu2, stix.R(omega), rtol=1e-04, atol=1e-09)
+
+        k = k[np.logical_or(cmp1, cmp2)]
+
+        return k if k.size > 0 else [np.nan] << u.rad / u.m

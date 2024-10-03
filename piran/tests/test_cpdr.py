@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 
@@ -9,7 +8,6 @@ from piran.cpdr import Cpdr
 from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
-from piran.wavefilter import TestFilter
 
 
 class TestCpdr:
@@ -36,7 +34,6 @@ class TestCpdr:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
     def test_cpdr_1(self):
@@ -91,11 +88,12 @@ class TestCpdr:
         assert math.isclose(k[2].value, 0.00014032247090573543)
         assert math.isnan(k[3].value) is True
 
-        # Raise valuer error (more than 1 real and positive root k)
+        # Test whether we get [np.nan], as frequency omega is not within range
+        # (value returned by the wave filter).
         omega = 100000 << (u.rad / u.s)
         X = [1.0] << u.dimensionless_unscaled
-        with pytest.raises(ValueError):
-            self.cpdr.solve_cpdr_for_norm_factor(omega, X)
+        k = self.cpdr.solve_cpdr_for_norm_factor(omega, X)
+        assert np.isnan(k[0])  # same as math.isnan(k[0].value)
 
     def test_cpdr_3(self):
         X = [0.01, 0.99] * u.dimensionless_unscaled
@@ -147,7 +145,6 @@ class TestCpdr:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.0, 0.3165829145728643] * u.dimensionless_unscaled
@@ -192,7 +189,6 @@ class TestCpdr:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
         X = [0.0] << u.dimensionless_unscaled
@@ -229,7 +225,6 @@ class TestCpdr:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
         # Test k_par positive and negative
@@ -294,22 +289,16 @@ class TestCpdr:
             alpha,
             resonance,
             freq_cutoff_params,
-            TestFilter(),
         )
 
-        # For the following resonant triplet we get:
-        # result1 = -1.4738870959263295e-06 rad / s
-        # result2 = 1127.069779406036 rad / s
-        # in find_resonant_parallel_wavenumber().
-        # This means that with abs_tol=1e-6 we get k_par_is_pos=k_par_is_neg=False
-        # and ValueError("None of them is root") is raised.
+        # With tolerance=1e-12 we get k_par_is_pos = k_par_is_neg = False
+        # and np.nan is returned.
         X = 0.0 << u.dimensionless_unscaled
         omega = 20773.61527263705 << u.rad / u.s
         k = 0.0002288927620211241 << u.rad / u.m
+        k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-12)
+        assert np.isnan(k_par)
 
-        with pytest.raises(ValueError):
-            cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-12)
-
-        # With the default abs_tol it should not raise a ValueError.
+        # With the default tolerance it returns the correct k_par.
         k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k)
         assert math.isclose(k_par.value, k.value)

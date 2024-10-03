@@ -18,6 +18,7 @@ def compute_glauert_norm_factor(
     method="simpson",
 ) -> u.Quantity[UNIT_NF]:
     """
+    FIXME
     Calculate the normalisation factor from
     Glauert & Horne 2005 (equation 15).
 
@@ -64,9 +65,18 @@ def compute_glauert_norm_factor(
         X = X_range[i]
         k = wave_numbers[i]
 
-        evaluated_integrand[i] = (
-            eval_gx[i] * k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
-        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
+        # We need this conditional here after refactoring
+        # this function and solve_cpdr_for_norm_factor() in
+        # commit ed48d76a9d8d1cfdffbe2113e986d94582e461cd.
+        # Without it, if one wave number from the list is NaN, then,
+        # for that index, `evaluated_integrand` becomes NaN which means
+        # that the integration fails (`integral` becomes NaN too).
+        if np.isnan(k):
+            evaluated_integrand[i] = 0.0
+        else:
+            evaluated_integrand[i] = (
+                eval_gx[i] * k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
+            ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
 
     # `simpson` returns a float
     # `trapezoid` returns a dimensionless `Quantity`
@@ -91,6 +101,7 @@ def compute_cunningham_norm_factor(
     X_range: u.Quantity[u.dimensionless_unscaled],
 ) -> u.Quantity[UNIT_NF]:
     """
+    FIXME
     Calculate the normalisation factor from
     Cunningham 2023 (denominator of equation 4b).
 
@@ -132,9 +143,13 @@ def compute_cunningham_norm_factor(
         X = X_range[i]
         k = wave_numbers[i]
 
-        norm_factor[i] = (
-            k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
-        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
+        if np.isnan(k):
+            norm_factor[i] = 0.0
+        else:
+            norm_factor[i] = (
+                k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
+            ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
+
     norm_factor /= 2 * np.pi**2
 
     return norm_factor << UNIT_NF

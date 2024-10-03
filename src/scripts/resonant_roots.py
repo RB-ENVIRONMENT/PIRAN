@@ -59,13 +59,15 @@ def get_dispersion_relation(cpdr: Cpdr, X, y_list):
         # and we get "PolynomialError: multivariate polynomials not
         # supported" when we call `.as_poly()`.
         try:
-            k_root = cpdr.solve_cpdr(omega.value, X.value)
+            k_root = cpdr.solve_cpdr(omega, X)
+            k_filtered = cpdr.filter(X, omega, k_root)
         except Exception:
             continue
 
-        if not np.isnan(k_root):
-            x = k_root * const.c / np.abs(electron_gyro)
-            dispersion_relation.append((x, y))
+        for k in k_filtered:
+            if not np.isnan(k):
+                x = k * const.c / np.abs(electron_gyro)
+                dispersion_relation.append((x, y))
 
     return dispersion_relation
 
