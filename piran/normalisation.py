@@ -68,12 +68,9 @@ def compute_glauert_norm_factor(
         # We need this conditional here after refactoring
         # this function and solve_cpdr_for_norm_factor() in
         # commit ed48d76a9d8d1cfdffbe2113e986d94582e461cd.
-        # The question is why? What am I missing?
-        # I mean if one wave number from the list is NaN then
-        # evaluated_integrand becomes Nan for that index and then
-        # integral is NaN too, but why now and not before ???
-        # It was possible to get NaN before, but maybe we didn't
-        # in our examples?
+        # Without it, if one wave number from the list is NaN, then,
+        # for that index, `evaluated_integrand` becomes NaN which means
+        # that the integration fails (`integral` becomes NaN too).
         if np.isnan(k):
             evaluated_integrand[i] = 0.0
         else:
@@ -146,12 +143,13 @@ def compute_cunningham_norm_factor(
         X = X_range[i]
         k = wave_numbers[i]
 
-        # Do we need the same "if np.isnan(k)" as we did in
-        # compute_glauert_norm_factor()?
+        if np.isnan(k):
+            norm_factor[i] = 0.0
+        else:
+            norm_factor[i] = (
+                k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
+            ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
 
-        norm_factor[i] = (
-            k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
-        ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
     norm_factor /= 2 * np.pi**2
 
     return norm_factor << UNIT_NF
