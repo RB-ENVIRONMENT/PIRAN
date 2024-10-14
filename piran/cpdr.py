@@ -250,13 +250,17 @@ class Cpdr:
             cpdr_in_k = cpdr_in_X_k(X.value)
             k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
             valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
-            filtered_k = self.filter(X, omega, valid_k_l)
 
-            if filtered_k.size == 1:
+            is_desired_wave_mode = [self.filter(X, omega, k) for k in valid_k_l]
+            filtered_k = valid_k_l[is_desired_wave_mode]
+
+            if filtered_k.size == 0:
+                k_sol.append(np.nan << u.rad / u.m)
+            elif filtered_k.size == 1:
                 k_sol.append(filtered_k[0])
             else:
                 raise AssertionError(
-                    "In solve_cpdr_for_norm_factor we got 0 or >1 solutions for k"
+                    "In solve_cpdr_for_norm_factor we got more than 1 solutions for k"
                 )
 
         return k_sol
@@ -317,61 +321,33 @@ class Cpdr:
                 roots.append([root])
                 continue
 
-            # Find values of k for each valid omega root
+            # Given X and omega solve the resonance condition
+            # to find values of k for each valid omega root
             # yielding some kind of nested named tuples of
             # X, omega, k, k_par, k_perp values
             # for later use in numerical integration.
             roots_tmp = []
             for valid_omega in valid_omega_l:
-                valid_k = self.solve_cpdr(valid_omega, X)
-                filtered_k = self.filter(X, valid_omega, valid_k)
+                k, k_par, k_perp = self.find_resonant_wavenumber(X, valid_omega)
 
-                counter = 0
-                for k in filtered_k:
-                    k_par = self.find_resonant_parallel_wavenumber(
-                        X << u.dimensionless_unscaled,
-                        valid_omega << u.rad / u.s,
-                        k << u.rad / u.m,
-                    )
-                    k_perp = k * np.sin(psi)
-
-                    # k_par can be NaN if k is already Nan
-                    # or if the triplet (X, omega, k) is not
-                    # a resonant root.
-                    if np.isnan(k_par):
-                        continue
-
+                is_desired_wave_mode = self.filter(X, valid_omega, k)
+                if is_desired_wave_mode:
                     root = ResonantRoot(
                         X=X << u.dimensionless_unscaled,
-                        omega=valid_omega << u.rad / u.s,
-                        k=k << u.rad / u.m,
-                        k_par=k_par << u.rad / u.m,
-                        k_perp=k_perp << u.rad / u.m,
+                        omega=valid_omega,
+                        k=k,
+                        k_par=k_par,
+                        k_perp=k_perp,
                     )
-                    roots_tmp.append(root)
-                    counter += 1
-
-                # If none of the filtered k is a resonant root
-                # then we will hit the continue inside the conditional
-                # and therefore roots_tmp will be empty. Just append
-                # a ResonantRoot object with NaNs for k, k_par and k_perp
-                # for tracking purposes.
-                # If on the other hand more than one k ended up being a resonant
-                # root that is also in the selected wave mode, then throw an
-                # exception as we don't know how to continue.
-                if counter == 0:
+                else:
                     root = ResonantRoot(
                         X=X << u.dimensionless_unscaled,
-                        omega=valid_omega << u.rad / u.s,
+                        omega=valid_omega,
                         k=np.nan << u.rad / u.m,
                         k_par=np.nan << u.rad / u.m,
                         k_perp=np.nan << u.rad / u.m,
                     )
-                    roots_tmp.append(root)
-                elif counter > 1:
-                    raise AssertionError(
-                        "In solve_resonant we got more than one solution"
-                    )
+                roots_tmp.append(root)
 
             roots.append(roots_tmp)
 
@@ -417,12 +393,10 @@ class Cpdr:
         return valid_k_l
 
     @u.quantity_input
-    def find_resonant_parallel_wavenumber(
+    def find_resonant_wavenumber(
         self,
         X: Quantity[u.dimensionless_unscaled],
-        omega: Quantity[u.rad / u.s],
-        k: Quantity[u.rad / u.m],
-        rel_tol: float = 1e-05,
+        omega: Quantity[u.rad / u.s]
     ) -> Quantity[u.rad / u.m]:
         """
         FIXME
@@ -442,50 +416,28 @@ class Cpdr:
             Wave normal angle.
         omega : Quantity[u.rad / u.s]
             Wave frequency.
-        k : Quantity[u.rad / u.m]
-            Wavenumber.
-        rel_tol : float = 1e-05
-            Relative tolerance for deciding whether positive or
-            negative k_par is a solution to the resonance condition.
 
         Returns
         -------
-        k_par : Quantity[u.rad / u.m]
+        [k, k_par, k_perp] : Quantity[u.rad / u.m]
+            Astropy array containing wavenumber `k` along with the parallel
+            and perpendicular components. `k_par` can be either positive
+            or negative depending on the direction of wave propagation,
+            while `k` and `k_perp` are non-negative as we take the absolute
+            value and `psi` is in [0, 90] since X >= 0.
         """
-        if np.isnan(k):
-            return np.nan << u.rad / u.m
 
         psi = np.arctan(X)
-        k_par = k * np.cos(psi)
         gyrofreq = self.plasma.gyro_freq[0]
         reson = self.resonance
         v_par = self.v_par
         gamma = self.gamma
 
-        # Rearrange resonance condition to produce scaled `1 = ...` equation
-        result1 = ((reson * gyrofreq / gamma) + (k_par * v_par)) / omega  # [0, pi/2)
-        result2 = ((reson * gyrofreq / gamma) - (k_par * v_par)) / omega  # (pi/2, pi]
+        k_par = (omega - (reson * gyrofreq / gamma)) / v_par
+        k = np.abs(k_par / np.cos(psi))  # NOTE: we take the absolute value
+        k_perp = k * np.sin(psi)
 
-        # Compare to unity to determine signedness of k_par
-        k_par_is_pos = math.isclose(result1.value, 1.0, rel_tol=rel_tol)
-        k_par_is_neg = math.isclose(result2.value, 1.0, rel_tol=rel_tol)
-
-        if k_par_is_pos and not k_par_is_neg:
-            # only positive k_par is root
-            return k_par
-        elif k_par_is_neg and not k_par_is_pos:
-            # only negative k_par is root
-            return -k_par
-        elif k_par_is_pos and k_par_is_neg:
-            raise ValueError("Both are roots")
-        else:
-            # raise ValueError("None of them is root")
-            # There is a chance that one of them is a root but because of the
-            # relative tolerance we discarded it. This has happened in the past
-            # and we had to rework this function and reduce the tolerance.
-            # Maybe we need to throw a warning and print also the values
-            # for result[12] so that we can verify later.
-            return np.nan << u.rad / u.m
+        return [k, k_par, k_perp] << u.rad / u.m
 
     @u.quantity_input
     def filter(
@@ -493,7 +445,7 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
         omega: Quantity[u.rad / u.s],
         k: Quantity[u.rad / u.m],
-    ) -> Quantity[u.rad / u.m]:
+    ) -> bool:
         """
         FIXME
         Parameters

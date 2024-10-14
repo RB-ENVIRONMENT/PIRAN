@@ -35,7 +35,7 @@ class WaveFilter(ABC):
         k: u.Quantity[u.rad / u.m],
         plasma: PlasmaPoint,
         stix: Stix,
-    ) -> u.Quantity[u.rad / u.m]:
+    ) -> bool:
         """
         Given [resonant] solution(s) to the CPDR, filter solutions in/out depending on
         criteria defined within this function.
@@ -62,13 +62,11 @@ class WaveFilter(ABC):
         stix: Stix
             Methods for calculating Stix parameters.
 
-
         Returns
         -------
-        u.Quantity[u.rad / u.s]
-            Any `k` for which `(X, omega, k)` satisfies the criteria defined within this
-            function (i.e. fits the desired wave mode), or np.nan if there are no
-            satisfactory `k`.
+        Boolean
+            True if `(omega, k)` satisfy the criteria defined within this
+            function (i.e. fits the desired wave mode), or False otherwise.
         """
 
         raise NotImplementedError
@@ -92,17 +90,15 @@ class WhistlerFilter(WaveFilter):
         k: u.Quantity[u.rad / u.m],
         plasma: PlasmaPoint,
         stix: Stix,
-    ) -> u.Quantity[u.rad / u.m]:
+    ) -> bool:
 
         # Frequency for Whistlers does not exceed electron plasma- or gyro-frequency
         if omega > min(abs(plasma.gyro_freq[0]), abs(plasma.plasma_freq[0])):
-            return [np.nan] << u.rad / u.m
+            return False
 
         # The square of the index of refraction is:
         # - bounded by R below
         # - unbounded above
-
-        k = np.atleast_1d(k)
 
         # Calculate index of refraction for all k.
         # Exclude any k for which index of refraction does not exceed R.
@@ -115,6 +111,7 @@ class WhistlerFilter(WaveFilter):
         cmp1 = mu2 >= stix.R(omega)
         cmp2 = np.isclose(mu2, stix.R(omega), rtol=1e-04, atol=1e-09)
 
-        k = k[np.logical_or(cmp1, cmp2)]
-
-        return k if k.size > 0 else [np.nan] << u.rad / u.m
+        if cmp1 or cmp2:
+            return True
+        else:
+            return False
