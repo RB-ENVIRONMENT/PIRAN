@@ -86,7 +86,7 @@ class TestCpdr:
         assert math.isclose(k[0].value, 0.00011414445445389277)
         assert math.isclose(k[1].value, 0.00011766325510931447)
         assert math.isclose(k[2].value, 0.00014032247090573543)
-        assert math.isnan(k[3].value) is True
+        assert math.isnan(k[3].value)
 
         # Test whether we get [np.nan], as frequency omega is not within range
         # (value returned by the wave filter).
@@ -202,7 +202,7 @@ class TestCpdr:
         assert np.isnan(roots[0][0].k)
 
     def test_cpdr_6(self):
-        """More solve_resonant and find_resonant_parallel_wavenumber tests"""
+        """More solve_resonant and find_resonant_wavenumber tests"""
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
         mag_point = MagPoint(mlat_deg, l_shell)
@@ -246,7 +246,7 @@ class TestCpdr:
         assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
         assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
 
-        # Test no resonant wavenumber
+        # Another test with very large X
         X = [1e30] << u.dimensionless_unscaled
         roots = cpdr.solve_resonant(X)
 
@@ -255,18 +255,17 @@ class TestCpdr:
 
         assert math.isclose(roots[0][0].X.value, 1e30)
         assert math.isclose(roots[0][0].omega.value, 20213.427803)
-        assert np.isnan(roots[0][0].k)
-        assert np.isnan(roots[0][0].k_par)
-        assert np.isnan(roots[0][0].k_perp)
+        assert math.isclose(roots[0][0].k.value, 1.589966e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][0].k_par.value, 9.7357355e-08, rel_tol=1e-08)
+        assert math.isclose(roots[0][0].k_perp.value, 1.589966e+09, rel_tol=1e-06)
 
         assert math.isclose(roots[0][1].X.value, 1e30)
         assert math.isclose(roots[0][1].omega.value, 20206.733655)
-        assert np.isnan(roots[0][1].k)
-        assert np.isnan(roots[0][1].k_par)
-        assert np.isnan(roots[0][1].k_perp)
+        assert math.isclose(roots[0][1].k.value, 1.589637e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][1].k_par.value, -9.7337249e-08, rel_tol=1e-08)
+        assert math.isclose(roots[0][1].k_perp.value, 1.589637e+09, rel_tol=1e-06)
 
-    def test_find_resonant_parallel_wavenumber_1(self):
-        """Capture ValueError in find_resonant_parallel_wavenumber."""
+    def test_find_resonant_wavenumber_1(self):
         mlat_deg = Angle(0 * u.deg)
         l_shell = 4.5
         mag_point = MagPoint(mlat_deg, l_shell)
@@ -291,14 +290,44 @@ class TestCpdr:
             freq_cutoff_params,
         )
 
-        # With tolerance=1e-12 we get k_par_is_pos = k_par_is_neg = False
-        # and np.nan is returned.
         X = 0.0 << u.dimensionless_unscaled
         omega = 20773.61527263705 << u.rad / u.s
-        k = 0.0002288927620211241 << u.rad / u.m
-        k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k, 1e-12)
-        assert np.isnan(k_par)
 
-        # With the default tolerance it returns the correct k_par.
-        k_par = cpdr.find_resonant_parallel_wavenumber(X, omega, k)
-        assert math.isclose(k_par.value, k.value)
+        k, k_par, k_perp = cpdr.find_resonant_wavenumber(X, omega)
+        assert math.isclose(k.value, 0.00022889276, rel_tol=1e-08)
+        assert math.isclose(k_par.value, 0.00022889276, rel_tol=1e-08)
+        assert math.isclose(k_perp.value, 0.0)
+
+    def test_filtering(self):
+        """Test where (omega, k) is not in the desired wave mode."""
+        mlat_deg = Angle(0 * u.deg)
+        l_shell = 4.5
+        mag_point = MagPoint(mlat_deg, l_shell)
+
+        particles = ("e", "p+")
+        plasma_over_gyro_ratio = 0.2
+        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+
+        n_particles = len(particles)
+        cpdr_sym = CpdrSymbolic(n_particles)
+
+        energy = 0.1 * u.MeV
+        alpha = Angle(5, u.deg)
+        resonance = -3
+        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        cpdr = Cpdr(
+            cpdr_sym,
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            freq_cutoff_params,
+        )
+
+        X = [0.0] << u.dimensionless_unscaled
+        roots = cpdr.solve_resonant(X)
+
+        assert math.isclose(roots[0][0].omega.value, 11955.2984, rel_tol=1e-08)
+        assert np.isnan(roots[0][0].k)
+        assert np.isnan(roots[0][0].k_par)
+        assert np.isnan(roots[0][0].k_perp)
