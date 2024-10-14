@@ -151,10 +151,8 @@ class TestWaveFilter:
         omega_c = plasma.gyro_freq[0]
         assert omega < calculate_omega_L0(omega_p, omega_c)
 
-        k_after_filtering = whistlers.filter(X, omega, k, plasma, stix)
-
-        # We have one whistler mode wave that is unchanged by our filter
-        assert k == k_after_filtering
+        # (omega, k) is whistler mode wave so filter should return True
+        assert whistlers.filter(X, omega, k, plasma, stix)
 
     def test_whistler_2(self):
 
@@ -209,9 +207,12 @@ class TestWaveFilter:
         # Confirm we have 2 roots
         assert valid_k_l.size == 2
 
-        k_after_filtering = WhistlerFilter().filter(X, omega, valid_k_l, plasma, stix)
+        is_desired_wave_mode = []
+        for valid_k in valid_k_l:
+            is_desired_wave_mode.append(WhistlerFilter().filter(X, omega, valid_k, plasma, stix))
 
         # Confirm that we have 1 solution after filtering...
+        k_after_filtering = valid_k_l[is_desired_wave_mode]
         assert k_after_filtering.size == 1
 
         # ... and that it is the largest solution (since index of refraction is greater for whistlers than z-mode)
