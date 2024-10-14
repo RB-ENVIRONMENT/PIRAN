@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 
@@ -125,3 +126,20 @@ class TestNormalisationFactors:
 
         # Check the size of the array
         assert cnf.size == X_npoints
+
+    def test_wrong_integration_rule(self):
+        X_min = 0.0 << u.dimensionless_unscaled
+        X_max = 1.0 << u.dimensionless_unscaled
+        X_npoints = 100
+        X_range = u.Quantity(
+            np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+        )
+
+        X_m = 0.0 << u.dimensionless_unscaled  # peak
+        X_w = 0.577 << u.dimensionless_unscaled  # angular width
+        wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
+
+        with pytest.raises(ValueError):
+            compute_glauert_norm_factor(
+                self.cpdr, self.omega, X_range, wave_norm_angle_dist, method="unknown"
+            )
