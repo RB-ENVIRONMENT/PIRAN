@@ -360,20 +360,24 @@ class Cpdr:
         X: Quantity[u.dimensionless_unscaled],
     ) -> Quantity[u.rad / u.m]:
         """
-        FIXME
-        Solve the cold plasma dispersion relation given wave frequency
-        omega and wave normal angle X=tan(psi).
+        Given wave frequency `omega` and tangent of the wave normal angle
+        `X=tan(psi)`, solves the cold plasma dispersion relation for the
+        wavenumber `k`.
 
         Parameters
         ----------
-        omega : float
-            Wave frequency.
-        X_range : float
-            Wave normal angles.
+        omega : Quantity[u.rad / u.s]
+            Scalar astropy Quantity representing the wave frequency in
+            radians per second.
+        X : Quantity[u.dimensionless_unscaled]
+            Scalar astropy Quantity representing the tangent of the wave
+            normal angle in unscaled dimensionless units.
 
         Returns
         -------
-        k : float (or np.nan)
+        k : Quantity[u.rad / u.m]
+            1d astropy Quantity representing the real and positive wavenumbers
+            in radians per meter.
         """
         # Substitute omega and X into CPDR.
         # Only k is a symbol after this.
