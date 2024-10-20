@@ -210,29 +210,31 @@ class Cpdr:
         X_range: Quantity[u.dimensionless_unscaled],
     ) -> Sequence[Quantity[u.rad / u.m]]:
         """
-        FIXME
-        Given wave frequency omega, solve the dispersion relation for each
-        wave normal angle X=tan(psi) in X_range to get wave number k.
-        Optimised version, similar to solve_cpdr, but we lambdify in X
+        Given wave frequency `omega`, solve the dispersion relation for each
+        wave normal angle X=tan(psi) in `X_range` to get wave number `k`.
+        Optimised version, similar to `solve_cpdr`, but we lambdify in `X`
         after we substitute omega and is more efficient when we have
         a single value for omega and a range of X values (for example when
-        computing the normalisation factor). We are also filtering directly
-        for wave modes of our interest here.
+        computing the normalisation factor).
+
+        **Note:** A key difference between this function and `solve_cpdr` is
+        that we filter for specific wave modes here, while `solve_cpdr` does
+        not.
 
         Parameters
         ----------
         omega : astropy.units.quantity.Quantity convertible to rad/second
             Wave frequency.
-        X_range : astropy.units.quantity.Quantity or float
+        X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
             Wave normal angles.
 
         Returns
         -------
-        k_sol : list of k
-            The k are given in the same order as X_range.
-            This means that each (X, omega, k) triplet is a solution
+        k_sol : List[Quantity[u.rad / u.m]]
+            The solutions are given in the same order as X_range.
+            This means that each `(X, omega, k)` triplet is a solution
             to the cold plasma dispersion relation.
-            If we get NaN then for this X, omega pair the CPDR has no
+            If we get NaN then for this `(X, omega)` pair the CPDR has no
             roots.
         """
 
@@ -271,20 +273,23 @@ class Cpdr:
         X_range: Quantity[u.dimensionless_unscaled],
     ) -> Sequence[Sequence[NamedTuple]]:
         """
-        FIXME
-        Simultaneously solve the resonance condition and the dispersion relation
-        to get root pairs of wave frequency omega and wave number k, including its
-        parallel and perpendicular components, given tangent of wave normal angle
-        X=tan(psi).
+        Given the tangent of wave normal angle `X=tan(psi)`, simultaneously solve
+        the resonance condition and dispersion relation to obtain root pairs of
+        wave frequency `omega` and wave number `k`, including their parallel and
+        perpendicular components.
+
+        **Note:** We filter out solutions that do not correspond to the desired
+        wave modes.
 
         Parameters
         ----------
         X_range : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
-            Wave normal angles.
+            Tangent of wave normal angles.
 
         Returns
         -------
-        Resonant roots as a list of lists of ResonantRoot objects.
+        roots : List[List[ResonantRoot]]
+            Resonant roots as a list of lists of `ResonantRoot` objects.
         """
 
         roots = []
@@ -368,10 +373,10 @@ class Cpdr:
         ----------
         omega : Quantity[u.rad / u.s]
             Scalar astropy Quantity representing the wave frequency in
-            radians per second.
+            units convertible to radians per second.
         X : Quantity[u.dimensionless_unscaled]
             Scalar astropy Quantity representing the tangent of the wave
-            normal angle in unscaled dimensionless units.
+            normal angle in units convertible to dimensionless unscaled.
 
         Returns
         -------
@@ -403,23 +408,20 @@ class Cpdr:
         omega: Quantity[u.rad / u.s]
     ) -> Quantity[u.rad / u.m]:
         """
-        FIXME
-        Given triplet X, omega and k, solution to the resonant cpdr,
-        return k_par = k * cos(psi) or k_par = k * cos(pi - psi)
-        according to the resonance condition,
-        i.e. the _signed_ value of k_par.
-        (We have to check this manually since the wavenumber k is
-        always positive and psi is in [0, 90] degrees but the
-        resonant cpdr returns solutions for psi in [0, 180],
-        i.e. including _negative_ k_par, and we are interested in all
-        of these solutions!)
+        Substitute the resonant `omega` into the resonance condition to obtain
+        `k_par`. Then, using the resonant `X = tan(psi)`, we can calculate `k`
+        and `k_perp`. Because `psi` is in the range [0, 90] degrees, `k` and
+        `k_perp` are always positive (we ensure this by taking the absolute value).
+        However, the resonant cpdr returns solutions in the range [0, 180] degrees,
+        which means that `k_par` can be negative.
 
         Parameters
         ----------
         X : Quantity[u.dimensionless_unscaled]
-            Wave normal angle.
+            Tangent of wave normal angle in units convertible to dimensionless
+            unscaled.
         omega : Quantity[u.rad / u.s]
-            Wave frequency.
+            Wave frequency in units convertible to radians per second.
 
         Returns
         -------
@@ -451,19 +453,8 @@ class Cpdr:
         k: Quantity[u.rad / u.m],
     ) -> bool:
         """
-        FIXME
-        Parameters
-        ----------
-        X : Quantity[u.dimensionless_unscaled]
-            Wave normal angle (0d).
-        omega : Quantity[u.rad / u.s]
-            Wave frequency (0d).
-        k : Quantity[u.rad / u.m]
-            Wavenumber (1d array).
-
-        Returns
-        -------
-        k : Quantity[u.rad / u.m] (1d array)
-            Wavenumbers for the selected wave mode.
+        This method calls the `filter` method of the `WaveFilter` class.
+        Please refer to the `WaveFilter.filter` documentation for details about
+        the parameters and their corresponding meanings.
         """
         return self.__wave_filter.filter(X, omega, k, self.plasma, self.stix)
