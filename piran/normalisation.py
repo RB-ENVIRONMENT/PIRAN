@@ -18,7 +18,6 @@ def compute_glauert_norm_factor(
     method="simpson",
 ) -> u.Quantity[UNIT_NF]:
     """
-    FIXME
     Calculate the normalisation factor from
     Glauert & Horne 2005 (equation 15).
 
@@ -33,6 +32,8 @@ def compute_glauert_norm_factor(
     wave_norm_angle_dist : piran.gauss.Gaussian
         Distribution of wave normal angles.
     method : str, default="simpson"
+        A string representing the integration method. The valid options
+        are "trapezoid" and "simpson".
 
     Returns
     -------
@@ -40,8 +41,7 @@ def compute_glauert_norm_factor(
     """
     # Given omega and X_range calculate wave number k,
     # solution to the dispersion relation.
-    # We could add units here, but we'd only have to strip them further down.
-    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # << u.rad / u.m
+    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)
 
     # It is more performant to substitute omega here, since it is the
     # same for all root pairs/triplets, and then lambdify the expression outside
@@ -101,7 +101,6 @@ def compute_cunningham_norm_factor(
     X_range: u.Quantity[u.dimensionless_unscaled],
 ) -> u.Quantity[UNIT_NF]:
     """
-    FIXME
     Calculate the normalisation factor from
     Cunningham 2023 (denominator of equation 4b).
 
