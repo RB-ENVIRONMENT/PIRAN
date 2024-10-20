@@ -40,7 +40,7 @@ class WaveFilter(ABC):
         Given [resonant] solution(s) to the CPDR, filter solutions in/out depending on
         criteria defined within this function.
 
-        `X` and `omega` are expected to be 0d while `k` is 1d with up to two values;
+        `X` `omega` and `k` are expected to be 0d;
         each `(X, omega, k)` triplet is a [resonant] solution to the CPDR.
 
         If using this within the `Cpdr`, there is no need for the user to supply the
@@ -56,7 +56,7 @@ class WaveFilter(ABC):
             Size: 0d.
         k : Quantity[u.rad / u.m]
             Wavenumber.
-            Size: 1d.
+            Size: 0d.
         plasma : PlasmaPoint
             Plasma composition (e.g. particle plasma- and gyro-frequencies).
         stix: Stix
@@ -65,7 +65,7 @@ class WaveFilter(ABC):
         Returns
         -------
         Boolean
-            True if `(omega, k)` satisfy the criteria defined within this
+            True if `(X, omega, k)` satisfy the criteria defined within this
             function (i.e. fits the desired wave mode), or False otherwise.
         """
 
@@ -74,7 +74,6 @@ class WaveFilter(ABC):
 
 class WhistlerFilter(WaveFilter):
     """
-    FIXME
     Filter solutions to the CPDR to accept only Whistler mode waves.
 
     For more info on the selection criteria used in this function, see:
