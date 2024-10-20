@@ -1,4 +1,3 @@
-import math
 from typing import NamedTuple, Sequence
 
 import numpy as np
@@ -403,9 +402,7 @@ class Cpdr:
 
     @u.quantity_input
     def find_resonant_wavenumber(
-        self,
-        X: Quantity[u.dimensionless_unscaled],
-        omega: Quantity[u.rad / u.s]
+        self, X: Quantity[u.dimensionless_unscaled], omega: Quantity[u.rad / u.s]
     ) -> Quantity[u.rad / u.m]:
         """
         Substitute the resonant `omega` into the resonance condition to obtain

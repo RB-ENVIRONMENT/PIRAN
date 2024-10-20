@@ -209,7 +209,9 @@ class TestWaveFilter:
 
         is_desired_wave_mode = []
         for valid_k in valid_k_l:
-            is_desired_wave_mode.append(WhistlerFilter().filter(X, omega, valid_k, plasma, stix))
+            is_desired_wave_mode.append(
+                WhistlerFilter().filter(X, omega, valid_k, plasma, stix)
+            )
 
         # Confirm that we have 1 solution after filtering...
         k_after_filtering = valid_k_l[is_desired_wave_mode]

@@ -255,15 +255,15 @@ class TestCpdr:
 
         assert math.isclose(roots[0][0].X.value, 1e30)
         assert math.isclose(roots[0][0].omega.value, 20213.427803)
-        assert math.isclose(roots[0][0].k.value, 1.589966e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][0].k.value, 1.589966e09, rel_tol=1e-06)
         assert math.isclose(roots[0][0].k_par.value, 9.7357355e-08, rel_tol=1e-08)
-        assert math.isclose(roots[0][0].k_perp.value, 1.589966e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][0].k_perp.value, 1.589966e09, rel_tol=1e-06)
 
         assert math.isclose(roots[0][1].X.value, 1e30)
         assert math.isclose(roots[0][1].omega.value, 20206.733655)
-        assert math.isclose(roots[0][1].k.value, 1.589637e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][1].k.value, 1.589637e09, rel_tol=1e-06)
         assert math.isclose(roots[0][1].k_par.value, -9.7337249e-08, rel_tol=1e-08)
-        assert math.isclose(roots[0][1].k_perp.value, 1.589637e+09, rel_tol=1e-06)
+        assert math.isclose(roots[0][1].k_perp.value, 1.589637e09, rel_tol=1e-06)
 
     def test_find_resonant_wavenumber_1(self):
         mlat_deg = Angle(0 * u.deg)
