@@ -24,7 +24,7 @@ from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
-script_version = "1.0.1"
+script_version = "1.0.2"
 
 
 def format_figure(fig, ax):
@@ -172,11 +172,15 @@ def main():
             X_rc = np.sqrt(resonance_cone_angle).value
 
             X_max = min(5.67, 0.9999 * X_rc) << u.dimensionless_unscaled
-            k = cpdr.solve_cpdr(omega, X_max)
-            filtered_k = cpdr.filter(X_max, omega, k)
-            if filtered_k.size > 1:
+            cpdr_k = cpdr.solve_cpdr(omega, X_max)
+            is_desired_wave_mode = [cpdr.filter(X_max, omega, k) for k in cpdr_k]
+            filtered_k = cpdr_k[is_desired_wave_mode]
+            if filtered_k.size == 0:
+                mu = const.c * (np.nan << u.rad / u.m) / omega
+            elif filtered_k.size == 1:
+                mu = const.c * filtered_k[0] / omega
+            else:
                 raise Exception("We didn't expect more than one elements in filtered_k")
-            mu = const.c * filtered_k[0] / omega
             yy[jj] = mu.value
 
         plot_figure1b(

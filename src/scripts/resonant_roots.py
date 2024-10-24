@@ -60,7 +60,8 @@ def get_dispersion_relation(cpdr: Cpdr, X, y_list):
         # supported" when we call `.as_poly()`.
         try:
             k_root = cpdr.solve_cpdr(omega, X)
-            k_filtered = cpdr.filter(X, omega, k_root)
+            is_desired_wave_mode = [cpdr.filter(X, omega, k) for k in k_root]
+            k_filtered = k_root[is_desired_wave_mode]
         except Exception:
             continue
 
