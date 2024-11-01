@@ -8,11 +8,17 @@ Welcome to PIRAN's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Modules:
 
    piran/cpdr
-
-
+   piran/diffusion
+   piran/gauss
+   piran/helpers
+   piran/magpoint
+   piran/normalisation
+   piran/plasmapoint
+   piran/stix
+   piran/wavefilter
 
 Indices and tables
 ==================
