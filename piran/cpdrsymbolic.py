@@ -1,8 +1,16 @@
+"""
+Defines the CpdrSymbolic class.
+"""
+
 import astropy.constants as const
 import sympy as sym
 
 
 class CpdrSymbolic:
+    """
+    CpdrSymbolic constructor.
+    """
+
     def __init__(
         self,
         n_species: float,
