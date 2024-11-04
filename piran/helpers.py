@@ -14,14 +14,18 @@ def calc_lorentz_factor(
     relativistic kinetic energy and rest mass.
     Relativistic kinetic energy = Total relativistic energy - Rest mass energy
     RKE = TRE - RME = (gamma - 1) * m_0 * c^2
-    Inputs:
-        E: Joule (Relativistic kinetic energy)
-        m: kg    (Rest mass)
-    Returns:
-        gamma: unitless (Lorentz factor)
 
     Note that this is different from plasmapy's `Lorentz_factor` which provides the
     'standard' way of calculating the Lorentz factor using the relative velocity `v`.
+
+    Parameters
+    ----------
+        E: Joule (Relativistic kinetic energy)
+        m: kg    (Rest mass)
+
+    Returns
+    -------
+        gamma: unitless (Lorentz factor)
     """
     return (E.to(u.Joule) / (m.to(u.kg) * const.c**2)) + 1
 
