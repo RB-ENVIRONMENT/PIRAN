@@ -23,12 +23,10 @@ class MagPoint:
     l_shell : float
         The "L-shell", "L-value", or "McIlwain L-parameter".
 
-    planetary_radius : astropy.units.Quantity[u.m],
-            default=astropy.constants.R_earth
+    planetary_radius : astropy.units.Quantity[u.m], default=astropy.constants.R_earth
         The radius of the planet of interest, given in units convertible to meters.
 
-    mag_dipole_moment : astropy.units.Quantity[u.tesla * u.m**3],
-            default=8.033454e15 * (u.tesla * u.m**3)
+    mag_dipole_moment : astropy.units.Quantity[u.tesla * u.m**3], default=8.033454e15 * (u.tesla * u.m**3)
         The magnetic dipole moment of the planet of interest, given in units convertible
         to tesla metres cubed.
     """
