@@ -31,6 +31,9 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = []
 
+# Split long functions sigs over multiple lines (one per param)
+python_maximum_signature_line_length = 88
+
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
