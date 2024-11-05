@@ -325,3 +325,34 @@ def get_energy_diffusion_coefficient(
     )
 
     return energy_diff_coef
+
+
+@u.quantity_input
+def get_mixed_aE_diffusion_coefficient(
+    rel_kin_energy: u.Quantity[u.J],
+    rest_mass_energy: u.Quantity[u.J],
+    mixed_ap_diff_coef: u.Quantity[UNIT_DIFF],
+) -> u.Quantity[u.J**2 / u.s]:
+    """
+    Given relativistic kinetic energy, rest mass energy and
+    mixed pitch angle-momentum diffusion coefficient calculate
+    the mixed pitch angle-energy diffusion coefficient from
+    equation 30 in Glauert & Horne 2005.
+
+    Parameters
+    ----------
+    rel_kin_energy : astropy.units.quantity.Quantity.Quantity[Joule],
+        Relativistic kinetic energy.
+    rest_mass_energy : astropy.units.quantity.Quantity.Quantity[Joule],
+        Rest mass energy.
+    mixed_ap_diff_coef : astropy.units.quantity.Quantity[UNIT_DIFF]
+        Mixed pitch angle-momentum diffusion coefficient $D_{pp}$.
+
+    Returns
+    -------
+    mixed_aE_diff_coef : astropy.units.quantity.Quantity[u.J**2 / u.s]
+        Mixed pitch angle-energy diffusion coefficient $D_{aE}$.
+    """
+    mixed_aE_diff_coef = mixed_ap_diff_coef * (const.c**2 * rel_kin_energy / (rel_kin_energy + rest_mass_energy))
+
+    return mixed_aE_diff_coef
