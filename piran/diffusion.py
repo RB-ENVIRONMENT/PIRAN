@@ -353,6 +353,8 @@ def get_mixed_aE_diffusion_coefficient(
     mixed_aE_diff_coef : astropy.units.quantity.Quantity[u.J**2 / u.s]
         Mixed pitch angle-energy diffusion coefficient $D_{aE}$.
     """
-    mixed_aE_diff_coef = mixed_ap_diff_coef * (const.c**2 * rel_kin_energy / (rel_kin_energy + rest_mass_energy))
+    mixed_aE_diff_coef = mixed_ap_diff_coef * (
+        const.c**2 * rel_kin_energy / (rel_kin_energy + rest_mass_energy)
+    )
 
     return mixed_aE_diff_coef

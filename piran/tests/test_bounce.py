@@ -109,7 +109,9 @@ class TestBounce:
         a_eq = np.pi / 1000 << u.rad
         bounce = Bounce(a_eq, mag_point_eq)
         pitch_angle_1 = bounce.get_bounce_pitch_angle(0.0 << u.rad)
-        pitch_angle_2 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude - (0.00000001 << u.rad))
+        pitch_angle_2 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude - (0.00000001 << u.rad)
+        )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
         assert math.isclose(pitch_angle_1.value, 0.00314159, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57019476, rel_tol=1e-05)
@@ -119,7 +121,9 @@ class TestBounce:
         a_eq = np.pi / 4 << u.rad
         bounce = Bounce(a_eq, mag_point_eq)
         pitch_angle_1 = bounce.get_bounce_pitch_angle(0.0 << u.rad)
-        pitch_angle_2 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude - (0.00000001 << u.rad))
+        pitch_angle_2 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude - (0.00000001 << u.rad)
+        )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
         assert math.isclose(pitch_angle_1.value, 0.78539816, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57061455, rel_tol=1e-05)
@@ -129,7 +133,9 @@ class TestBounce:
         a_eq = np.pi / 2 - 0.0001 << u.rad
         bounce = Bounce(a_eq, mag_point_eq)
         pitch_angle_1 = bounce.get_bounce_pitch_angle(0.0 << u.rad)
-        pitch_angle_2 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude - (0.00000001 << u.rad))
+        pitch_angle_2 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude - (0.00000001 << u.rad)
+        )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
         assert math.isclose(pitch_angle_1.value, 1.57069632, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57079426, rel_tol=1e-05)

@@ -91,8 +91,8 @@ class Bounce:
 
     @u.quantity_input
     def get_bounce_pitch_angle(
-            self,
-            mlat: Quantity[u.rad],
+        self,
+        mlat: Quantity[u.rad],
     ) -> Quantity[u.rad]:
         """
         Given equatorial pitch angle calculates the pitch angle for a given
@@ -125,6 +125,11 @@ class Bounce:
             self.__equatorial_magpoint.planetary_radius,
             self.__equatorial_magpoint.mag_dipole_moment,
         )
-        pitch_angle = np.arcsin(np.sin(self.__equatorial_pitch_angle) * np.sqrt(new_magpoint.flux_density / self.__equatorial_magpoint.flux_density))
+        pitch_angle = np.arcsin(
+            np.sin(self.__equatorial_pitch_angle)
+            * np.sqrt(
+                new_magpoint.flux_density / self.__equatorial_magpoint.flux_density
+            )
+        )
 
         return pitch_angle
