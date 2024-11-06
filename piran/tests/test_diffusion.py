@@ -14,6 +14,7 @@ from piran.diffusion import (
     get_diffusion_coefficients,
     get_DnX_single_root,
     get_energy_diffusion_coefficient,
+    get_mixed_aE_diffusion_coefficient,
     get_normalised_intensity,
     get_phi_squared,
     get_power_spectral_density,
@@ -251,3 +252,16 @@ class TestDiffusion:
         )
 
         assert math.isclose(Dee.value, 2.41705e-34, rel_tol=1e-5)
+
+    def test_get_mixed_aE_diffusion_coefficient(self):
+        rel_kin_energy = 1.602177e-15 << u.J
+        rest_mass_energy = 8.187106e-14 << u.J
+        mixed_ap_diff_coef = 5.33153e-49 << UNIT_DIFF
+
+        Dae = get_mixed_aE_diffusion_coefficient(
+            rel_kin_energy,
+            rest_mass_energy,
+            mixed_ap_diff_coef,
+        )
+
+        assert math.isclose(Dae.value, 9.19721e-34, rel_tol=1e-5)
