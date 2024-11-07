@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools >= 68", "setuptools_scm >= 8"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "piran"
-version = "0.1.0"
+dynamic = ["version"]
 description = "piran code package"
 readme = "README.md"
 requires-python = ">=3"
@@ -12,6 +16,8 @@ dependencies = [
     "sympy",
     "matplotlib",
 ]
+
+[tool.setuptools_scm]
 
 [project.optional-dependencies]
 dev = [
