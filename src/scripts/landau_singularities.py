@@ -1,3 +1,10 @@
+# This script visualises the Landau singularity term, as described in
+# paragraph 21 of Glauert & Horne 2005. The x-axis intersections of the
+# plotted curve correspond to the Landau singularities.
+# Due to the numerical challenges of directly locating these singularities,
+# we've opted to avoid segmenting the x-axis range, which prevents
+# integration issues that could arise from singularities.
+# To run:
 # python src/scripts/landau_singularities.py --rke 1.0 \
 #                                            --alpha 5.0 \
 #                                            --resonance 0
