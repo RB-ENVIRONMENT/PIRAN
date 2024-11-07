@@ -4,19 +4,17 @@
 #                                           [--save]
 # where rke in MeV and alpha in degrees.
 import argparse
-import math
+from typing import Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import Angle
 
-from piran.cpdr import Cpdr
-from piran.gauss import Gaussian
-from piran.magfield import MagField
-from piran.particles import Particles, PiranParticle
-from piran.resonance import calc_lorentz_factor, compute_root_pairs
+from piran.cpdr import Cpdr, ResonantRoot
+from piran.cpdrsymbolic import CpdrSymbolic
+from piran.magpoint import MagPoint
+from piran.plasmapoint import PlasmaPoint
 
 
 def plot(
@@ -34,7 +32,7 @@ def plot(
         }
     )
 
-    plt.plot(x, y, "b.")
+    plt.plot(x, y, "b.", markersize=2)
     plt.axhline(y=0.0, color="k", linestyle="--", alpha=0.4)
     plt.yscale("symlog")
     plt.xlim(0.0, 1.0)
@@ -51,110 +49,25 @@ def plot(
         plt.show()
 
 
-def compute(RKE, alpha, resonance):
-    frequency_ratio = 1.5 * u.dimensionless_unscaled
+def compute_landau_term(cpdr: Cpdr, resonant_roots: Sequence[Sequence[ResonantRoot]]):
+    x_axis = []
+    y_axis = []
+    for row in resonant_roots:
+        for root in row:
+            X = root.X
+            omega = root.omega
+            k = root.k
 
-    # ============================== START ============================== #
-    # Those should be attributes of one of the main classes
-    # Magnetic field
-    M = 8.033454e15 * (u.tesla * u.m**3)
-    mlat = Angle(0, u.deg)
-    l_shell = 4.5 * u.dimensionless_unscaled
-    B = (M * math.sqrt(1 + 3 * math.sin(mlat.rad) ** 2)) / (
-        l_shell**3 * const.R_earth**3 * math.cos(mlat.rad) ** 6
-    )
+            dD_dk = cpdr.stix.dD_dk(omega, X, k)
+            dD_dw = cpdr.stix.dD_dw(omega, X, k)
 
-    q_e = -const.e.si  # Signed electron charge
-    q_p = const.e.si  # Signed proton charge
+            if root.k_par >= 0.0:
+                y = cpdr.v_par + (dD_dk / dD_dw) * np.sqrt(1 + X**2)
+            else:
+                y = cpdr.v_par - (dD_dk / dD_dw) * np.sqrt(1 + X**2)
 
-    Omega_e = (q_e * B) / const.m_e
-    Omega_e_abs = abs(Omega_e)
-    omega_pe = Omega_e_abs * frequency_ratio
-
-    n_ = omega_pe**2 * const.eps0 * const.m_e / abs(q_e) ** 2
-    Omega_p = (q_p * B) / const.m_p
-    omega_pp = np.sqrt((n_ * q_p**2) / (const.eps0 * const.m_p))
-    # =============================== END =============================== #
-
-    # ============================== START ============================== #
-    # We need those because they are input arguments to the new Cpdr class.
-    # They are not needed for these tests.
-
-    gamma = calc_lorentz_factor(RKE, const.m_e)
-    v = const.c * math.sqrt(1 - (1 / gamma**2))  # relative velocity
-    v_par = v * math.cos(alpha.rad)
-
-    # Lower and upper cut-off frequencies
-    omega_m = 0.35 * Omega_e_abs
-    delta_omega = 0.15 * Omega_e_abs
-    omega_lc = omega_m - 1.5 * delta_omega
-    omega_uc = omega_m + 1.5 * delta_omega
-
-    # Resonances
-    n_min = resonance
-    n_max = resonance
-    n_range = u.Quantity(
-        range(n_min, n_max + 1), unit=u.dimensionless_unscaled, dtype=np.int32
-    )
-    # =============================== END =============================== #
-
-    piran_particle_list = (PiranParticle("e", n_), PiranParticle("H+", n_))
-    cpdr_particles = Particles(piran_particle_list, RKE, alpha)
-    cpdr_wave_angles = Gaussian(0, 1e10, 0, 0.577)
-    cpdr_wave_freqs = Gaussian(omega_lc, omega_uc, omega_m, delta_omega)
-    cpdr_mag_field = MagField()
-    cpdr_resonances = n_range
-
-    dispersion = Cpdr(
-        cpdr_particles,
-        cpdr_wave_angles,
-        cpdr_wave_freqs,
-        cpdr_mag_field,
-        mlat,
-        l_shell,
-        cpdr_resonances,
-    )
-
-    dispersion.as_poly_in_k()
-
-    X_min = 0.00
-    X_max = 1.00
-    X_npoints = 200
-    X_range = u.Quantity(
-        np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
-    )
-
-    # For each resonance n and tangent of wave normal angle psi,
-    # solve simultaneously the dispersion relation and the
-    # resonance condition to get valid root pairs for omega and k.
-    root_pairs = compute_root_pairs(
-        dispersion,
-        n_range,
-        X_range,
-        v_par,
-        gamma,
-        Omega_e,
-        Omega_p,
-        omega_pe,
-        omega_pp,
-        omega_lc,
-        omega_uc,
-    )
-
-    xwk_roots = root_pairs[resonance]
-
-    x_axis = np.empty(len(xwk_roots), dtype=np.float64)
-    y_axis = np.empty(len(xwk_roots), dtype=np.float64)
-    for ii, pair in enumerate(xwk_roots):
-        X_res = pair[0]
-        omega_res = pair[1] * u.Hz
-        k_res = pair[2]
-
-        dD_dk = dispersion.stix.dD_dk(omega_res, X_res, k_res / u.m).value
-        dD_dw = dispersion.stix.dD_dw(omega_res, X_res, k_res / u.m).value
-
-        y_axis[ii] = v_par.value + (dD_dk / dD_dw) * math.sqrt(1 + X_res**2)
-        x_axis[ii] = X_res
+            y_axis.append(y.value)
+            x_axis.append(X.value)
 
     return x_axis, y_axis
 
@@ -167,11 +80,37 @@ def main():
     parser.add_argument("--save", action="store_true", default=False)
     args = parser.parse_args()
 
-    rke = args.rke * u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
+    energy = args.rke << u.MeV  # Relativistic kinetic energy (Mega-electronvolts)
     alpha = Angle(args.alpha, u.deg)  # pitch angle in degrees
     resonance = int(args.resonance)  # resonance
 
-    x, y = compute(rke, alpha, resonance)
+    mlat_deg = Angle(0, u.deg)
+    l_shell = 4.5
+
+    particles = ("e", "p+")
+    plasma_over_gyro_ratio = 1.5
+
+    freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+
+    X_min = 0.0 << u.dimensionless_unscaled
+    X_max = 1.0 << u.dimensionless_unscaled
+    X_npoints = 301
+    X_range = u.Quantity(
+        np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+    )
+
+    mag_point = MagPoint(mlat_deg, l_shell)
+    plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+    cpdr_sym = CpdrSymbolic(len(particles))
+    cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+
+    resonant_roots = cpdr.solve_resonant(X_range)
+    # for row in resonant_roots:
+    #     for root in row:
+    #         print(f"X={root.X.value:.4f}, k_par={root.k_par.value:.6e}")
+    #     print()
+
+    x, y = compute_landau_term(cpdr, resonant_roots)
     plot(x, y, args.rke, args.alpha, args.resonance, args.save)
 
 
