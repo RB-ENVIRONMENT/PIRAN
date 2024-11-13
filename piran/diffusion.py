@@ -157,7 +157,7 @@ def get_normalised_intensity(
     norm_factor: u.Quantity[UNIT_NF],
 ) -> u.Quantity[UNIT_BKN]:
     """
-    Calculates the normalised intensity |B_{k}^{norm}|^2.
+    Calculates the normalised intensity :math:`|B_{k}^{norm}|^2`.
 
     Depending on the input parameters, this is either equation 4b
     or 5b from Cunningham 2023. Equation 5b is used in Glauert & Horne 2005,
@@ -183,7 +183,7 @@ def get_normalised_intensity(
     Returns
     -------
     normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
-        Normalised intensity |B_{k}^{norm}|^2
+        Normalised intensity :math:`|B_{k}^{norm}|^2`
     """
     normalised_intensity = (
         power_spectral_density * wave_norm_angle_dist_eval / norm_factor
@@ -214,7 +214,7 @@ def get_DnX_single_root(
         NamedTuple object containing a resonant root, i.e.,
         root to both dispersion relation and resonance condition.
     normalised_intensity : astropy.units.quantity.Quantity[UNIT_BKN]
-        Normalised intensity |B_{k}^{norm}|^2
+        Normalised intensity :math:`|B_{k}^{norm}|^2`
     phi_squared : astropy.units.quantity.Quantity[u.dimensionless_unscaled]
         Phi_{n,k}^2.
     singular_term : astropy.units.quantity.Quantity[u.m / u.s]
