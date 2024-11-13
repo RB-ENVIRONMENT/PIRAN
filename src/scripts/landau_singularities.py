@@ -6,7 +6,7 @@
 # integration issues that could arise from singularities.
 # To run:
 # python src/scripts/landau_singularities.py --rke 1.0 \
-#                                            --alpha 5.0 \
+#                                            --alpha 70.8 \
 #                                            --resonance 0
 #                                           [--save]
 # where rke in MeV and alpha in degrees.
