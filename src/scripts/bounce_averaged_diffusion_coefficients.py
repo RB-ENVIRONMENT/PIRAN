@@ -163,9 +163,9 @@ def main():
     # respective bounce-averaged diffusion coefficients.
     # It's important to initialise with zeros as if pitch angle
     # is invalid, we will continue with the next latitude.
-    baDaa_integrand = np.zeros(mlat_npoints, dtype=np.float64)
-    baDap_integrand = np.zeros(mlat_npoints, dtype=np.float64)
-    baDpp_integrand = np.zeros(mlat_npoints, dtype=np.float64)
+    baDaa_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
+    baDap_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
+    baDpp_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
 
     for ii, mlat in enumerate(lambda_range):
 
@@ -280,28 +280,22 @@ def main():
         # Sum the diffusion coefficients for all the resonances.
         # This is essentially what is calculated in equations 8, 9
         # and 10 in Glauert & Horne 2005.
-        print("Add again the unit here after stripping it")
-        Daa = np.sum([v.value for v in Dnaa])
-        Dap = np.sum([v.value for v in Dnap])
-        Dpp = np.sum([v.value for v in Dnpp])
-
-
-
+        Daa = np.sum([v.value for v in Dnaa]) << UNIT_DIFF
+        Dap = np.sum([v.value for v in Dnap]) << UNIT_DIFF
+        Dpp = np.sum([v.value for v in Dnpp]) << UNIT_DIFF
 
         baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
         baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
         baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
 
 
-    print("units here too")
+    # Scipy's simpson strips the units so we might want to re-add them here manually
     baDaa = simpson(baDaa_integrand, x=lambda_range) / bounce.particle_bounce_period
     baDap = simpson(baDap_integrand, x=lambda_range) / bounce.particle_bounce_period
     baDpp = simpson(baDpp_integrand, x=lambda_range) / bounce.particle_bounce_period
     container["baDaa"] = baDaa.value
     container["baDap"] = baDap.value
     container["baDpp"] = baDpp.value
-
-
 
 
     formatted_angle = f"{equatorial_pitch_angle.deg:.3f}"
