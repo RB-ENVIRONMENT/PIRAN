@@ -73,47 +73,6 @@ from piran.normalisation import (
 from piran.plasmapoint import PlasmaPoint
 
 
-def bounce_aa_factor(
-    mlat,
-    alpha,
-    alpha_eq,
-):
-    """
-    Factor that multiplies the pitch angle diffusion coefficient
-    inside the integral (equation 24, Glauert & Horne 2005).
-    """
-    factor = (np.cos(alpha) / np.cos(alpha_eq)**2) * np.cos(mlat)**7
-
-    return factor
-
-
-def bounce_ap_factor(
-    mlat,
-    alpha,
-):
-    """
-    Factor that multiplies the mixed pitch angle-momentum
-    diffusion coefficient inside the integral (equation 25,
-    Glauert & Horne 2005).
-    """
-    factor = (np.cos(mlat)**4 * (1 + 3 * np.sin(mlat)**2)**(1 / 4)) / np.cos(alpha)
-
-    return factor
-
-
-def bounce_pp_factor(
-    mlat,
-    alpha,
-):
-    """
-    Factor that multiplies the momentum diffusion coefficient
-    inside the integral (equation 26, Glauert & Horne 2005).
-    """
-    factor = (np.cos(mlat) * (1 + 3 * np.sin(mlat)**3)**(1 / 2)) / np.cos(alpha)
-
-    return factor
-
-
 def main():
     parser = argparse.ArgumentParser(
         prog="Bounce-averaged diffusion coefficints",
@@ -329,10 +288,9 @@ def main():
 
 
 
-        print(".rad not necessary if we use quantity_input")
-        baDaa_integrand[ii] = Daa * bounce_aa_factor(mlat, pitch_angle, equatorial_pitch_angle.rad)
-        baDap_integrand[ii] = Dap * bounce_ap_factor(mlat, pitch_angle)
-        baDpp_integrand[ii] = Dpp * bounce_pp_factor(mlat, pitch_angle)
+        baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
+        baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
+        baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
 
 
     print("units here too")
