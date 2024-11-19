@@ -276,10 +276,6 @@ def main():
                 cpdr_sym, plasma_point, energy, pitch_angle, resonance, freq_cutoff_params
             )
 
-            # Verify that momentum is the same for all latitudes.
-            # I think it is as it depends only on energy and mass.
-            print(f"{mlat=}\t{resonance=}\tmomentum={cpdr.momentum}")
-
             # Depends only on energy and mass. Will be the same for different
             # resonances and latitudes.
             container["momentum"] = cpdr.momentum.value
