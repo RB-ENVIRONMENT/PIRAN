@@ -105,9 +105,7 @@ def get_DnX_per_X(
                 continue
 
             # See par.23 in Glauert & Horne 2005
-            resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(
-                root.omega
-            )
+            resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(root.omega)
             X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
             if root.X.value > X_upper.value:
                 continue
@@ -262,7 +260,11 @@ def main():
     for ii, mlat in enumerate(lambda_range):
 
         pitch_angle = bounce.get_bounce_pitch_angle(mlat)
-        if np.isnan(pitch_angle) or pitch_angle <= 0.0 << u.rad or pitch_angle >= np.pi/2 << u.rad:
+        if (
+            np.isnan(pitch_angle)
+            or pitch_angle <= 0.0 << u.rad
+            or pitch_angle >= np.pi / 2 << u.rad
+        ):
             continue
 
         mag_point = MagPoint(mlat, l_shell)
@@ -273,7 +275,12 @@ def main():
         Dnpp = []
         for resonance in resonances:
             cpdr = Cpdr(
-                cpdr_sym, plasma_point, energy, pitch_angle, resonance, freq_cutoff_params
+                cpdr_sym,
+                plasma_point,
+                energy,
+                pitch_angle,
+                resonance,
+                freq_cutoff_params,
             )
 
             # Depends only on energy and mass. Will be the same for different
@@ -293,14 +300,20 @@ def main():
                 wave_norm_angle_dist,
                 integral_gx,
                 wave_amplitude,
-                method
+                method,
             )
 
             # Calculate the integrals from equations 8, 9 and 10 in
             # Glauert & Horne 2005, only for this resonance.
-            Dnaa_this_res = get_diffusion_coefficients(X_range, DnXaa_this_res << UNIT_DIFF)
-            Dnap_this_res = get_diffusion_coefficients(X_range, DnXap_this_res << UNIT_DIFF)
-            Dnpp_this_res = get_diffusion_coefficients(X_range, DnXpp_this_res << UNIT_DIFF)
+            Dnaa_this_res = get_diffusion_coefficients(
+                X_range, DnXaa_this_res << UNIT_DIFF
+            )
+            Dnap_this_res = get_diffusion_coefficients(
+                X_range, DnXap_this_res << UNIT_DIFF
+            )
+            Dnpp_this_res = get_diffusion_coefficients(
+                X_range, DnXpp_this_res << UNIT_DIFF
+            )
             Dnaa.append(Dnaa_this_res)
             Dnap.append(Dnap_this_res)
             Dnpp.append(Dnpp_this_res)
