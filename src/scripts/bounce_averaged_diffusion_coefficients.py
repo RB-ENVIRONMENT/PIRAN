@@ -290,8 +290,8 @@ def main():
                 (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
             )
 
-            # Given the resonance, calculate equations 11, 12 and 13 from
-            # Glauert & Horne 2005.
+            # Calculate equations 11, 12 and 13 from
+            # Glauert & Horne 2005, for this resonance.
             DnXaa_this_res, DnXap_this_res, DnXpp_this_res = get_DnX_per_X(
                 cpdr,
                 X_range,
