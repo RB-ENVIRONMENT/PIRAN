@@ -73,6 +73,98 @@ from piran.normalisation import (
 from piran.plasmapoint import PlasmaPoint
 
 
+def get_DnX_per_X(
+    cpdr,
+    X_range,
+    X_max,
+    epsilon,
+    wave_norm_angle_dist,
+    integral_gx,
+    wave_amplitude,
+    method,
+):
+    """
+    Given a cpdr object (which means that resonance is fixed) calculate
+    equations 11, 12 and 13 from Glauert & Horne 2005.
+    It returns three lists one for each DnXaa, DnXap and DnXpp.
+    Each individual list contains one value per X.
+    """
+    DnXaa_this_res = []
+    DnXap_this_res = []
+    DnXpp_this_res = []
+
+    resonant_roots = cpdr.solve_resonant(X_range)
+    for roots_this_x in resonant_roots:
+
+        DnXaa_this_X = 0.0
+        DnXap_this_X = 0.0
+        DnXpp_this_X = 0.0
+        for root in roots_this_x:
+
+            if np.isnan(root.omega) or np.isnan(root.k):
+                continue
+
+            # See par.23 in Glauert & Horne 2005
+            resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(
+                root.omega
+            )
+            X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
+            if root.X.value > X_upper.value:
+                continue
+
+            if method == 0:
+                eval_gx = wave_norm_angle_dist.eval(root.X)
+
+                # For Glauert's norm factor we limit the range in X
+                # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
+                X_range_glauert = X_range[X_range <= X_upper]
+
+                norm_factor = compute_glauert_norm_factor(
+                    cpdr,
+                    root.omega,
+                    X_range_glauert,
+                    wave_norm_angle_dist,
+                    method="simpson",
+                )
+            elif method == 1:
+                if root.X.value == 0.0:
+                    # Avoid division by zero
+                    continue
+                eval_gx = wave_norm_angle_dist.eval(root.X) / integral_gx
+                norm_factor = compute_cunningham_norm_factor(
+                    cpdr,
+                    root.omega,
+                    [root.X] << root.X.unit,
+                )[0]
+
+            power_spectral_density = get_power_spectral_density(
+                cpdr, wave_amplitude, root.omega
+            )
+            normalised_intensity = get_normalised_intensity(
+                power_spectral_density, eval_gx, norm_factor
+            )
+            phi_squared = get_phi_squared(cpdr, root)
+            singular_term = get_singular_term(cpdr, root)
+
+            DnXaa_this_root, DnXap_this_root, DnXpp_this_root = get_DnX_single_root(
+                cpdr,
+                root,
+                normalised_intensity,
+                phi_squared,
+                singular_term,
+            )
+
+            DnXaa_this_X += DnXaa_this_root.value
+            DnXap_this_X += DnXap_this_root.value
+            DnXpp_this_X += DnXpp_this_root.value
+
+        DnXaa_this_res.append(DnXaa_this_X)
+        DnXap_this_res.append(DnXap_this_X)
+        DnXpp_this_res.append(DnXpp_this_X)
+
+    return DnXaa_this_res, DnXap_this_res, DnXpp_this_res
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="Bounce-averaged diffusion coefficints",
@@ -180,10 +272,6 @@ def main():
         Dnap = []
         Dnpp = []
         for resonance in resonances:
-            DnXaa_this_res = []
-            DnXap_this_res = []
-            DnXpp_this_res = []
-
             cpdr = Cpdr(
                 cpdr_sym, plasma_point, energy, pitch_angle, resonance, freq_cutoff_params
             )
@@ -193,80 +281,24 @@ def main():
             print(f"{mlat=}\t{resonance=}\tmomentum={cpdr.momentum}")
 
             # Depends only on energy and mass. Will be the same for different
-            # resonances and lattitudes.
+            # resonances and latitudes.
             container["momentum"] = cpdr.momentum.value
             container["rest_mass_energy_Joule"] = (
                 (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
             )
 
-            resonant_roots = cpdr.solve_resonant(X_range)
-            for roots_this_x in resonant_roots:
-
-                DnXaa_this_X = 0.0
-                DnXap_this_X = 0.0
-                DnXpp_this_X = 0.0
-                for root in roots_this_x:
-
-                    if np.isnan(root.omega) or np.isnan(root.k):
-                        continue
-
-                    # See par.23 in Glauert & Horne 2005
-                    resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(
-                        root.omega
-                    )
-                    X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
-                    if root.X.value > X_upper.value:
-                        continue
-
-                    if method == 0:
-                        eval_gx = wave_norm_angle_dist.eval(root.X)
-
-                        # For Glauert's norm factor we limit the range in X
-                        # between X_min and X_upper=min(X_max, epsilon*sqrt(-P/S)).
-                        X_range_glauert = X_range[X_range <= X_upper]
-
-                        norm_factor = compute_glauert_norm_factor(
-                            cpdr,
-                            root.omega,
-                            X_range_glauert,
-                            wave_norm_angle_dist,
-                            method="simpson",
-                        )
-                    elif method == 1:
-                        if root.X.value == 0.0:
-                            # Avoid division by zero
-                            continue
-                        eval_gx = wave_norm_angle_dist.eval(root.X) / integral_gx
-                        norm_factor = compute_cunningham_norm_factor(
-                            cpdr,
-                            root.omega,
-                            [root.X] << root.X.unit,
-                        )[0]
-
-                    power_spectral_density = get_power_spectral_density(
-                        cpdr, wave_amplitude, root.omega
-                    )
-                    normalised_intensity = get_normalised_intensity(
-                        power_spectral_density, eval_gx, norm_factor
-                    )
-                    phi_squared = get_phi_squared(cpdr, root)
-                    singular_term = get_singular_term(cpdr, root)
-
-                    DnXaa_this_root, DnXap_this_root, DnXpp_this_root = get_DnX_single_root(
-                        cpdr,
-                        root,
-                        normalised_intensity,
-                        phi_squared,
-                        singular_term,
-                    )
-
-                    DnXaa_this_X += DnXaa_this_root.value
-                    DnXap_this_X += DnXap_this_root.value
-                    DnXpp_this_X += DnXpp_this_root.value
-
-                DnXaa_this_res.append(DnXaa_this_X)
-                DnXap_this_res.append(DnXap_this_X)
-                DnXpp_this_res.append(DnXpp_this_X)
+            # Given the resonance, calculate equations 11, 12 and 13 from
+            # Glauert & Horne 2005.
+            DnXaa_this_res, DnXap_this_res, DnXpp_this_res = get_DnX_per_X(
+                cpdr,
+                X_range,
+                X_max,
+                epsilon,
+                wave_norm_angle_dist,
+                integral_gx,
+                wave_amplitude,
+                method
+            )
 
             # Calculate the integrals from equations 8, 9 and 10 in
             # Glauert & Horne 2005, only for this resonance.
@@ -288,8 +320,8 @@ def main():
         baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
         baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
 
-
     # Scipy's simpson strips the units so we might want to re-add them here manually
+    # If we don't, the unit will be "dimensionless_unscaled" which is incorrect.
     baDaa = simpson(baDaa_integrand, x=lambda_range) / bounce.particle_bounce_period
     baDap = simpson(baDap_integrand, x=lambda_range) / bounce.particle_bounce_period
     baDpp = simpson(baDpp_integrand, x=lambda_range) / bounce.particle_bounce_period
@@ -297,7 +329,7 @@ def main():
     container["baDap"] = baDap.value
     container["baDpp"] = baDpp.value
 
-
+    # Write the results to disk as a JSON formatted file
     formatted_angle = f"{equatorial_pitch_angle.deg:.3f}"
     formatted_energy = f"{energy.to(u.MeV).value:.10f}"
     filename = f"results_{formatted_angle}deg_{formatted_energy}MeV.json"
