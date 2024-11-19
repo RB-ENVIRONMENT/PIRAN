@@ -154,7 +154,9 @@ class Bounce:
         """
         mlat = mlat.to(u.rad)
         pitch_angle = self.get_bounce_pitch_angle(mlat)
-        factor = (np.cos(pitch_angle) / np.cos(self.__equatorial_pitch_angle)**2) * np.cos(mlat)**7
+        factor = (
+            np.cos(pitch_angle) / np.cos(self.__equatorial_pitch_angle) ** 2
+        ) * np.cos(mlat) ** 7
 
         return factor
 
@@ -179,7 +181,9 @@ class Bounce:
         """
         mlat = mlat.to(u.rad)
         pitch_angle = self.get_bounce_pitch_angle(mlat)
-        factor = (np.cos(mlat)**4 * (1 + 3 * np.sin(mlat)**2)**(1 / 4)) / np.cos(pitch_angle)
+        factor = (np.cos(mlat) ** 4 * (1 + 3 * np.sin(mlat) ** 2) ** (1 / 4)) / np.cos(
+            pitch_angle
+        )
 
         return factor
 
@@ -203,6 +207,8 @@ class Bounce:
         """
         mlat = mlat.to(u.rad)
         pitch_angle = self.get_bounce_pitch_angle(mlat)
-        factor = (np.cos(mlat) * (1 + 3 * np.sin(mlat)**3)**(1 / 2)) / np.cos(pitch_angle)
+        factor = (np.cos(mlat) * (1 + 3 * np.sin(mlat) ** 3) ** (1 / 2)) / np.cos(
+            pitch_angle
+        )
 
         return factor
