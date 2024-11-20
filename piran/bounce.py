@@ -131,7 +131,9 @@ class Bounce:
             self.__equatorial_magpoint.mag_dipole_moment,
         )
 
-        num = np.sin(self.__equatorial_pitch_angle) * np.sqrt(new_magpoint.flux_density / self.__equatorial_magpoint.flux_density)
+        num = np.sin(self.__equatorial_pitch_angle) * np.sqrt(
+            new_magpoint.flux_density / self.__equatorial_magpoint.flux_density
+        )
 
         # Round num to 1 if it's slightly above 1, otherwise keep the original value
         is_close_to_one = math.isclose(num, 1, abs_tol=abs_tol)

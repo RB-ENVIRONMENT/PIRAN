@@ -113,7 +113,9 @@ class TestBounce:
             bounce.mirror_latitude - (0.00000001 << u.rad)
         )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
-        pitch_angle_4 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude + (0.001 << u.rad))
+        pitch_angle_4 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude + (0.001 << u.rad)
+        )
         assert math.isclose(pitch_angle_1.value, 0.00314159, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57019476, rel_tol=1e-05)
         assert math.isclose(pitch_angle_3.value, np.pi / 2, rel_tol=1e-05)
@@ -127,7 +129,9 @@ class TestBounce:
             bounce.mirror_latitude - (0.00000001 << u.rad)
         )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
-        pitch_angle_4 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude + (0.001 << u.rad))
+        pitch_angle_4 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude + (0.001 << u.rad)
+        )
         assert math.isclose(pitch_angle_1.value, 0.78539816, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57061455, rel_tol=1e-05)
         assert math.isclose(pitch_angle_3.value, np.pi / 2, rel_tol=1e-05)
@@ -141,7 +145,9 @@ class TestBounce:
             bounce.mirror_latitude - (0.00000001 << u.rad)
         )
         pitch_angle_3 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude)
-        pitch_angle_4 = bounce.get_bounce_pitch_angle(bounce.mirror_latitude + (0.001 << u.rad))
+        pitch_angle_4 = bounce.get_bounce_pitch_angle(
+            bounce.mirror_latitude + (0.001 << u.rad)
+        )
         assert math.isclose(pitch_angle_1.value, 1.57069632, rel_tol=1e-05)
         assert math.isclose(pitch_angle_2.value, 1.57079426, rel_tol=1e-05)
         assert math.isclose(pitch_angle_3.value, np.pi / 2, rel_tol=1e-05)
