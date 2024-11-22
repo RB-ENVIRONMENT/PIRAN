@@ -133,3 +133,82 @@ class Bounce:
         )
 
         return pitch_angle
+
+    @u.quantity_input
+    def get_pitch_angle_factor(
+        self,
+        mlat: Quantity[u.rad],
+    ) -> Quantity[u.dimensionless_unscaled]:
+        """
+        Factor that multiplies the pitch angle diffusion coefficient
+        inside the integral (equation 24, Glauert & Horne 2005).
+
+        Parameters
+        ----------
+        mlat : Quantity[u.rad]
+            The magnetic latitude, given in units convertible to radians.
+
+        Returns
+        -------
+        Quantity[u.dimensionless_unscaled]
+        """
+        mlat = mlat.to(u.rad)
+        pitch_angle = self.get_bounce_pitch_angle(mlat)
+        factor = (
+            np.cos(pitch_angle) / np.cos(self.__equatorial_pitch_angle) ** 2
+        ) * np.cos(mlat) ** 7
+
+        return factor
+
+    @u.quantity_input
+    def get_mixed_factor(
+        self,
+        mlat: Quantity[u.rad],
+    ) -> Quantity[u.dimensionless_unscaled]:
+        """
+        Factor that multiplies the mixed pitch angle-momentum
+        diffusion coefficient inside the integral (equation 25,
+        Glauert & Horne 2005).
+
+        Parameters
+        ----------
+        mlat : Quantity[u.rad]
+            The magnetic latitude, given in units convertible to radians.
+
+        Returns
+        -------
+        Quantity[u.dimensionless_unscaled]
+        """
+        mlat = mlat.to(u.rad)
+        pitch_angle = self.get_bounce_pitch_angle(mlat)
+        factor = (np.cos(mlat) ** 4 * (1 + 3 * np.sin(mlat) ** 2) ** (1 / 4)) / np.cos(
+            pitch_angle
+        )
+
+        return factor
+
+    @u.quantity_input
+    def get_momentum_factor(
+        self,
+        mlat: Quantity[u.rad],
+    ) -> Quantity[u.dimensionless_unscaled]:
+        """
+        Factor that multiplies the momentum diffusion coefficient
+        inside the integral (equation 26, Glauert & Horne 2005).
+
+        Parameters
+        ----------
+        mlat : Quantity[u.rad]
+            The magnetic latitude, given in units convertible to radians.
+
+        Returns
+        -------
+        Quantity[u.dimensionless_unscaled]
+        """
+        mlat = mlat.to(u.rad)
+        pitch_angle = self.get_bounce_pitch_angle(mlat)
+        factor = (np.cos(mlat) * (1 + 3 * np.sin(mlat) ** 3) ** (1 / 2)) / np.cos(
+            pitch_angle
+        )
+
+        return factor
