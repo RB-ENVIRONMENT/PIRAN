@@ -152,3 +152,27 @@ class TestBounce:
         assert math.isclose(pitch_angle_2.value, 1.57079426, rel_tol=1e-05)
         assert math.isclose(pitch_angle_3.value, np.pi / 2, rel_tol=1e-05)
         assert np.isnan(pitch_angle_4)
+
+    def test_bounce_6(self):
+        """Test `get_pitch_angle_factor`, `get_mixed_factor` and `get_momentum_factor`"""
+        mag_point_eq = MagPoint(0.0 << u.rad, 4.5)
+        a_eq = 3 << u.deg
+        bounce = Bounce(a_eq, mag_point_eq)
+
+        # Test with mlat in degrees
+        mlat = 45 << u.deg
+        daaf1 = bounce.get_pitch_angle_factor(mlat)
+        dapf1 = bounce.get_mixed_factor(mlat)
+        dppf1 = bounce.get_momentum_factor(mlat)
+        assert math.isclose(daaf1, 0.087082196, rel_tol=1e-05)
+        assert math.isclose(dapf1, 0.319949798, rel_tol=1e-05)
+        assert math.isclose(dppf1, 1.033106324, rel_tol=1e-05)
+
+        # Test with mlat in radians
+        mlat = np.pi / 4 << u.rad
+        daaf2 = bounce.get_pitch_angle_factor(mlat)
+        dapf2 = bounce.get_mixed_factor(mlat)
+        dppf2 = bounce.get_momentum_factor(mlat)
+        assert math.isclose(daaf2, daaf1, rel_tol=1e-05)
+        assert math.isclose(dapf2, dapf1, rel_tol=1e-05)
+        assert math.isclose(dppf2, dppf1, rel_tol=1e-05)
