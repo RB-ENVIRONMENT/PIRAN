@@ -136,7 +136,7 @@ class Bounce:
         )
 
         # Round num to 1 if it's slightly above 1, otherwise keep the original value
-        if math.isclose(num, 1, abs_tol=abs_tol)
+        if math.isclose(num, 1, abs_tol=abs_tol):
             num = min(num, 1.0) << num.unit
 
         pitch_angle = np.arcsin(num)
