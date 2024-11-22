@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from astropy import units as u
 from astropy.units import Quantity
@@ -93,6 +95,7 @@ class Bounce:
     def get_bounce_pitch_angle(
         self,
         mlat: Quantity[u.rad],
+        abs_tol=1e-6,
     ) -> Quantity[u.rad]:
         """
         Given equatorial pitch angle calculates the pitch angle for a given
@@ -105,14 +108,16 @@ class Bounce:
         **Note:** When the given magnetic latitude is the mirror latitude, the
         quantity inside the arcsin function should ideally be 1. However, due
         to floating-point precision limitations, this value might slightly
-        exceed 1, leading to NaN results. To address this, we could consider
-        returning π/2 to account for the maximum pitch angle, but our current
-        implementation does not handle this scenario.
+        exceed 1, leading to NaN results. To address this, if the number is slightly
+        above 1, we round it down to 1.
 
         Parameters
         ----------
         mlat : Quantity[u.rad]
             The magnetic latitude, given in units convertible to radians.
+
+        abs_tol : float, optional
+            The absolute tolerance for determining closeness to 1. Default is 1e-6.
 
         Returns
         -------
@@ -125,12 +130,16 @@ class Bounce:
             self.__equatorial_magpoint.planetary_radius,
             self.__equatorial_magpoint.mag_dipole_moment,
         )
-        pitch_angle = np.arcsin(
-            np.sin(self.__equatorial_pitch_angle)
-            * np.sqrt(
-                new_magpoint.flux_density / self.__equatorial_magpoint.flux_density
-            )
+
+        num = np.sin(self.__equatorial_pitch_angle) * np.sqrt(
+            new_magpoint.flux_density / self.__equatorial_magpoint.flux_density
         )
+
+        # Round num to 1 if it's slightly above 1, otherwise keep the original value
+        if math.isclose(num, 1, abs_tol=abs_tol):
+            num = min(num, 1.0) << num.unit
+
+        pitch_angle = np.arcsin(num)
 
         return pitch_angle
 
