@@ -29,11 +29,14 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 from astropy import units as u
 from matplotlib.ticker import LogFormatterMathtext
 
-from piran.diffusion import UNIT_DIFF, get_energy_diffusion_coefficient, get_mixed_aE_diffusion_coefficient
+from piran.diffusion import (
+    UNIT_DIFF,
+    get_energy_diffusion_coefficient,
+    get_mixed_aE_diffusion_coefficient,
+)
 
 
 def load_and_post_process(pathname, bounce=False):
@@ -78,7 +81,9 @@ def load_and_post_process(pathname, bounce=False):
             Dap = results["Dap"] << UNIT_DIFF
             Dpp = results["Dpp"] << UNIT_DIFF
 
-        DaE = get_mixed_aE_diffusion_coefficient(rel_kin_energy_J, rest_mass_energy_J, Dap)
+        DaE = get_mixed_aE_diffusion_coefficient(
+            rel_kin_energy_J, rest_mass_energy_J, Dap
+        )
         DEE = get_energy_diffusion_coefficient(
             rel_kin_energy_J, rest_mass_energy_J, Dpp
         )
@@ -158,11 +163,17 @@ def format_figure(fig, axs, fid, energy):
         ax.set_ylim(y_lim_min, y_lim_max)
 
         if ii == 0:
-            ax.set_ylabel(rf"${langle}\text{{D}}_{{\alpha\alpha}}{rangle} / \text{{p}}^2$")
+            ax.set_ylabel(
+                rf"${langle}\text{{D}}_{{\alpha\alpha}}{rangle} / \text{{p}}^2$"
+            )
         elif ii == 1:
-            ax.set_ylabel(rf"$|{langle}\text{{D}}_{{\alpha\text{{E}}}}{rangle}| / \text{{E}}^2$")
+            ax.set_ylabel(
+                rf"$|{langle}\text{{D}}_{{\alpha\text{{E}}}}{rangle}| / \text{{E}}^2$"
+            )
         elif ii == 2:
-            ax.set_ylabel(rf"${langle}\text{{D}}_{{\text{{EE}}}}{rangle} / \text{{E}}^2$")
+            ax.set_ylabel(
+                rf"${langle}\text{{D}}_{{\text{{EE}}}}{rangle} / \text{{E}}^2$"
+            )
 
         ax.legend(loc="lower left")
 
@@ -226,7 +237,9 @@ def main():
 
     # Plot data
     if args.r1 is not None:
-        xx, yy_aa, yy_aE, yy_EE, method, ratio, energy = load_and_post_process(args.r1, bounce)
+        xx, yy_aa, yy_aE, yy_EE, method, ratio, energy = load_and_post_process(
+            args.r1, bounce
+        )
 
         if method == 0:
             method_label = "Glauert"
@@ -235,13 +248,17 @@ def main():
         else:
             raise ValueError("Unknown normalisation method")
 
-        label = rf"{method_label} $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
+        label = (
+            rf"{method_label} $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
+        )
         plot_figure(axs[0], xx, yy_aa, "C0", "-", "", 1.0, label)
         plot_figure(axs[1], xx, yy_aE, "C0", "-", "", 1.0, label)
         plot_figure(axs[2], xx, yy_EE, "C0", "-", "", 1.0, label)
 
     if args.r2 is not None:
-        xx, yy_aa, yy_aE, yy_EE, method, ratio, energy = load_and_post_process(args.r2, bounce)
+        xx, yy_aa, yy_aE, yy_EE, method, ratio, energy = load_and_post_process(
+            args.r2, bounce
+        )
 
         if method == 0:
             method_label = "Glauert"
@@ -250,7 +267,9 @@ def main():
         else:
             raise ValueError("Unknown normalisation method")
 
-        label = rf"{method_label} $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
+        label = (
+            rf"{method_label} $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
+        )
         plot_figure(axs[0], xx, yy_aa, "C1", "-", "", 1.0, label)
         plot_figure(axs[1], xx, yy_aE, "C1", "-", "", 1.0, label)
         plot_figure(axs[2], xx, yy_EE, "C1", "-", "", 1.0, label)
