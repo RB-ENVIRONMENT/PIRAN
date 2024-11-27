@@ -2,7 +2,7 @@
 
 To get started with development of code in this repo, run the following from a bash shell:
 
-- Create a virtual python environment via either `python -m venv env` or `conda create -n NAME python=VERSION`
+- Create a virtual python environment via either `python -m venv env` or `conda create -n NAME python=VERSION` using a supported Python version (>=3.10).
 - Activate the virtual environment via `source env/bin/activate` or `conda activate NAME`
 - Install the pre-commit package manager and its dependencies into the virtual environment via `pip install .[dev]`
 - Install the git hooks scripts for pre-commit into .git/hooks via `pre-commit install`
