@@ -238,6 +238,10 @@ def main():
     # Cunningham used left endpoint integration rule in his paper.
     if method == 1:
         integral_gx = simpson(wave_norm_angle_dist.eval(X_range), x=X_range)
+    elif method == 0:
+        integral_gx = None  # Unused for Glauert's norm factor
+    else:
+        raise ValueError("Invalid normalisation method specified.")
 
     # Create integration range for equations 24, 25 and 26 in Glauert 2005
     lambda_min = 0.0 << u.rad
