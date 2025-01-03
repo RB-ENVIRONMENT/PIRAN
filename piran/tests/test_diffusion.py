@@ -129,8 +129,13 @@ class TestDiffusion:
         X = [0.1] << u.dimensionless_unscaled
         resonant_root = cpdr.solve_resonant(X)
 
-        phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
-        phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
+        if cpdr.numpy_polynomials:
+            # Same solutions, different order
+            phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
+            phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
+        else:
+            phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
+            phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
 
         assert math.isclose(phi_squared_11, 0.460906, rel_tol=1e-6)
         assert math.isclose(phi_squared_12, 0.489358, rel_tol=1e-6)
@@ -156,13 +161,27 @@ class TestDiffusion:
         X = [0.1] << u.dimensionless_unscaled
         resonant_root = cpdr.solve_resonant(X)
 
+        if cpdr.numpy_polynomials:
+            # Same solutions, different order
+            singular_term_11 = get_singular_term(
+                cpdr, resonant_root[0][1]
+            )  # positive k_par
+            singular_term_12 = get_singular_term(
+                cpdr, resonant_root[0][0]
+            )  # negative k_par
+        else:
+            singular_term_11 = get_singular_term(
+                cpdr, resonant_root[0][0]
+            )  # positive k_par
+            singular_term_12 = get_singular_term(
+                cpdr, resonant_root[0][1]
+            )  # negative k_par
+
         # positive k_par
-        singular_term_11 = get_singular_term(cpdr, resonant_root[0][0])
         assert singular_term_11.unit == u.m / u.s
         assert math.isclose(singular_term_11.value, -54012493.8, rel_tol=1e-7)
 
         # negative k_par
-        singular_term_12 = get_singular_term(cpdr, resonant_root[0][1])
         assert singular_term_12.unit == u.m / u.s
         assert math.isclose(singular_term_12.value, 154355842.6, rel_tol=1e-7)
 
@@ -201,9 +220,16 @@ class TestDiffusion:
         phi_squared = 0.460906 << u.dimensionless_unscaled
         singular_term = -54012493.87 << (u.m / u.s)
 
+        if cpdr.numpy_polynomials:
+            # We only check one soln in the below; it's index differs with sympy vs
+            # numpy polynomials
+            root_index = 1
+        else:
+            root_index = 0
+
         DnXaa, DnXap, DnXpp = get_DnX_single_root(
             cpdr,
-            resonant_root[0][0],
+            resonant_root[0][root_index],
             normalised_intensity,
             phi_squared,
             singular_term,

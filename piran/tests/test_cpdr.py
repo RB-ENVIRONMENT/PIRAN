@@ -158,12 +158,21 @@ class TestCpdr:
         assert math.isclose(roots[0][0].k.value, 0.00024016935645729707)
 
         assert len(roots[1]) == 2
-        assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][0].omega.value, 34361.48787566025)
-        assert math.isclose(roots[1][0].k.value, 0.0003923953536206822)
-        assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][1].omega.value, 21197.313961282573)
-        assert math.isclose(roots[1][1].k.value, 0.00024206540583296198)
+        if cpdr.numpy_polynomials:
+            # Same roots in both cases, but in a different order...
+            assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
+            assert math.isclose(roots[1][0].omega.value, 21197.313961282573)
+            assert math.isclose(roots[1][0].k.value, 0.00024206540583296198)
+            assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
+            assert math.isclose(roots[1][1].omega.value, 34361.48787566025)
+            assert math.isclose(roots[1][1].k.value, 0.0003923953536206822)
+        else:
+            assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
+            assert math.isclose(roots[1][0].omega.value, 34361.48787566025)
+            assert math.isclose(roots[1][0].k.value, 0.0003923953536206822)
+            assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
+            assert math.isclose(roots[1][1].omega.value, 21197.313961282573)
+            assert math.isclose(roots[1][1].k.value, 0.00024206540583296198)
 
     def test_cpdr_5(self):
         """No resonant frequency"""
@@ -234,17 +243,31 @@ class TestCpdr:
         assert len(roots) == 1
         assert len(roots[0]) == 2
 
-        assert math.isclose(roots[0][0].X.value, 0.6)
-        assert math.isclose(roots[0][0].omega.value, 33719.09383836)
-        assert math.isclose(roots[0][0].k.value, 0.0004581964569)
-        assert math.isclose(roots[0][0].k_par.value, 0.0003929002204)
-        assert math.isclose(roots[0][0].k_perp.value, 0.0002357401322)
+        if cpdr.numpy_polynomials:
+            # Same roots in both cases, but in a different order...
+            assert math.isclose(roots[0][0].X.value, 0.6)
+            assert math.isclose(roots[0][0].omega.value, 14447.39075335)
+            assert math.isclose(roots[0][0].k.value, 0.0001954579422)
+            assert math.isclose(roots[0][0].k_par.value, -0.0001676038027)
+            assert math.isclose(roots[0][0].k_perp.value, 0.0001005622816)
 
-        assert math.isclose(roots[0][1].X.value, 0.6)
-        assert math.isclose(roots[0][1].omega.value, 14447.39075335)
-        assert math.isclose(roots[0][1].k.value, 0.0001954579422)
-        assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
-        assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
+            assert math.isclose(roots[0][1].X.value, 0.6)
+            assert math.isclose(roots[0][1].omega.value, 33719.09383836)
+            assert math.isclose(roots[0][1].k.value, 0.0004581964569)
+            assert math.isclose(roots[0][1].k_par.value, 0.0003929002204)
+            assert math.isclose(roots[0][1].k_perp.value, 0.0002357401322)
+        else:
+            assert math.isclose(roots[0][0].X.value, 0.6)
+            assert math.isclose(roots[0][0].omega.value, 33719.09383836)
+            assert math.isclose(roots[0][0].k.value, 0.0004581964569)
+            assert math.isclose(roots[0][0].k_par.value, 0.0003929002204)
+            assert math.isclose(roots[0][0].k_perp.value, 0.0002357401322)
+
+            assert math.isclose(roots[0][1].X.value, 0.6)
+            assert math.isclose(roots[0][1].omega.value, 14447.39075335)
+            assert math.isclose(roots[0][1].k.value, 0.0001954579422)
+            assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
+            assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
 
         # Another test with very large X
         X = [1e30] << u.dimensionless_unscaled
