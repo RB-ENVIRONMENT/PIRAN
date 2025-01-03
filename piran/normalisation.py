@@ -1,14 +1,77 @@
-import functools
-
 import numpy as np
 import sympy as sym
+from astropy import constants as const
 from astropy import units as u
 from scipy.integrate import simpson, trapezoid
 
 from piran.cpdr import Cpdr
 from piran.gauss import Gaussian
+from piran.stix import Stix
 
 UNIT_NF = u.s / u.m**3
+
+
+class Jacobian:
+
+    @u.quantity_input
+    def __init__(self, stix: Stix, omega: u.Quantity[u.rad / u.s]) -> None:
+        self.__stix = stix
+        self.__omega = omega
+
+        self.__R = stix.R(omega)
+        self.__L = stix.L(omega)
+        self.__P = stix.P(omega)
+        self.__S = stix.S(omega)
+
+        self.__dR = stix.dR(omega)
+        self.__dL = stix.dL(omega)
+        self.__dP = stix.dP(omega)
+        self.__dS = stix.dS(omega)
+
+    def __A(
+        self, X: u.Quantity[u.dimensionless_unscaled]
+    ) -> u.Quantity[u.dimensionless_unscaled]:
+        return (self.__S * X**2) + self.__P
+
+    def __B(
+        self, X: u.Quantity[u.dimensionless_unscaled]
+    ) -> u.Quantity[u.dimensionless_unscaled]:
+        return (self.__R * self.__L * X**2) + ((self.__P * self.__S) * (2 + X**2))
+
+    def __C(
+        self, X: u.Quantity[u.dimensionless_unscaled]
+    ) -> u.Quantity[u.dimensionless_unscaled]:
+        return (self.__P * self.__R * self.__L) * (1 + X**2)
+
+    def __dA(self, X: u.Quantity[u.dimensionless_unscaled]) -> u.Quantity[u.s / u.rad]:
+        return (self.__dS * X**2) + self.__dP
+
+    def __dB(self, X: u.Quantity[u.dimensionless_unscaled]) -> u.Quantity[u.s / u.rad]:
+        return ((self.__dR * self.__L + self.__R * self.__dL) * (X**2)) + (
+            (self.__dP * self.__S + self.__P * self.__dS) * (2 + X**2)
+        )
+
+    def __dC(self, X: u.Quantity[u.dimensionless_unscaled]) -> u.Quantity[u.s / u.rad]:
+        return (
+            self.__dP * self.__R * self.__L
+            + self.__P * self.__dR * self.__L
+            + self.__P * self.__R * self.__dL
+        ) * (1 + X**2)
+
+    @u.quantity_input
+    def calculate(
+        self,
+        X: u.Quantity[u.dimensionless_unscaled],
+        k: u.Quantity[u.rad / u.m],
+    ) -> u.Quantity[u.rad * u.s / u.m**2]:
+        mu = const.c * k / self.__omega
+        return ((k**2) / (1 + X**2)) * (
+            (
+                (self.__dA(X) * mu**4 - self.__dB(X) * mu**2 + self.__dC(X))
+                / (2 * (2 * self.__A(X) * mu**4 - self.__B(X) * mu**2))
+            )
+            - (1 / self.__omega)
+        )
 
 
 @u.quantity_input
@@ -46,8 +109,7 @@ def compute_glauert_norm_factor(
     wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)
 
     if cpdr.numpy_polynomials:
-        cpdr_domega_lamb = functools.partial(cpdr.stix.dD_dw, omega)
-        cpdr_dk_lamb = functools.partial(cpdr.stix.dD_dk, omega)
+        jacob = Jacobian(cpdr.stix, omega)
 
     else:
         # It is more performant to substitute omega here, since it is the
@@ -83,8 +145,8 @@ def compute_glauert_norm_factor(
         else:
             if cpdr.numpy_polynomials:
                 evaluated_integrand[i] = (
-                    eval_gx[i] * k.value**2 * np.abs(cpdr_domega_lamb(X, k)).value * X
-                ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k)).value)
+                    eval_gx[i] * k.value * X * np.abs(jacob.calculate(X, k).value)
+                ) / ((1 + X**2) ** (1 / 2))
             else:
                 evaluated_integrand[i] = (
                     eval_gx[i]
@@ -138,8 +200,7 @@ def compute_cunningham_norm_factor(
     wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # << u.rad / u.m
 
     if cpdr.numpy_polynomials:
-        cpdr_domega_lamb = functools.partial(cpdr.stix.dD_dw, omega)
-        cpdr_dk_lamb = functools.partial(cpdr.stix.dD_dk, omega)
+        jacob = Jacobian(cpdr.stix, omega)
 
     else:
         # It is more performant to substitute omega here, since it is the
@@ -167,9 +228,9 @@ def compute_cunningham_norm_factor(
             norm_factor[i] = 0.0
         else:
             if cpdr.numpy_polynomials:
-                norm_factor[i] = (
-                    k.value**2 * np.abs(cpdr_domega_lamb(X, k)).value * X
-                ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X, k)).value)
+                norm_factor[i] = (k.value * X * np.abs(jacob.calculate(X, k).value)) / (
+                    (1 + X**2) ** (1 / 2)
+                )
             else:
                 norm_factor[i] = (
                     k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
