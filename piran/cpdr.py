@@ -54,7 +54,7 @@ class Cpdr:
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
         wave_filter: WaveFilter = WhistlerFilter(),
-        numpy_polynomials: bool = True,
+        numpy_polynomials: bool = False,
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma
@@ -294,6 +294,10 @@ class Cpdr:
     @property
     def wave_freqs(self):
         return self.__wave_freqs
+
+    @property
+    def numpy_polynomials(self):
+        return self.__numpy_polynomials
 
     @u.quantity_input
     def solve_cpdr_for_norm_factor(
