@@ -141,6 +141,8 @@ class Cpdr:
                 self.__R -= (self.__plasma.plasma_freq[j].value ** 2) * R_i
                 self.__L -= (self.__plasma.plasma_freq[j].value ** 2) * L_i
 
+            # Store parts of A, B, C polynomials with coefficients that are dependent on X
+
             self.__Ax = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * self.__S
             self.__Bx = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * (
                 (self.__R * self.__L) + (self.__P * self.__S)
@@ -151,6 +153,8 @@ class Cpdr:
                 * self.__R
                 * self.__L
             )
+
+            # Store remaining parts of A, B, C polynomials with constant coefficients
 
             self.__Ac = self.__P * np.polynomial.polynomial.Polynomial.fromroots(
                 [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
