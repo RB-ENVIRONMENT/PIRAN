@@ -54,7 +54,7 @@ class Cpdr:
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
         wave_filter: WaveFilter = WhistlerFilter(),
-        numpy_polynomials: bool = False,
+        numpy_polynomials: bool = True,
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma
