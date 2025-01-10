@@ -1,5 +1,10 @@
 """
-Defines the MagPoint class.
+The `magpoint` module provides a class for representing the magnetic field
+of a planet (defaulting to Earth) at a specific point in space. It calculates
+the magnetic flux density based on magnetic latitude, L-shell value, planetary
+radius, and magnetic dipole moment.
+
+This module uses the dipole approximation for the planetary magnetic field.
 """
 
 import numpy as np
@@ -10,10 +15,11 @@ from astropy.units import Quantity
 
 class MagPoint:
     """
-    A representation of the magnetic field of a planet (by default Earth's),
-    at a specific point defined by magnetic latitude and L-shell value.
-    Given magnetic latitude, L-shell value, radius and magnetic dipole moment,
-    we compute the magnetic flux density and store it in self.flux_density.
+    Represents the magnetic field of a planet (by default Earth's) at a
+    specific point defined by magnetic latitude and L-shell value.
+
+    This class uses the dipole approximation to calculate the magnetic flux
+    density.
 
     Parameters
     ----------
@@ -21,14 +27,34 @@ class MagPoint:
         The magnetic latitude, given in units convertible to radians.
 
     l_shell : float
-        The "L-shell", "L-value", or "McIlwain L-parameter".
+        The "L-shell", "L-value", or "McIlwain L-parameter". A dimensionless
+        quantity representing the radial distance of a magnetic field line
+        from the center of the planet, normalised to the planetary radius.
 
     planetary_radius : astropy.units.Quantity[u.m], default=astropy.constants.R_earth
         The radius of the planet of interest, given in units convertible to meters.
+        Defaults to Earth's radius.
 
     mag_dipole_moment : astropy.units.Quantity[u.tesla * u.m**3], default=8.033454e15 * (u.tesla * u.m**3)
         The magnetic dipole moment of the planet of interest, given in units convertible
-        to tesla metres cubed.
+        to Tesla metres cubed (T m^3). Defaults to Earth's magnetic dipole moment (8.033454e15 T m^3).
+
+    Attributes
+    ----------
+    flux_density : astropy.units.Quantity[u.tesla]
+        The magnetic flux density vector at the specified point, as an
+        `astropy.units.Quantity` with units of Tesla.
+
+    Notes
+    -----
+    The magnetic field is calculated using the dipole model, as described in
+    Glauert & Horne (2005), paragraph 13.
+
+    Examples
+    --------
+    >>> mlat_deg = Angle(0 * u.deg)
+    >>> l_shell = 4.5 * u.dimensionless_unscaled
+    >>> mag_point = MagPoint(mlat_deg, l_shell)
     """
 
     @u.quantity_input
