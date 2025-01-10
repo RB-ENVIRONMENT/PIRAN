@@ -9,7 +9,6 @@ the distribution at given locations.
 """
 
 import numpy as np
-import numpy.typing
 
 
 class Gaussian:
