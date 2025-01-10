@@ -5,7 +5,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.magpoint import MagPoint
-from piran.plasmapoint import IllegalArgumentError, PlasmaPoint
+from piran.plasmapoint import PlasmaPoint
 
 
 class TestPlasmaPoint:
@@ -68,7 +68,7 @@ class TestPlasmaPoint:
         plasma_over_gyro_ratio = 1.5
         number_density = 1 * (1 / u.m**3)
 
-        with pytest.raises(IllegalArgumentError):
+        with pytest.raises(ValueError):
             PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio, number_density)
 
     def test_plasmapoint_4(self):
