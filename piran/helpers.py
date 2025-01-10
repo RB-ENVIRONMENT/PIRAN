@@ -5,7 +5,7 @@ root finding.
 
 This module includes functions for calculating:
 
-- The Lorentz factor :math:`\gamma` (`calc_lorentz_factor`).
+- The Lorentz factor :math:`\\gamma` (`calc_lorentz_factor`).
 - The momentum of a particle (`calc_momentum`).
 - Filtering real and positive roots from a set of roots (`get_real_and_positive_roots`).
 
@@ -24,13 +24,13 @@ def calc_lorentz_factor(
     m: Quantity[u.kg],
 ) -> float:
     """
-    Calculate the Lorentz factor (:math:`\gamma`) from the relativistic
+    Calculate the Lorentz factor (:math:`\\gamma`) from the relativistic
     kinetic energy (:math:`E_k`) and rest mass (:math:`m_0`).
 
     The Lorentz factor is calculated as:
 
     .. math::
-        \gamma = 1 + \\frac{E_k}{m_0 c^2}
+        \\gamma = 1 + \\frac{E_k}{m_0 c^2}
 
     where :math:`c` is the speed of light.
 
@@ -39,7 +39,7 @@ def calc_lorentz_factor(
     relativistic energy and the rest mass energy:
 
     .. math::
-        E_k = E_t - E_0 = (\gamma - 1)m_0 c^2
+        E_k = E_t - E_0 = (\\gamma - 1)m_0 c^2
 
     Notes
     -----
@@ -47,7 +47,7 @@ def calc_lorentz_factor(
     factor using velocity :math:`v`:
 
     .. math::
-        \gamma = \\frac{1}{\\sqrt{1 - v^2/c^2}}
+        \\gamma = \\frac{1}{\\sqrt{1 - v^2/c^2}}
 
     as implemented in packages like `plasmapy`. This function is specifically
     designed for cases where the relativistic kinetic energy is known.
@@ -63,7 +63,7 @@ def calc_lorentz_factor(
     Returns
     -------
     float
-        The Lorentz factor :math:`\gamma`, a dimensionless quantity.
+        The Lorentz factor :math:`\\gamma`, a dimensionless quantity.
 
     See Also
     --------
@@ -86,12 +86,12 @@ def calc_momentum(
 ) -> Quantity[u.kg * u.m / u.s]:
     """
     Calculate the relativistic momentum of a particle given its Lorentz factor
-    (:math:`\gamma`) and rest mass (:math:`m_0`).
+    (:math:`\\gamma`) and rest mass (:math:`m_0`).
 
     The relativistic momentum (:math:`p`) is given by:
 
     .. math::
-        p = \\sqrt{\gamma^2 - 1}m_0c
+        p = \\sqrt{\\gamma^2 - 1}m_0c
 
     where :math:`c` is the speed of light, as shown in Glauert & Horne (2005), Equation 18.
 

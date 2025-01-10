@@ -30,9 +30,9 @@ class Gaussian:
     upper : float
         The upper cutoff; values of *x* above this are treated as having zero probability.
     peak : float
-        The mean (:math:`\mu`) or expectation of the distribution.
+        The mean (:math:`\\mu`) or expectation of the distribution.
     width : float
-        The standard deviation (:math:`\sigma`) of the distribution.
+        The standard deviation (:math:`\\sigma`) of the distribution.
 
     Examples
     --------
