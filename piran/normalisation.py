@@ -1,5 +1,4 @@
 import numpy as np
-import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from scipy.integrate import simpson, trapezoid
@@ -108,24 +107,8 @@ def compute_glauert_norm_factor(
     # solution to the dispersion relation.
     wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)
 
-    if cpdr.numpy_polynomials:
-        jacob = Jacobian(cpdr.stix, omega)
-
-    else:
-        # It is more performant to substitute omega here, since it is the
-        # same for all root pairs/triplets, and then lambdify the expression outside
-        # the loop and use the lambdified object within the loop to replace X and k.
-        values_dict = {"omega": omega.value}
-
-        # Derivative in omega
-        cpdr_domega_lamb = sym.lambdify(
-            ["X", "k"], cpdr.poly_in_k_domega.subs(values_dict), "numpy"
-        )
-
-        # Derivative in k
-        cpdr_dk_lamb = sym.lambdify(
-            ["X", "k"], cpdr.poly_in_k_dk.subs(values_dict), "numpy"
-        )
+    # Substitute fixed omega to retrieve an expression for the Jacobian in terms of (X, k)
+    jacob = Jacobian(cpdr.stix, omega)
 
     eval_gx = wave_norm_angle_dist.eval(X_range)
 
@@ -143,17 +126,9 @@ def compute_glauert_norm_factor(
         if np.isnan(k):
             evaluated_integrand[i] = 0.0
         else:
-            if cpdr.numpy_polynomials:
-                evaluated_integrand[i] = (
-                    eval_gx[i] * k.value * X * np.abs(jacob.calculate(X, k).value)
-                ) / ((1 + X**2) ** (1 / 2))
-            else:
-                evaluated_integrand[i] = (
-                    eval_gx[i]
-                    * k.value**2
-                    * np.abs(cpdr_domega_lamb(X.value, k.value))
-                    * X
-                ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
+            evaluated_integrand[i] = (
+                eval_gx[i] * k.value * X * np.abs(jacob.calculate(X, k).value)
+            ) / ((1 + X**2) ** (1 / 2))
 
     # `simpson` returns a float
     # `trapezoid` returns a dimensionless `Quantity`
@@ -199,25 +174,8 @@ def compute_cunningham_norm_factor(
     # We could add units here, but we'd only have to strip them further down.
     wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # << u.rad / u.m
 
-    if cpdr.numpy_polynomials:
-        jacob = Jacobian(cpdr.stix, omega)
-
-    else:
-        # It is more performant to substitute omega here, since it is the
-        # same for all root pairs/triplets, and then lambdify the expression outside
-        # the loop and use the lambdified object within the loop to replace X and k.
-
-        values_dict = {"omega": omega.value}
-
-        # Derivative in omega
-        cpdr_domega_lamb = sym.lambdify(
-            ["X", "k"], cpdr.poly_in_k_domega.subs(values_dict), "numpy"
-        )
-
-        # Derivative in k
-        cpdr_dk_lamb = sym.lambdify(
-            ["X", "k"], cpdr.poly_in_k_dk.subs(values_dict), "numpy"
-        )
+    # Substitute fixed omega to retrieve an expression for the Jacobian in terms of (X, k)
+    jacob = Jacobian(cpdr.stix, omega)
 
     norm_factor = np.zeros_like(X_range.value, dtype=np.float64)
     for i in range(norm_factor.shape[0]):
@@ -227,14 +185,9 @@ def compute_cunningham_norm_factor(
         if np.isnan(k):
             norm_factor[i] = 0.0
         else:
-            if cpdr.numpy_polynomials:
-                norm_factor[i] = (k.value * X * np.abs(jacob.calculate(X, k).value)) / (
-                    (1 + X**2) ** (1 / 2)
-                )
-            else:
-                norm_factor[i] = (
-                    k.value**2 * np.abs(cpdr_domega_lamb(X.value, k.value)) * X
-                ) / ((1 + X**2) ** (3 / 2) * np.abs(cpdr_dk_lamb(X.value, k.value)))
+            norm_factor[i] = (k.value * X * np.abs(jacob.calculate(X, k).value)) / (
+                (1 + X**2) ** (1 / 2)
+            )
 
     norm_factor /= 2 * np.pi**2
 

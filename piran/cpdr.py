@@ -2,7 +2,6 @@ import functools
 from typing import NamedTuple, Sequence
 
 import numpy as np
-import sympy as sym
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
@@ -54,7 +53,6 @@ class Cpdr:
         resonance: int | None = None,
         freq_cutoff_params: Sequence[float] | None = None,
         wave_filter: WaveFilter = WhistlerFilter(),
-        numpy_polynomials: bool = True,
     ) -> None:
         self.__symbolic = symbolic
         self.__plasma = plasma
@@ -77,100 +75,95 @@ class Cpdr:
         # Wave mode filter
         self.__wave_filter = wave_filter
 
-        # Numpy polynomials
-        self.__numpy_polynomials = numpy_polynomials
+        # Polynomial cache
+        # We store several polynomials (**in omega**) for reuse later.
+        # In particular, we store polynomials corresponding to the Stix parameters and
+        # the A, B, and C polynomials from the CPDR, with the latter set split into
+        # constant and non-constant (i.e. dependent on X) parts.
+        #
+        # To obtain polynomials in `omega`, we need to remove `omega` from the
+        # denominator of each term in the Stix parameters.
+        # We do this by multiplying each Stix param by the lowest common multiple of
+        # all the denominators used in the parameter.
 
-        if self.__numpy_polynomials:
+        # For P this is easy: we just multiply by `omega**2`
+        self.__P = np.polynomial.polynomial.Polynomial(
+            [-np.sum(self.__plasma.plasma_freq.value**2), 0, 1]
+        )
 
-            # Polynomial cache
-            # We store several polynomials (**in omega**) for reuse later.
-            # In particular, we store polynomials corresponding to the Stix parameters and
-            # the A, B, and C polynomials from the CPDR, with the latter set split into
-            # constant and non-constant (i.e. dependent on X) parts.
-            #
-            # To obtain polynomials in `omega`, we need to remove `omega` from the
-            # denominator of each term in the Stix parameters.
-            # We do this by multiplying each Stix param by the lowest common multiple of
-            # all the denominators used in the parameter.
+        # For S, R, and L we multiply by the following...
+        #
+        # NOTE: these correspond to the 'constant' (1) part of the parameter prior
+        # to multiplication; we add on the 'summation' part of the parameter below.
+        self.__S = np.polynomial.polynomial.Polynomial.fromroots(
+            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
+        )
+        self.__R = np.polynomial.polynomial.Polynomial.fromroots(
+            [0, *-self.__plasma.gyro_freq.value]
+        )
+        self.__L = np.polynomial.polynomial.Polynomial.fromroots(
+            [0, *self.__plasma.gyro_freq.value]
+        )
 
-            # For P this is easy: we just multiply by `omega**2`
-            self.__P = np.polynomial.polynomial.Polynomial(
-                [-np.sum(self.__plasma.plasma_freq.value**2), 0, 1]
-            )
+        # ...which results in a product nested within the summation part of the
+        # parameter. The indices for the summation and the product both run over all
+        # particles within the plasma, *except that* the index on the product skips the
+        # current index being used in the summation.
 
-            # For S, R, and L we multiply by the following...
-            #
-            # NOTE: these correspond to the 'constant' (1) part of the parameter prior
-            # to multiplication; we add on the 'summation' part of the parameter below.
-            self.__S = np.polynomial.polynomial.Polynomial.fromroots(
-                [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
-            )
-            self.__R = np.polynomial.polynomial.Polynomial.fromroots(
-                [0, *-self.__plasma.gyro_freq.value]
-            )
-            self.__L = np.polynomial.polynomial.Polynomial.fromroots(
-                [0, *self.__plasma.gyro_freq.value]
-            )
+        for j in range(len(self.plasma.particles)):
+            S_i = 1
+            R_i = 1
+            L_i = 1
+            for i in range(len(self.plasma.particles)):
+                if i == j:
+                    continue
+                S_i *= np.polynomial.polynomial.Polynomial.fromroots(
+                    [
+                        self.__plasma.gyro_freq[i].value,
+                        -self.__plasma.gyro_freq[i].value,
+                    ]
+                )
+                R_i *= np.polynomial.polynomial.Polynomial.fromroots(
+                    [-self.__plasma.gyro_freq[i].value]
+                )
+                L_i *= np.polynomial.polynomial.Polynomial.fromroots(
+                    [self.__plasma.gyro_freq[i].value]
+                )
 
-            # ...which results in a product nested within the summation part of the
-            # parameter. The indices for the summation and the product both run over all
-            # particles within the plasma, *except that* the index on the product skips the
-            # current index being used in the summation.
+            self.__S -= (self.__plasma.plasma_freq[j].value ** 2) * S_i
+            self.__R -= (self.__plasma.plasma_freq[j].value ** 2) * R_i
+            self.__L -= (self.__plasma.plasma_freq[j].value ** 2) * L_i
 
-            for j in range(len(self.plasma.particles)):
-                S_i = 1
-                R_i = 1
-                L_i = 1
-                for i in range(len(self.plasma.particles)):
-                    if i == j:
-                        continue
-                    S_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                        [
-                            self.__plasma.gyro_freq[i].value,
-                            -self.__plasma.gyro_freq[i].value,
-                        ]
-                    )
-                    R_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                        [-self.__plasma.gyro_freq[i].value]
-                    )
-                    L_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                        [self.__plasma.gyro_freq[i].value]
-                    )
+        # Store parts of A, B, C polynomials with coefficients that are dependent on X
 
-                self.__S -= (self.__plasma.plasma_freq[j].value ** 2) * S_i
-                self.__R -= (self.__plasma.plasma_freq[j].value ** 2) * R_i
-                self.__L -= (self.__plasma.plasma_freq[j].value ** 2) * L_i
+        self.__Ax = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * self.__S
+        self.__Bx = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * (
+            (self.__R * self.__L) + (self.__P * self.__S)
+        )
+        self.__Cx = (
+            np.polynomial.polynomial.Polynomial.fromroots([0, 0])
+            * self.__P
+            * self.__R
+            * self.__L
+        )
 
-            # Store parts of A, B, C polynomials with coefficients that are dependent on X
+        # Store remaining parts of A, B, C polynomials with constant coefficients
 
-            self.__Ax = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * self.__S
-            self.__Bx = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * (
-                (self.__R * self.__L) + (self.__P * self.__S)
-            )
-            self.__Cx = (
-                np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-                * self.__P
-                * self.__R
-                * self.__L
-            )
-
-            # Store remaining parts of A, B, C polynomials with constant coefficients
-
-            self.__Ac = self.__P * np.polynomial.polynomial.Polynomial.fromroots(
-                [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
-            )
-            self.__Bc = (
-                2
-                * np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-                * self.__P
-                * self.__S
-            )
-            self.__Cc = (
-                np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-                * self.__P
-                * self.__R
-                * self.__L
-            )
+        self.__Ac = self.__P * np.polynomial.polynomial.Polynomial.fromroots(
+            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
+        )
+        self.__Bc = (
+            2
+            * np.polynomial.polynomial.Polynomial.fromroots([0, 0])
+            * self.__P
+            * self.__S
+        )
+        self.__Cc = (
+            np.polynomial.polynomial.Polynomial.fromroots([0, 0])
+            * self.__P
+            * self.__R
+            * self.__L
+        )
 
         if (
             energy is not None
@@ -299,10 +292,6 @@ class Cpdr:
     def wave_freqs(self):
         return self.__wave_freqs
 
-    @property
-    def numpy_polynomials(self):
-        return self.__numpy_polynomials
-
     @u.quantity_input
     def solve_cpdr_for_norm_factor(
         self,
@@ -338,30 +327,15 @@ class Cpdr:
             roots.
         """
 
-        if self.__numpy_polynomials:
-            # This isn't an exact replacement for 'lambdification';
-            # we're just passing a consistent value to an inner func without
-            # 'hard-coding' the value of omega in the inner func.
-            cpdr_in_X_k = functools.partial(self.numpy_poly_in_k, omega=omega.value)
-        else:
-            # Replace omega and lambdify
-            cpdr_in_X_k = sym.lambdify(
-                ["X"], self.__poly_in_k.subs({"omega": omega.value}), "numpy"
-            )
+        # Replace omega to retrieve a function in X only.
+        # omega is a fixed quantity at this point, whereas we still have a range in X.
+        cpdr_in_X_k = functools.partial(self.numpy_poly_in_k, omega=omega.value)
 
         k_sol = []
         for i, X in enumerate(X_range):
 
-            if self.__numpy_polynomials:
-                cpdr_in_k = cpdr_in_X_k(X.value)
-                k_l = cpdr_in_k.roots()
-            else:
-                # We've lambified `X` but `k` is still a symbol. When we call it with an
-                # argument it substitutes `X` with the value and returns a
-                # `sympy.core.add.Add` object, that's why calling `numpy.roots`
-                # still works.
-                cpdr_in_k = cpdr_in_X_k(X.value)
-                k_l = np.roots(cpdr_in_k.as_poly().all_coeffs())
+            cpdr_in_k = cpdr_in_X_k(X.value)
+            k_l = cpdr_in_k.roots()
 
             valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
 
@@ -441,22 +415,9 @@ class Cpdr:
         roots = []
         for X in np.atleast_1d(X_range):
 
-            if self.__numpy_polynomials:
-                resonant_cpdr_in_omega = self.numpy_poly_in_omega(X)
-                omega_l = resonant_cpdr_in_omega.roots()
-            else:
-                psi = np.arctan(X)  # arctan of dimensionless returns radians
-
-                # Only omega is a symbol after this
-                resonant_cpdr_in_omega = self.__resonant_poly_in_omega.subs(
-                    {
-                        "X": X.value,
-                        "psi": psi.value,
-                    }
-                )
-
-                # Solve modified CPDR to obtain omega roots for given X
-                omega_l = np.roots(resonant_cpdr_in_omega.as_poly().all_coeffs())
+            # Solve resonant CPDR to obtain omega roots for given X
+            resonant_cpdr_in_omega = self.numpy_poly_in_omega(X)
+            omega_l = resonant_cpdr_in_omega.roots()
 
             # Categorise roots
             # Keep only real, positive and within bounds
@@ -535,21 +496,9 @@ class Cpdr:
             1d astropy Quantity representing the real and positive wavenumbers
             in radians per meter.
         """
-        if self.__numpy_polynomials:
-            cpdr_in_k = self.numpy_poly_in_k(X.value, omega.value)
-            k_l = cpdr_in_k.roots()
-        else:
-            # Substitute omega and X into CPDR.
-            # Only k is a symbol after this.
-            cpdr_in_k_omega = self.__poly_in_k.subs(
-                {
-                    "X": X.value,
-                    "omega": omega.value,
-                }
-            )
-
-            # Solve unmodified CPDR to obtain k roots for given X, omega
-            k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
+        # Solve CPDR to obtain k roots for given (X, omega)
+        cpdr_in_k = self.numpy_poly_in_k(X.value, omega.value)
+        k_l = cpdr_in_k.roots()
 
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
