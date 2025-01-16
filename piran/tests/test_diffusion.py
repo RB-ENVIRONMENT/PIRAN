@@ -7,7 +7,6 @@ from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
     UNIT_BKN,
     UNIT_DIFF,
@@ -31,8 +30,6 @@ class TestDiffusion:
         self.l_shell = 4.5
         self.mag_point = MagPoint(self.mlat_deg, self.l_shell)
         self.particles = ("e", "p+")
-        self.n_particles = len(self.particles)
-        self.cpdr_sym = CpdrSymbolic(self.n_particles)
         self.freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
 
     def test_get_power_spectral_density_1(self):
@@ -46,7 +43,6 @@ class TestDiffusion:
         wave_amplitude = (100 << u.pT).to(u.T)
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -89,7 +85,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -118,7 +113,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -145,7 +139,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -186,7 +179,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,

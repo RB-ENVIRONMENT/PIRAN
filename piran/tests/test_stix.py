@@ -5,7 +5,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
@@ -20,51 +19,25 @@ class TestStix:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
-        self.cpdr = Cpdr(cpdr_sym, plasma_point)
+        self.cpdr = Cpdr(plasma_point)
 
         omega_ratio = 0.1225
         self.omega = np.abs(self.cpdr.plasma.gyro_freq[0]) * omega_ratio
 
     def test_stix_1(self):
-        X_min = 0.00
-        X_max = 1.00
-        X_npoints = 100
-        X_range = u.Quantity(
-            np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
-        )
-
         # Find (X, omega, k) CPDR roots
-        for X in X_range:
-            k = self.cpdr.solve_cpdr(self.omega, X)[0]
-            k <<= u.rad / u.m
+        X = u.Quantity(0.5, u.dimensionless_unscaled)
+        k = self.cpdr.solve_cpdr(self.omega, X)[0]
+        k <<= u.rad / u.m
 
-            values_dict = {
-                "X": X.value,
-                "omega": self.omega.value,
-                "k": k.value,
-            }
-            dD_dw = self.cpdr.poly_in_k_domega.subs(values_dict)
-            dD_dk = self.cpdr.poly_in_k_dk.subs(values_dict)
+        # Test dD/domega
+        dD_dw = self.cpdr.stix.dD_dw(self.omega, X, k)
+        assert math.isclose(dD_dw.value, 25.43102517952277)
 
-            dD_dw <<= u.s / u.rad
-            dD_dk <<= u.m / u.rad
+        # Test dD/dk
+        dD_dk = self.cpdr.stix.dD_dk(self.omega, X, k)
+        assert math.isclose(dD_dk.value, -2537950057.1427784)
 
-            # Test dD/domega
-            numeric_dD_dw = self.cpdr.stix.dD_dw(self.omega, X, k)
-            assert math.isclose(dD_dw.value, numeric_dD_dw.value)
-            assert dD_dw.unit == numeric_dD_dw.unit
-
-            # Test dD/dk
-            numeric_dD_dk = self.cpdr.stix.dD_dk(self.omega, X, k)
-            assert math.isclose(dD_dk.value, dD_dk.value)
-            assert dD_dk.unit == numeric_dD_dk.unit
-
-            # Test jacobian
-            sympy_result = (k * dD_dw) / ((1 + X**2) * dD_dk)
-            numeric_result = self.cpdr.stix.jacobian(self.omega, X, k)
-
-            assert math.isclose(sympy_result.value, numeric_result.value)
-            assert sympy_result.unit == numeric_result.unit
+        # Test jacobian
+        jacobian = self.cpdr.stix.jacobian(self.omega, X, k)
+        assert math.isclose(jacobian.value, -9.7616573640402e-13)

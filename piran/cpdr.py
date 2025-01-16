@@ -6,7 +6,6 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
 
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
 from piran.helpers import (
     calc_lorentz_factor,
@@ -46,7 +45,6 @@ class Cpdr:
     @u.quantity_input
     def __init__(
         self,
-        symbolic: CpdrSymbolic,
         plasma: PlasmaPoint,
         energy: Quantity[u.Joule] | None = None,
         pitch_angle: Quantity[u.rad] | None = None,
@@ -54,20 +52,7 @@ class Cpdr:
         freq_cutoff_params: Sequence[float] | None = None,
         wave_filter: WaveFilter = WhistlerFilter(),
     ) -> None:
-        self.__symbolic = symbolic
         self.__plasma = plasma
-
-        # CPDR after replacing gyro and plasma frequencies
-        self.__poly_in_k = self.__symbolic.poly_in_k.subs(
-            {
-                "omega_c": tuple(self.__plasma.gyro_freq.value),
-                "omega_p": tuple(self.__plasma.plasma_freq.value),
-            }
-        )
-
-        # CPDR derivatives
-        self.__poly_in_k_dk = self.__poly_in_k.diff("k")
-        self.__poly_in_k_domega = self.__poly_in_k.diff("omega")
 
         # Stix parameters
         self.__stix = Stix(self.__plasma.plasma_freq, self.__plasma.gyro_freq)
@@ -187,15 +172,6 @@ class Cpdr:
             self.__p_par = self.__momentum * np.cos(self.__pitch_angle)
             self.__p_perp = self.__momentum * np.sin(self.__pitch_angle)
 
-            self.__resonant_poly_in_omega = self.__symbolic.resonant_poly_in_omega.subs(
-                {
-                    "omega_c": tuple(self.__plasma.gyro_freq.value),
-                    "omega_p": tuple(self.__plasma.plasma_freq.value),
-                    "gamma": self.__gamma.value,
-                    "n": self.__resonance,
-                    "v_par": self.__v_par.value,
-                }
-            )
             omega_mean_cutoff = freq_cutoff_params[0] * abs(self.__plasma.gyro_freq[0])
             omega_delta_cutoff = freq_cutoff_params[1] * abs(self.__plasma.gyro_freq[0])
             self.__omega_lc = (
@@ -209,32 +185,12 @@ class Cpdr:
             )
 
     @property
-    def symbolic(self):
-        return self.__symbolic
-
-    @property
     def plasma(self):
         return self.__plasma
 
     @property
-    def poly_in_k(self):
-        return self.__poly_in_k
-
-    @property
-    def poly_in_k_dk(self):
-        return self.__poly_in_k_dk
-
-    @property
-    def poly_in_k_domega(self):
-        return self.__poly_in_k_domega
-
-    @property
     def stix(self):
         return self.__stix
-
-    @property
-    def resonant_poly_in_omega(self):
-        return self.__resonant_poly_in_omega
 
     @property
     def energy(self):

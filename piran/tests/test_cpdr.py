@@ -5,7 +5,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
@@ -20,15 +19,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = 2
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         self.cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -131,15 +126,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(71, u.deg)
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -175,15 +166,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(70, u.deg)
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -211,15 +198,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -274,15 +257,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 << u.MeV
         alpha = Angle(89.5, u.deg)
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -308,15 +287,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 0.2
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 0.1 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = -3
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
