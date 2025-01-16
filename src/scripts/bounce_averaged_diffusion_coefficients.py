@@ -54,7 +54,6 @@ from scipy.integrate import simpson
 
 from piran.bounce import Bounce
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
     UNIT_DIFF,
     get_diffusion_coefficients,
@@ -230,7 +229,6 @@ def main():
     else:
         raise Exception("Wrong method")
 
-    cpdr_sym = CpdrSymbolic(len(particles))
     wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
     bounce = Bounce(equatorial_pitch_angle, MagPoint(0.0 << u.rad, l_shell))
 
@@ -279,7 +277,6 @@ def main():
         Dnpp = []
         for resonance in resonances:
             cpdr = Cpdr(
-                cpdr_sym,
                 plasma_point,
                 energy,
                 pitch_angle,

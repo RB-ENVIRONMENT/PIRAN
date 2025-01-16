@@ -53,7 +53,6 @@ from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
     UNIT_DIFF,
     get_diffusion_coefficients,
@@ -123,7 +122,6 @@ def main():
 
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-    cpdr_sym = CpdrSymbolic(len(particles))
     wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
     # Calculate integral of g(X) to normalise it.
@@ -161,9 +159,7 @@ def main():
         DnXap_this_res = []
         DnXpp_this_res = []
 
-        cpdr = Cpdr(
-            cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params
-        )
+        cpdr = Cpdr(plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
         # Depends only on energy and mass. Will be the same for different resonances.
         container["momentum"] = cpdr.momentum.value

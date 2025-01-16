@@ -8,7 +8,6 @@ from astropy.coordinates import Angle
 from matplotlib.ticker import LogFormatterMathtext
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.helpers import get_real_and_positive_roots
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
@@ -19,18 +18,8 @@ class Cpdr2(Cpdr):
         self,
         X,
     ):
-        psi = np.arctan(X)  # arctan of dimensionless returns radians
-
-        # Only omega is a symbol after this
-        resonant_cpdr_in_omega = self.resonant_poly_in_omega.subs(
-            {
-                "X": X.value,
-                "psi": psi.value,
-            }
-        )
-
         # Solve modified CPDR to obtain omega roots for given X
-        omega_l = np.roots(resonant_cpdr_in_omega.as_poly().all_coeffs())
+        omega_l = self.numpy_poly_in_omega(X.value).roots()
 
         # Categorise roots
         # Keep only real, positive and within bounds
@@ -50,17 +39,8 @@ class Cpdr2(Cpdr):
         Similar to solve_cpdr() but we return all real and
         positive roots, even if we have more than one.
         """
-        # Substitute omega and X into CPDR.
-        # Only k is a symbol after this.
-        cpdr_in_k_omega = self.poly_in_k.subs(
-            {
-                "X": X,
-                "omega": omega,
-            }
-        )
-
         # Solve unmodified CPDR to obtain k roots for given X, omega
-        k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
+        k_l = self.numpy_poly_in_k(X.value, omega.value)
 
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l)
@@ -261,10 +241,9 @@ def main():
     omega_npoints = 150
     # =================================================
 
-    cpdr_sym = CpdrSymbolic(len(particles))
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-    cpdr = Cpdr2(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+    cpdr = Cpdr2(plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
     # Geometric sequence between lower and upper cutoffs
     omega_range = np.geomspace(

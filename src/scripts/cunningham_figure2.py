@@ -30,7 +30,6 @@ from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
 from piran.magpoint import MagPoint
 from piran.normalisation import (
@@ -199,10 +198,7 @@ def main():
     particles = ("e", "p+")
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-    n_particles = len(particles)
-    cpdr_sym = CpdrSymbolic(n_particles)
-
-    cpdr = Cpdr(cpdr_sym, plasma_point)
+    cpdr = Cpdr(plasma_point)
 
     # Load data from Cunningham paper
     cunningham_dat_filepath = Path(args.path) / f"Figure2{args.figure}.dat"
