@@ -20,8 +20,8 @@ class Gaussian:
     .. math::
         f(x) = \\exp\\left(-\\frac{(x - \\mu)^2}{\\sigma^2}\\right)
 
-    for :math:`lower \\le x \\le upper`, and 0 otherwise. Note that this is not
-    normalised.
+    for :math:`\\text{lower} \\le x \\le \\text{upper}`, and :math:`f(x) = 0` otherwise.
+    Note that this is not normalised.
 
     Parameters
     ----------
