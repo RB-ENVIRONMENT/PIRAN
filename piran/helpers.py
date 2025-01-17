@@ -91,7 +91,7 @@ def calc_momentum(
     The relativistic momentum (:math:`p`) is given by:
 
     .. math::
-        p = \\sqrt{\\gamma^2 - 1}m_0c
+        p = m_0c\\sqrt{\\gamma^2 - 1}
 
     where :math:`c` is the speed of light, as shown in Glauert & Horne (2005), Equation 18.
 
