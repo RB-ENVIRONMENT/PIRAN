@@ -16,7 +16,7 @@ class TestGaussian:
 
         X_range = np.array([-2.0, -1.0, 0.0, 0.5, 1.0, 2.0])
         result = gauss.eval(X_range)
-        expected = [0.0, 0.0, 1.0, 0.471936, 0.049606, 0.0]
+        expected = [0.0, 0.0, 1.0, 0.47193649125899506, 0.04960600324212487, 0.0]
 
         for i in range(result.shape[0]):
-            assert math.isclose(result[i], expected[i], rel_tol=1e-05)
+            assert math.isclose(result[i], expected[i])
