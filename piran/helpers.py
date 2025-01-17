@@ -117,7 +117,7 @@ def calc_momentum(
     return np.sqrt(gamma**2 - 1) * mass * const.c
 
 
-def get_real_and_positive_roots(values, tol=1e-8):
+def get_real_and_positive_roots(values: np.ndarray, tol=1e-8) -> np.ndarray:
     """
     Filter a sequence of values (real or complex), returning only the real
     and positive values that are greater than the specified tolerance.
@@ -128,8 +128,8 @@ def get_real_and_positive_roots(values, tol=1e-8):
 
     Parameters
     ----------
-    values : array_like
-        A sequence (e.g., list, tuple, NumPy array) containing the values to be filtered.
+    values : numpy.ndarray
+        A NumPy array containing the values to be filtered.
     tol : float, optional
         The tolerance below which values are considered zero and thus excluded.
         We compare only the real part if the input is a complex number.
@@ -150,7 +150,7 @@ def get_real_and_positive_roots(values, tol=1e-8):
 
     Examples
     --------
-    >>> values = [-1 + 0j, 1.1 + 0.00000001j, 100 + 2j]
+    >>> values = np.array([-1 + 0j, 1.1 + 0.00000001j, 100 + 2j])
     >>> valid_roots = get_real_and_positive_roots(values)
     >>> print(valid_roots)
     [1.1]
