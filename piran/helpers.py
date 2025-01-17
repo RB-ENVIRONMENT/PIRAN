@@ -22,7 +22,7 @@ from astropy.units import Quantity
 def calc_lorentz_factor(
     E: Quantity[u.Joule],
     m: Quantity[u.kg],
-) -> float:
+) -> Quantity[u.dimensionless_unscaled]:
     """
     Calculate the Lorentz factor (:math:`\\gamma`) from the relativistic
     kinetic energy (:math:`E_k`) and rest mass (:math:`m_0`).
@@ -62,7 +62,7 @@ def calc_lorentz_factor(
 
     Returns
     -------
-    float
+    astropy.units.Quantity[u.dimensionless_unscaled]
         The Lorentz factor :math:`\\gamma`, a dimensionless quantity.
 
     See Also
@@ -97,7 +97,7 @@ def calc_momentum(
 
     Parameters
     ----------
-    gamma : float
+    gamma : astropy.units.Quantity[u.dimensionless_unscaled]
         The Lorentz factor, a dimensionless quantity.
     mass : astropy.units.Quantity[u.kg]
         The rest mass of the particle. Must have units convertible to kilograms.
