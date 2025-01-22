@@ -1,31 +1,46 @@
 """
-Defines the Gaussian class for use with Cpdr.
+The `gauss` module provides a class for representing and evaluating
+truncated Gaussian distributions.
+
+This module defines the `Gaussian` class, which allows users to create
+Gaussian distributions with specified lower and upper cutoffs. The
+`eval` method of the `Gaussian` class can then be used to evaluate
+the distribution at given locations.
 """
 
 import numpy as np
-import numpy.typing
 
 
 class Gaussian:
     """
-    Implements a Gaussian distribution.
+    Implements a truncated Gaussian distribution.
 
-    The form of the distribution is exp(-((X - peak)/width)**2)) for X between lower and
-    upper, or 0 otherwise.
+    The distribution is defined as:
+
+    .. math::
+        f(x) = \\exp\\left(-\\frac{(x - \\mu)^2}{\\sigma^2}\\right)
+
+    for :math:`\\text{lower} \\le x \\le \\text{upper}`, and :math:`f(x) = 0` otherwise.
+    Note that this is not normalised.
 
     Parameters
     ----------
     lower : float
-        The lower cutoff, below which Gaussian(X) returns 0.
-
+        The lower cutoff; values of *x* below this are treated as having zero probability.
     upper : float
-        The upper cutoff, above which Gaussian(X) returns 0.
-
+        The upper cutoff; values of *x* above this are treated as having zero probability.
     peak : float
-        The mean or expectation of the distribution.
-
+        The mean (:math:`\\mu`) or expectation of the distribution.
     width : float
-        The standard deviation of the distribution.
+        The standard deviation (:math:`\\sigma`) of the distribution.
+
+    Examples
+    --------
+    >>> X_min = 0.0
+    >>> X_max = 1.0
+    >>> X_m = 0.0
+    >>> X_w = 0.577
+    >>> gaussian = Gaussian(X_min, X_max, X_m, X_w)
     """
 
     def __init__(
@@ -36,19 +51,32 @@ class Gaussian:
         self._peak = peak
         self._width = width
 
-    def eval(self, X: float) -> numpy.typing.ArrayLike:
+    def eval(self, X: np.ndarray) -> np.ndarray:
         """
-        Return the value of the distribution at location(s) X.
+        Evaluate the Gaussian distribution at the given locations.
 
         Parameters
         ----------
-        X : numpy.typing.ArrayLike
-            The location(s) at which the distribution is to be sampled.
+        X : np.ndarray
+            The location(s) at which to evaluate the distribution.
 
         Returns
         -------
-        numpy.typing.ArrayLike
-            The value of the distribution at location(s) X.
+        np.ndarray
+            The value(s) of the Gaussian distribution at the given location(s).
+            Returns 0 if the input X is outside of the range [lower, upper].
+
+        Raises
+        ------
+        TypeError:
+            If the input X is of incorrect type (for example a list).
+
+        Examples
+        --------
+        >>> from astropy import units as u
+        >>> gaussian = Gaussian(0.0, 1.0, 0.0, 0.577)
+        >>> print(gaussian.eval([-1, 0, 1] * u.dimensionless_unscaled))
+        [0.       1.       0.049606]
         """
         return (
             (X >= self._lower)
