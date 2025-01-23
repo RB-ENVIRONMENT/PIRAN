@@ -364,14 +364,14 @@ class Cpdr:
 
         # Replace omega to retrieve a function in X only.
         # omega is a fixed quantity at this point, whereas we still have a range in X.
-        cpdr_in_X_k = functools.partial(self.numpy_poly_in_k, omega=omega.value)
+        roots_in_k_with_fixed_omega = functools.partial(
+            self.roots_in_k, omega=omega.value
+        )
 
         k_sol = []
         for i, X in enumerate(X_range):
 
-            cpdr_in_k = cpdr_in_X_k(X.value)
-            k_l = cpdr_in_k.roots()
-
+            k_l = roots_in_k_with_fixed_omega(X.value)
             valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
 
             is_desired_wave_mode = [self.filter(X, omega, k) for k in valid_k_l]
@@ -398,7 +398,7 @@ class Cpdr:
 
         return (A, B, C)
 
-    def numpy_poly_in_omega(self, X) -> Polynomial:
+    def resonant_roots_in_omega(self, X) -> Polynomial:
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
@@ -409,18 +409,18 @@ class Cpdr:
         ) / (self.v_par.value * np.cos(np.atan(X)).value)
         ck = const.c.value * k_res
 
-        # Bring everything together to return a single polynomial in omega
-        return A * ck**4 - B * ck**2 + C
+        # Bring everything together to solve a single polynomial in omega
+        return (A * ck**4 - B * ck**2 + C).roots()
 
-    def numpy_poly_in_k(self, X, omega) -> Polynomial:
+    def roots_in_k(self, X, omega) -> Polynomial:
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
 
-        # Sub in omega to return a single (biquadratic) polynomial in k
+        # Sub in omega and solve a single (biquadratic) polynomial in k
         return Polynomial(
             [C(omega), 0, -B(omega) * const.c.value**2, 0, A(omega) * const.c.value**4]
-        )
+        ).roots()
 
     @u.quantity_input
     def solve_resonant(
@@ -451,8 +451,7 @@ class Cpdr:
         for X in np.atleast_1d(X_range):
 
             # Solve resonant CPDR to obtain omega roots for given X
-            resonant_cpdr_in_omega = self.numpy_poly_in_omega(X)
-            omega_l = resonant_cpdr_in_omega.roots()
+            omega_l = self.resonant_roots_in_omega(X)
 
             # Categorise roots
             # Keep only real, positive and within bounds
@@ -532,8 +531,7 @@ class Cpdr:
             in radians per meter.
         """
         # Solve CPDR to obtain k roots for given (X, omega)
-        cpdr_in_k = self.numpy_poly_in_k(X.value, omega.value)
-        k_l = cpdr_in_k.roots()
+        k_l = self.roots_in_k(X.value, omega.value)
 
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m

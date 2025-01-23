@@ -19,7 +19,7 @@ class Cpdr2(Cpdr):
         X,
     ):
         # Solve modified CPDR to obtain omega roots for given X
-        omega_l = self.numpy_poly_in_omega(X.value).roots()
+        omega_l = self.resonant_roots_in_omega(X.value)
 
         # Categorise roots
         # Keep only real, positive and within bounds
@@ -40,7 +40,7 @@ class Cpdr2(Cpdr):
         positive roots, even if we have more than one.
         """
         # Solve unmodified CPDR to obtain k roots for given X, omega
-        k_l = self.numpy_poly_in_k(X.value, omega.value)
+        k_l = self.roots_in_k(X.value, omega.value)
 
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l)

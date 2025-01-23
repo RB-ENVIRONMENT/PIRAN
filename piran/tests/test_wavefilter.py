@@ -6,7 +6,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.helpers import get_real_and_positive_roots
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
@@ -186,11 +185,7 @@ class TestWaveFilter:
         # Confirm we are above omega_L0 but below omega_p
         assert plasma.plasma_freq[0] > omega > omega_L0
 
-        # Solve unmodified CPDR to obtain k roots for given X, omega
-        k_l = cpdr.numpy_poly_in_k(X.value, omega.value).roots()
-
-        # Keep only real and positive roots
-        valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
+        valid_k_l = cpdr.solve_cpdr(omega, X)
 
         # Confirm we have 2 roots
         assert valid_k_l.size == 2
