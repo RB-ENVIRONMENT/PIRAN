@@ -5,6 +5,7 @@ import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
+from numpy.polynomial.polynomial import Polynomial
 
 from piran.gauss import Gaussian
 from piran.helpers import (
@@ -60,96 +61,6 @@ class Cpdr:
         # Wave mode filter
         self.__wave_filter = wave_filter
 
-        # Polynomial cache
-        # We store several polynomials (**in omega**) for reuse later.
-        # In particular, we store polynomials corresponding to the Stix parameters and
-        # the A, B, and C polynomials from the CPDR, with the latter set split into
-        # constant and non-constant (i.e. dependent on X) parts.
-        #
-        # To obtain polynomials in `omega`, we need to remove `omega` from the
-        # denominator of each term in the Stix parameters.
-        # We do this by multiplying each Stix param by the lowest common multiple of
-        # all the denominators used in the parameter.
-
-        # For P this is easy: we just multiply by `omega**2`
-        self.__P = np.polynomial.polynomial.Polynomial(
-            [-np.sum(self.__plasma.plasma_freq.value**2), 0, 1]
-        )
-
-        # For S, R, and L we multiply by the following...
-        #
-        # NOTE: these correspond to the 'constant' (1) part of the parameter prior
-        # to multiplication; we add on the 'summation' part of the parameter below.
-        self.__S = np.polynomial.polynomial.Polynomial.fromroots(
-            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
-        )
-        self.__R = np.polynomial.polynomial.Polynomial.fromroots(
-            [0, *-self.__plasma.gyro_freq.value]
-        )
-        self.__L = np.polynomial.polynomial.Polynomial.fromroots(
-            [0, *self.__plasma.gyro_freq.value]
-        )
-
-        # ...which results in a product nested within the summation part of the
-        # parameter. The indices for the summation and the product both run over all
-        # particles within the plasma, *except that* the index on the product skips the
-        # current index being used in the summation.
-
-        for j in range(len(self.plasma.particles)):
-            S_i = 1
-            R_i = 1
-            L_i = 1
-            for i in range(len(self.plasma.particles)):
-                if i == j:
-                    continue
-                S_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                    [
-                        self.__plasma.gyro_freq[i].value,
-                        -self.__plasma.gyro_freq[i].value,
-                    ]
-                )
-                R_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                    [-self.__plasma.gyro_freq[i].value]
-                )
-                L_i *= np.polynomial.polynomial.Polynomial.fromroots(
-                    [self.__plasma.gyro_freq[i].value]
-                )
-
-            self.__S -= (self.__plasma.plasma_freq[j].value ** 2) * S_i
-            self.__R -= (self.__plasma.plasma_freq[j].value ** 2) * R_i
-            self.__L -= (self.__plasma.plasma_freq[j].value ** 2) * L_i
-
-        # Store parts of A, B, C polynomials with coefficients that are dependent on X
-
-        self.__Ax = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * self.__S
-        self.__Bx = np.polynomial.polynomial.Polynomial.fromroots([0, 0]) * (
-            (self.__R * self.__L) + (self.__P * self.__S)
-        )
-        self.__Cx = (
-            np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-            * self.__P
-            * self.__R
-            * self.__L
-        )
-
-        # Store remaining parts of A, B, C polynomials with constant coefficients
-
-        self.__Ac = self.__P * np.polynomial.polynomial.Polynomial.fromroots(
-            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
-        )
-        self.__Bc = (
-            2
-            * np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-            * self.__P
-            * self.__S
-        )
-        self.__Cc = (
-            np.polynomial.polynomial.Polynomial.fromroots([0, 0])
-            * self.__P
-            * self.__R
-            * self.__L
-        )
-
         if (
             energy is not None
             and pitch_angle is not None
@@ -183,6 +94,174 @@ class Cpdr:
             self.__wave_freqs = Gaussian(
                 self.__omega_lc, self.__omega_uc, omega_mean_cutoff, omega_delta_cutoff
             )
+
+        # Polynomial cache
+        #
+        # The CPDR in it's 'standard' form is a multivariate polynomial, given by
+        #
+        # .. math::
+        #    A(X, w) \mu^4 - B(X, w) \mu^2 + C = 0
+        #
+        # where 'w' is shorthand for 'omega', mu = ck/w, and
+        #
+        # .. math::
+        #    A(X, w) = SX^2 + P
+        #    B(X, w) = RLX^2 + PS(2 + X^2)
+        #    C(X, w) = PRL(1 + X^2)
+        #
+        # In particular, it is:
+        #
+        # - Quadratic in X
+        # - Biquadratic in k
+        # - Not a polynomial in omega
+        #
+        # Glauert & Horne 2005 states that by substituting the parallel component of k
+        # from the resonance condition into the CPDR, we can obtain a polynomial
+        # expression for the frequency omega.
+        #
+        # In practice, we have found that this requires some additional work. The CPDR
+        # is an equation that includes various occurrences of omega in the denominators
+        # of its many terms (originating from the Stix parameters and mu). Since the
+        # equation is 'CPDR = 0', we are able to 'multiply out' these omega from the
+        # denominators to obtain an equation that *is* a polynomial in omega.
+        #
+        # The multiplication factor we use is:
+        #
+        # .. math::
+        #    w^6 \prod_s (w + w_{c,s})(w - w_{c,s})
+        #
+        # where 'w' is shorthand for 'omega', 'w_c' is gyrofrequency, and the subscript
+        # 's' refers to a particular particle.
+        #
+        # This factor has been found by inspection of the CPDR and the Stix terms it is
+        # comprised of. Multiplying by this results in a polynomial in omega with order
+        # 6 + 2N (for a plasma comprised of N particle species), consistent with Glauert
+        # and Horne's description.
+        #
+        # We build the CPDR piece-by-piece from smaller polynomials in omega, stored as
+        # (private) class properties for convenient reuse. The fundamental building
+        # blocks are the Stix parameters, which again require multiplication by
+        # expressions involving omega in order to be given in polynomial form. We do not
+        # multiply anything by the whole 'multiplication factor' above; this applies to
+        # the _entire_ CPDR, of which the Stix parameters are just one contributing
+        # part. Once we begin combining Stix parameters to form the complete CPDR, we
+        # will consider what further expressions in omega we need to multiply each part
+        # by to ensure that each term has ultimately been multiplied by the same
+        # multiplication factor given above.
+        #
+        # The expression for P is given by:
+        #
+        # .. math::
+        #    1 - \sum_s \frac{w_{p,s}^2}{w^2}
+        #
+        # which we multiply by :math:`w^2`.
+        #
+        # The expression for S is given by:
+        #
+        # .. math::
+        #    1 - \sum_s \frac{w_{p,s}^2}{(w + w_{c,s})(w - w_{c,s})}
+        #
+        # which we multiply by :math:`\prod_s (w + w_{c,s})(w - w_{c,s})`.
+        #
+        # The expression for R is given by:
+        #
+        # .. math::
+        #    1 - \sum_s \frac{w_{p,s}^2}{w(w + w_{c,s})}
+        #
+        # which we multiply by :math:`w\prod_s (w + w_{c,s})`
+        #
+        # The expression for L is given by:
+        #
+        # .. math::
+        #    1 - \sum_s \frac{w_{p,s}^2}{w(w - w_{c,s})}
+        #
+        # which we multiply by :math:`w\prod_s (w - w_{c,s})`
+
+        # Following multiplication, P becomes a simple quadratic in `w`:
+
+        self.__P = Polynomial([-np.sum(self.__plasma.plasma_freq.value**2), 0, 1])
+
+        # For S, R, and L, the process is more complicated. Following multiplication:
+        #
+        # - the previously constant '1' term becomes a simple polynomial in `w`,
+        # - the summation becomes a summation over a product, where the product skips
+        #   the current index of summation (since this is the part that has been
+        #   'multiplied out').
+        #
+        # For example, our new expression for S looks like:
+        #
+        # .. math::
+        #    \prod_s (w + w_{c,s})(w - w_{c,s}) - \sum_j w_{p,j}^2 * \prod_{i \ne j} (w + w_{c,i})(w - w_{c,j})
+        #
+        # with R and L following similarly. Note that the indices s, i, and j here all
+        # run over all particles within the plasma.
+        #
+        # In all cases (S, R, L), we build these expressions up piece-by-piece by
+        # combining smaller polynomials. Starting with the first product term for each,
+        # we use Polynomial.fromroots to build a Polynomial:
+
+        self.__S = Polynomial.fromroots(
+            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
+        )
+        self.__R = Polynomial.fromroots([0, *-self.__plasma.gyro_freq.value])
+        self.__L = Polynomial.fromroots([0, *self.__plasma.gyro_freq.value])
+
+        # To handle the remaining part, the summation over the product, we use a
+        # double-for-loop and add to the existing term. The double-for-loop
+        # helps with skipping over an index in the product (the inner loop),
+        # although similar may be achieved with clever use of ndarrays.
+
+        for j in range(len(self.plasma.particles)):
+            S_i = 1
+            R_i = 1
+            L_i = 1
+            for i in range(len(self.plasma.particles)):
+                if i == j:
+                    continue
+                S_i *= Polynomial.fromroots(
+                    [
+                        self.__plasma.gyro_freq[i].value,
+                        -self.__plasma.gyro_freq[i].value,
+                    ]
+                )
+                R_i *= Polynomial.fromroots([-self.__plasma.gyro_freq[i].value])
+                L_i *= Polynomial.fromroots([self.__plasma.gyro_freq[i].value])
+
+            self.__S -= (self.__plasma.plasma_freq[j].value ** 2) * S_i
+            self.__R -= (self.__plasma.plasma_freq[j].value ** 2) * R_i
+            self.__L -= (self.__plasma.plasma_freq[j].value ** 2) * L_i
+
+        # Now returning to the expressions A(X, w), B(X, w), and C(X, w), we perform two
+        # modifications:
+        #
+        # - we 'absorb' the 1\w terms originating from mu into A, B ,C, and
+        # - we split A(X, w) into A_x(w) * X^2 + A_c(w) (and similar for B and C).
+        #
+        # The intention here is to group polynomials in omega and clearly demarcate
+        # parts that are constant-in-omega (A_c(w)) and X-dependent (A_x(w) * X^2)).
+        #
+        # This is also the point at which we need to ensure we have multiplied by a
+        # consistent multiplication factor across all the terms.
+        #
+        # For A_x, B_x, and C_x, this involves multiplying by an additional w^6, w^4,
+        # and w^2 respectively. When additionally accounting for the 1/w terms from mu,
+        # this actually results in multiplying each by a consistent w^2 (which we
+        # represent using Polynomial.fromroots([0,0])).
+
+        self.__Ax = Polynomial.fromroots([0, 0]) * self.__S
+        self.__Bx = Polynomial.fromroots([0, 0]) * (
+            (self.__R * self.__L) + (self.__P * self.__S)
+        )
+        self.__Cx = Polynomial.fromroots([0, 0]) * self.__P * self.__R * self.__L
+
+        # B_c, and C_c follow similarly. A_c is the exception, in which the 'missing'
+        # component is the product involving gyrofrequencies.
+
+        self.__Ac = self.__P * Polynomial.fromroots(
+            [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
+        )
+        self.__Bc = 2 * Polynomial.fromroots([0, 0]) * self.__P * self.__S
+        self.__Cc = Polynomial.fromroots([0, 0]) * self.__P * self.__R * self.__L
 
     @property
     def plasma(self):
@@ -319,13 +398,13 @@ class Cpdr:
 
         return (A, B, C)
 
-    def numpy_poly_in_omega(self, X) -> np.polynomial.polynomial.Polynomial:
+    def numpy_poly_in_omega(self, X) -> Polynomial:
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
 
         # Represent k in terms of omega
-        k_res = np.polynomial.polynomial.Polynomial.fromroots(
+        k_res = Polynomial.fromroots(
             [self.resonance * self.plasma.gyro_freq[0].value / self.gamma]
         ) / (self.v_par.value * np.cos(np.atan(X)).value)
         ck = const.c.value * k_res
@@ -333,13 +412,13 @@ class Cpdr:
         # Bring everything together to return a single polynomial in omega
         return A * ck**4 - B * ck**2 + C
 
-    def numpy_poly_in_k(self, X, omega) -> np.polynomial.polynomial.Polynomial:
+    def numpy_poly_in_k(self, X, omega) -> Polynomial:
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
 
         # Sub in omega to return a single (biquadratic) polynomial in k
-        return np.polynomial.polynomial.Polynomial(
+        return Polynomial(
             [C(omega), 0, -B(omega) * const.c.value**2, 0, A(omega) * const.c.value**4]
         )
 
