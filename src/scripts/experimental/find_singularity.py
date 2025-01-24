@@ -1,3 +1,22 @@
+# NOT WORKING AS OF 808baef1d2370d7c85e0848d77808b875187067e
+#
+# This uses CpdrSymbolic heavily, our old SymPy representation of the CPDR.
+# In particular, we need to be able to differentiate the resonant CPDR w.r.t omega and X.
+#
+# The derivative w.r.t omega is straightforward; we have a new
+# numpy.polynomial.polynomial.Polynomial representation of the CPDR already, so we
+# should just be able to use the deriv method:
+# https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.Polynomial.deriv.html#numpy.polynomial.polynomial.Polynomial.deriv
+#
+# The derivative w.r.t X is more complicated; the resonant CPDR is *not* a polynomial in
+# X (the resonance condition introduces cos(atan(X)) terms). Presumably we would need to
+# perform this differentiation manually and write a new function to return the result
+# (not horrible, but not trivial either).
+#
+# I've chosen to move this script into an 'experimental' folder to preserve our attempt
+# at solving this singularity-finding problem.
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
