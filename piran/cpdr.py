@@ -365,7 +365,7 @@ class Cpdr:
         # Replace omega to retrieve a function in X only.
         # omega is a fixed quantity at this point, whereas we still have a range in X.
         roots_in_k_with_fixed_omega = functools.partial(
-            self.roots_in_k, omega=omega.value
+            self.__roots_in_k, omega=omega.value
         )
 
         k_sol = []
@@ -388,7 +388,36 @@ class Cpdr:
 
         return k_sol
 
-    def __get_ABC_polynomials(self, X):
+    def __get_ABC_polynomials(
+        self, X: float
+    ) -> tuple[Polynomial, Polynomial, Polynomial]:
+        """
+        Given the tangent of wave normal angle `X=tan(psi)`, return polynomials
+        (in omega) for the A, B, and C parts of the resonant CPDR.
+
+        Note in particular that these polynomials have:
+
+        1. already been multiplied by the "resonant CPDR multiplication factor":
+
+        .. math::
+           w^6 \prod_s (w + w_{c,s})(w - w_{c,s})
+
+        where 'w' is shorthand for 'omega', 'w_c' is gyrofrequency, and the
+        subscript 's' refers to a particular particle.
+
+        2. have absorbed the `1/w` terms from the wave refractive index mu.
+
+        Parameters
+        ----------
+        X : float
+            Tangent of wave normal angle.
+
+        Returns
+        -------
+        A tuple of NumPy polynomials corresponding to the A, B, and C terms in
+        the CPDR. These are polynomials in 'omega' with 'X' fixed according to
+        the input parameter provided to this method.
+        """
 
         # Add X-dependent and 'constant' parts of A, B, and C polynomials together
         # to create larger polynomials (in omega).
@@ -398,7 +427,21 @@ class Cpdr:
 
         return (A, B, C)
 
-    def resonant_roots_in_omega(self, X) -> Polynomial:
+    def __resonant_roots_in_omega(self, X: float) -> np.ndarray:
+        """
+        Given the tangent of wave normal angle `X=tan(psi)`, simultaneously solve
+        the resonance condition and dispersion relation to obtain roots in `omega`.
+
+        Parameters
+        ----------
+        X : float
+            Tangent of wave normal angle.
+
+        Returns
+        -------
+        np.ndarray
+            Array containing the roots (in omega) of the resonant CPDR.
+        """
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
@@ -412,7 +455,29 @@ class Cpdr:
         # Bring everything together to solve a single polynomial in omega
         return (A * ck**4 - B * ck**2 + C).roots()
 
-    def roots_in_k(self, X, omega) -> Polynomial:
+    def __roots_in_k(self, X: float, omega: float) -> np.ndarray:
+        """
+        Given the tangent of wave normal angle `X=tan(psi)` and frequency `omega`,
+        solve the dispersion relation to obtain roots in `omega`.
+
+        Note that we use the same common base (provided by __get_ABC_polynomials)
+        as is used in __resonant_roots_in_omega. i.e. the equation we actually
+        solve here is the CPDR multiplied by the "resonant CPDR multiplication
+        factor". Mathematically, for a given (X, omega) this should yield the
+        same results for roots in 'k'.
+
+        Parameters
+        ----------
+        X : float
+            Tangent of wave normal angle.
+        omega : float
+            Wave frequency.
+
+        Returns
+        -------
+        np.ndarray
+            Array containing the roots (in 'k') of the CPDR.
+        """
 
         # Sub in X to return polynomials in omega for A, B, and C
         A, B, C = self.__get_ABC_polynomials(X)
@@ -451,7 +516,7 @@ class Cpdr:
         for X in np.atleast_1d(X_range):
 
             # Solve resonant CPDR to obtain omega roots for given X
-            omega_l = self.resonant_roots_in_omega(X)
+            omega_l = self.__resonant_roots_in_omega(X)
 
             # Categorise roots
             # Keep only real, positive and within bounds
@@ -531,7 +596,7 @@ class Cpdr:
             in radians per meter.
         """
         # Solve CPDR to obtain k roots for given (X, omega)
-        k_l = self.roots_in_k(X.value, omega.value)
+        k_l = self.__roots_in_k(X.value, omega.value)
 
         # Keep only real and positive roots
         valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
