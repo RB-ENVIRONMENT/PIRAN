@@ -1,10 +1,19 @@
+# NOT WORKING AS OF a14e5c2ba25e1d9c2740864b904e63b02e7562d7
+#
+# This relies on the experimental 'meshing' module, which does not work now that
+# SymPy has been removed from the codebase (but could be fixed).
+
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
+from piran.experimental.meshing import (
+    count_roots_per_bucket,
+    solve_resonant_for_x,
+    split_array,
+)
 from piran.magpoint import MagPoint
-from piran.meshing import count_roots_per_bucket, solve_resonant_for_x, split_array
 from piran.plasmapoint import PlasmaPoint
 
 

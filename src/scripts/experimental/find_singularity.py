@@ -1,4 +1,4 @@
-# NOT WORKING AS OF 808baef1d2370d7c85e0848d77808b875187067e
+# NOT WORKING AS OF a14e5c2ba25e1d9c2740864b904e63b02e7562d7
 #
 # This uses CpdrSymbolic heavily, our old SymPy representation of the CPDR.
 # In particular, we need to be able to differentiate the resonant CPDR w.r.t omega and X.
