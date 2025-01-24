@@ -400,7 +400,7 @@ class Cpdr:
         1. already been multiplied by the "resonant CPDR multiplication factor":
 
         .. math::
-           w^6 \prod_s (w + w_{c,s})(w - w_{c,s})
+           w^6 \\prod_s (w + w_{c,s})(w - w_{c,s})
 
         where 'w' is shorthand for 'omega', 'w_c' is gyrofrequency, and the
         subscript 's' refers to a particular particle.
@@ -449,7 +449,7 @@ class Cpdr:
         # Represent k in terms of omega
         k_res = Polynomial.fromroots(
             [self.resonance * self.plasma.gyro_freq[0].value / self.gamma]
-        ) / (self.v_par.value * np.cos(np.atan(X)).value)
+        ) / (self.v_par.value * np.cos(np.atan(X)))
         ck = const.c.value * k_res
 
         # Bring everything together to solve a single polynomial in omega
@@ -516,7 +516,7 @@ class Cpdr:
         for X in np.atleast_1d(X_range):
 
             # Solve resonant CPDR to obtain omega roots for given X
-            omega_l = self.__resonant_roots_in_omega(X)
+            omega_l = self.__resonant_roots_in_omega(X.value)
 
             # Categorise roots
             # Keep only real, positive and within bounds
