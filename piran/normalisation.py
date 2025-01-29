@@ -39,28 +39,17 @@ def compute_glauert_norm_factor(
     norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
     """
     # Given omega and X_range calculate wave number k,
-    # solution to the dispersion relation.
-    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)
+    # solution to the dispersion relation (while replacing NaN with 0)
+    wave_numbers = np.nan_to_num(cpdr.solve_cpdr_for_norm_factor(omega, X_range), False)
 
     eval_gx = wave_norm_angle_dist.eval(X_range)
 
-    evaluated_integrand = np.zeros_like(X_range, dtype=np.float64)
-    for i in range(evaluated_integrand.shape[0]):
-        X = X_range[i]
-        k = wave_numbers[i]
-
-        # We need this conditional here after refactoring
-        # this function and solve_cpdr_for_norm_factor() in
-        # commit ed48d76a9d8d1cfdffbe2113e986d94582e461cd.
-        # Without it, if one wave number from the list is NaN, then,
-        # for that index, `evaluated_integrand` becomes NaN which means
-        # that the integration fails (`integral` becomes NaN too).
-        if np.isnan(k):
-            evaluated_integrand[i] = 0.0
-        else:
-            evaluated_integrand[i] = (
-                eval_gx[i] * k.value * X * np.abs(cpdr.stix.jacobian(omega, X, k).value)
-            ) / ((1 + X**2) ** (1 / 2))
+    evaluated_integrand = (
+        eval_gx
+        * wave_numbers
+        * X_range
+        * np.abs(cpdr.stix.jacobian(omega, X_range, wave_numbers).value)
+    ) / ((1 + X_range**2) ** (1 / 2))
 
     # `simpson` returns a float
     # `trapezoid` returns a dimensionless `Quantity`

@@ -332,7 +332,7 @@ class Cpdr:
         self,
         omega: Quantity[u.rad / u.s],
         X_range: Quantity[u.dimensionless_unscaled],
-    ) -> Sequence[Quantity[u.rad / u.m]]:
+    ) -> Quantity[u.rad / u.m]:
         """
         Given wave frequency `omega`, solve the dispersion relation for each
         wave normal angle X=tan(psi) in `X_range` to get wave number `k`.
@@ -354,7 +354,7 @@ class Cpdr:
 
         Returns
         -------
-        k_sol : List[Quantity[u.rad / u.m]]
+        k_sol : Quantity[u.rad / u.m]
             The solutions are given in the same order as X_range.
             This means that each `(X, omega, k)` triplet is a solution
             to the cold plasma dispersion relation.
@@ -368,7 +368,7 @@ class Cpdr:
             self.__roots_in_k, omega=omega.value
         )
 
-        k_sol = []
+        k_sol = u.Quantity(np.zeros(X_range.size), u.rad / u.m)
         for i, X in enumerate(X_range):
 
             k_l = roots_in_k_with_fixed_omega(X.value)
@@ -378,9 +378,9 @@ class Cpdr:
             filtered_k = valid_k_l[is_desired_wave_mode]
 
             if filtered_k.size == 0:
-                k_sol.append(np.nan << u.rad / u.m)
+                k_sol[i] = np.nan << u.rad / u.m
             elif filtered_k.size == 1:
-                k_sol.append(filtered_k[0])
+                k_sol[i] = filtered_k[0]
             else:
                 raise AssertionError(
                     "In solve_cpdr_for_norm_factor we got more than 1 solutions for k"
