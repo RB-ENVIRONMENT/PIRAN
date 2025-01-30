@@ -356,9 +356,9 @@ class Cpdr:
         # although similar may be achieved with clever use of ndarrays.
 
         for j in range(len(self.plasma.particles)):
-            S_i = 1
-            R_i = 1
-            L_i = 1
+            S_i = Polynomial([1])
+            R_i = Polynomial([1])
+            L_i = Polynomial([1])
             for i in range(len(self.plasma.particles)):
                 if i == j:
                     continue
