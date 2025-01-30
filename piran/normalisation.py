@@ -1,5 +1,6 @@
 import numpy as np
 from astropy import units as u
+from astropy.coordinates import Angle
 from scipy.integrate import simpson, trapezoid
 
 from piran.cpdr import Cpdr
@@ -91,22 +92,13 @@ def compute_cunningham_norm_factor(
     norm_factor : astropy.units.quantity.Quantity[UNIT_NF]
     """
     # Given omega and X_range calculate wave number k,
-    # solution to the dispersion relation.
-    # We could add units here, but we'd only have to strip them further down.
-    wave_numbers = cpdr.solve_cpdr_for_norm_factor(omega, X_range)  # << u.rad / u.m
+    # solution to the dispersion relation (while replacing NaN with 0 in-place)
+    wave_numbers = np.nan_to_num(cpdr.solve_cpdr_for_norm_factor(omega, X_range), False)
 
-    norm_factor = np.zeros_like(X_range.value, dtype=np.float64)
-    for i in range(norm_factor.shape[0]):
-        X = X_range[i]
-        k = wave_numbers[i]
+    norm_factor = (
+        wave_numbers
+        * X_range
+        * np.abs(cpdr.stix.jacobian(omega, X_range, wave_numbers))
+    ) / (2 * Angle(np.pi, u.rad) ** 2 * (1 + X_range**2) ** (1 / 2))
 
-        if np.isnan(k):
-            norm_factor[i] = 0.0
-        else:
-            norm_factor[i] = (
-                k.value * X * np.abs(cpdr.stix.jacobian(omega, X, k).value)
-            ) / ((1 + X**2) ** (1 / 2))
-
-    norm_factor /= 2 * np.pi**2
-
-    return norm_factor << UNIT_NF
+    return norm_factor
