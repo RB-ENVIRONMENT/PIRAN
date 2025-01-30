@@ -11,7 +11,6 @@ Welcome to PIRAN's documentation!
    :caption: Modules:
 
    piran/cpdr
-   piran/cpdrsymbolic
    piran/diffusion
    piran/gauss
    piran/helpers
