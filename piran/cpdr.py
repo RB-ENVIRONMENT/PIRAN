@@ -449,7 +449,7 @@ class Cpdr:
         # Represent k in terms of omega
         k_res = Polynomial.fromroots(
             [self.resonance * self.plasma.gyro_freq[0].value / self.gamma]
-        ) / (self.v_par.value * np.cos(np.atan(X)))
+        ) / (self.v_par.value * np.cos(np.arctan(X)))
         ck = const.c.value * k_res
 
         # Bring everything together to solve a single polynomial in omega
