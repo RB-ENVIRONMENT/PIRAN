@@ -246,13 +246,13 @@ class Cpdr:
         # For A_x, B_x, and C_x, this involves multiplying by an additional w^6, w^4,
         # and w^2 respectively. When additionally accounting for the 1/w terms from mu,
         # this actually results in multiplying each by a consistent w^2 (which we
-        # represent using Polynomial.fromroots([0,0])).
+        # represent using Polynomial([0, 0 ,1])).
 
-        self.__Ax = Polynomial.fromroots([0, 0]) * self.__S
-        self.__Bx = Polynomial.fromroots([0, 0]) * (
+        self.__Ax = Polynomial([0, 0, 1]) * self.__S
+        self.__Bx = Polynomial([0, 0, 1]) * (
             (self.__R * self.__L) + (self.__P * self.__S)
         )
-        self.__Cx = Polynomial.fromroots([0, 0]) * self.__P * self.__R * self.__L
+        self.__Cx = Polynomial([0, 0, 1]) * self.__P * self.__R * self.__L
 
         # B_c, and C_c follow similarly. A_c is the exception, in which the 'missing'
         # component is the product involving gyrofrequencies.
@@ -260,8 +260,8 @@ class Cpdr:
         self.__Ac = self.__P * Polynomial.fromroots(
             [*self.__plasma.gyro_freq.value, *-self.__plasma.gyro_freq.value]
         )
-        self.__Bc = 2 * Polynomial.fromroots([0, 0]) * self.__P * self.__S
-        self.__Cc = Polynomial.fromroots([0, 0]) * self.__P * self.__R * self.__L
+        self.__Bc = 2 * Polynomial([0, 0, 1]) * self.__P * self.__S
+        self.__Cc = Polynomial([0, 0, 1]) * self.__P * self.__R * self.__L
 
     @property
     def plasma(self):
