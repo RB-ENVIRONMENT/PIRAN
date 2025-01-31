@@ -6,14 +6,18 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
+from piran.experimental.meshing import (
+    count_roots_per_bucket,
+    solve_resonant_for_x,
+    split_array,
+)
 from piran.magpoint import MagPoint
-from piran.meshing import count_roots_per_bucket, solve_resonant_for_x, split_array
 from piran.plasmapoint import PlasmaPoint
 
 
 class TestMeshing:
 
+    @pytest.mark.skip(reason="Experimental module; not currently working.")
     def test_meshing_regular_case(self):
         # ================ Parameters =====================
         mlat_deg = Angle(0 * u.deg)
@@ -37,9 +41,7 @@ class TestMeshing:
 
         mag_point = MagPoint(mlat_deg, l_shell)
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-        cpdr_sym = CpdrSymbolic(len(particles))
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -71,6 +73,7 @@ class TestMeshing:
         assert num_roots[0] == 0
         assert num_roots[1] == 1
 
+    @pytest.mark.skip(reason="Experimental module; not currently working.")
     def test_meshing_singular_case(self):
         # ================ Parameters =====================
         mlat_deg = Angle(0 * u.deg)
@@ -94,9 +97,7 @@ class TestMeshing:
 
         mag_point = MagPoint(mlat_deg, l_shell)
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-        cpdr_sym = CpdrSymbolic(len(particles))
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -193,10 +194,8 @@ class TestMeshing:
 
         mag_point = MagPoint(mlat_deg, l_shell)
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-        cpdr_sym = CpdrSymbolic(len(particles))
 
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,

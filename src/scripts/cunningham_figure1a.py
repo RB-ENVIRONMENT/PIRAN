@@ -19,7 +19,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
@@ -152,7 +151,6 @@ def main():
     xx = cunningham_figure_data[:, 0]
 
     particles = ("e", "p+")
-    cpdr_sym = CpdrSymbolic(len(particles))
 
     mlat_deg = Angle(0, u.deg)
     l_shell = 4.5
@@ -162,7 +160,7 @@ def main():
     for ii in range(len(ratio)):
         plasma_point = PlasmaPoint(mag_point, particles, ratio[ii])
 
-        cpdr = Cpdr(cpdr_sym, plasma_point)
+        cpdr = Cpdr(plasma_point)
 
         yy = np.zeros(xx.shape)
         for jj in range(xx.shape[0]):

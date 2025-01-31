@@ -6,7 +6,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.gauss import Gaussian
 from piran.magpoint import MagPoint
 from piran.normalisation import (
@@ -26,10 +25,7 @@ class TestNormalisationFactors:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
-        self.cpdr = Cpdr(cpdr_sym, plasma_point)
+        self.cpdr = Cpdr(plasma_point)
 
         omega_ratio = 0.1225
         self.omega = np.abs(self.cpdr.plasma.gyro_freq[0]) * omega_ratio

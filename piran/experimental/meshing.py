@@ -1,3 +1,9 @@
+# NOT WORKING AS OF a14e5c2ba25e1d9c2740864b904e63b02e7562d7
+#
+# This uses SymPy / CpdrSymbolic (now removed in favour of NumPy polynomials);
+# 'solve_resonant_for_X' no longer works. We would need a Cpdr method like
+# 'resonant_roots_in_X' (or perhaps psi) to restore this.
+
 from typing import List
 
 import numpy as np

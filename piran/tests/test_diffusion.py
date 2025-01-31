@@ -7,7 +7,6 @@ from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.diffusion import (
     UNIT_BKN,
     UNIT_DIFF,
@@ -31,8 +30,6 @@ class TestDiffusion:
         self.l_shell = 4.5
         self.mag_point = MagPoint(self.mlat_deg, self.l_shell)
         self.particles = ("e", "p+")
-        self.n_particles = len(self.particles)
-        self.cpdr_sym = CpdrSymbolic(self.n_particles)
         self.freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
 
     def test_get_power_spectral_density_1(self):
@@ -46,7 +43,6 @@ class TestDiffusion:
         wave_amplitude = (100 << u.pT).to(u.T)
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -89,7 +85,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -118,7 +113,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -129,8 +123,8 @@ class TestDiffusion:
         X = [0.1] << u.dimensionless_unscaled
         resonant_root = cpdr.solve_resonant(X)
 
-        phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
-        phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
+        phi_squared_11 = get_phi_squared(cpdr, resonant_root[0][1])  # neg k_par
+        phi_squared_12 = get_phi_squared(cpdr, resonant_root[0][0])  # pos k_par
 
         assert math.isclose(phi_squared_11, 0.460906, rel_tol=1e-6)
         assert math.isclose(phi_squared_12, 0.489358, rel_tol=1e-6)
@@ -145,7 +139,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -157,12 +150,12 @@ class TestDiffusion:
         resonant_root = cpdr.solve_resonant(X)
 
         # positive k_par
-        singular_term_11 = get_singular_term(cpdr, resonant_root[0][0])
+        singular_term_11 = get_singular_term(cpdr, resonant_root[0][1])
         assert singular_term_11.unit == u.m / u.s
         assert math.isclose(singular_term_11.value, -54012493.8, rel_tol=1e-7)
 
         # negative k_par
-        singular_term_12 = get_singular_term(cpdr, resonant_root[0][1])
+        singular_term_12 = get_singular_term(cpdr, resonant_root[0][0])
         assert singular_term_12.unit == u.m / u.s
         assert math.isclose(singular_term_12.value, 154355842.6, rel_tol=1e-7)
 
@@ -186,7 +179,6 @@ class TestDiffusion:
         resonance = -1
 
         cpdr = Cpdr(
-            self.cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -203,7 +195,7 @@ class TestDiffusion:
 
         DnXaa, DnXap, DnXpp = get_DnX_single_root(
             cpdr,
-            resonant_root[0][0],
+            resonant_root[0][1],
             normalised_intensity,
             phi_squared,
             singular_term,

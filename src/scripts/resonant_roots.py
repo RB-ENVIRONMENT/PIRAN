@@ -13,7 +13,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
@@ -205,8 +204,7 @@ def main():
 
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-    cpdr_sym = CpdrSymbolic(len(particles))
-    cpdr = Cpdr(cpdr_sym, plasma_point, energy, alpha, resonance, freq_cutoff_params)
+    cpdr = Cpdr(plasma_point, energy, alpha, resonance, freq_cutoff_params)
 
     print(f"Plasma: {particles}")
     print(f"Energy: {energy}")

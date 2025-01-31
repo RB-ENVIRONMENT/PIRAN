@@ -6,8 +6,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
-from piran.helpers import get_real_and_positive_roots
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 from piran.stix import Stix
@@ -161,15 +159,11 @@ class TestWaveFilter:
         plasma = PlasmaPoint(self.mag_point, self.particles, plasma_over_gyro_ratio)
         stix = Stix(plasma.plasma_freq, plasma.gyro_freq)
 
-        n_particles = len(self.particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0507018 * u.MeV
         alpha = Angle(0.125, u.deg)
         resonance = -5
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma,
             energy,
             alpha,
@@ -191,18 +185,7 @@ class TestWaveFilter:
         # Confirm we are above omega_L0 but below omega_p
         assert plasma.plasma_freq[0] > omega > omega_L0
 
-        cpdr_in_k_omega = cpdr.poly_in_k.subs(
-            {
-                "X": X.value,
-                "omega": omega.value,
-            }
-        )
-
-        # Solve unmodified CPDR to obtain k roots for given X, omega
-        k_l = np.roots(cpdr_in_k_omega.as_poly().all_coeffs())
-
-        # Keep only real and positive roots
-        valid_k_l = get_real_and_positive_roots(k_l) << u.rad / u.m
+        valid_k_l = cpdr.solve_cpdr(omega, X)
 
         # Confirm we have 2 roots
         assert valid_k_l.size == 2

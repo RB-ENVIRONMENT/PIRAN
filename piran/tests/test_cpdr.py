@@ -5,7 +5,6 @@ from astropy import units as u
 from astropy.coordinates import Angle
 
 from piran.cpdr import Cpdr
-from piran.cpdrsymbolic import CpdrSymbolic
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
 
@@ -20,15 +19,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = 2
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         self.cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -131,15 +126,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(71, u.deg)
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -159,11 +150,11 @@ class TestCpdr:
 
         assert len(roots[1]) == 2
         assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][0].omega.value, 34361.48787566025)
-        assert math.isclose(roots[1][0].k.value, 0.0003923953536206822)
+        assert math.isclose(roots[1][0].omega.value, 21197.313961282573)
+        assert math.isclose(roots[1][0].k.value, 0.00024206540583296198)
         assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][1].omega.value, 21197.313961282573)
-        assert math.isclose(roots[1][1].k.value, 0.00024206540583296198)
+        assert math.isclose(roots[1][1].omega.value, 34361.48787566025)
+        assert math.isclose(roots[1][1].k.value, 0.0003923953536206822)
 
     def test_cpdr_5(self):
         """No resonant frequency"""
@@ -175,15 +166,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(70, u.deg)
         resonance = 0
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -211,15 +198,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 * u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -235,35 +218,16 @@ class TestCpdr:
         assert len(roots[0]) == 2
 
         assert math.isclose(roots[0][0].X.value, 0.6)
-        assert math.isclose(roots[0][0].omega.value, 33719.09383836)
-        assert math.isclose(roots[0][0].k.value, 0.0004581964569)
-        assert math.isclose(roots[0][0].k_par.value, 0.0003929002204)
-        assert math.isclose(roots[0][0].k_perp.value, 0.0002357401322)
+        assert math.isclose(roots[0][0].omega.value, 14447.39075335)
+        assert math.isclose(roots[0][0].k.value, 0.0001954579422)
+        assert math.isclose(roots[0][0].k_par.value, -0.0001676038027)
+        assert math.isclose(roots[0][0].k_perp.value, 0.0001005622816)
 
         assert math.isclose(roots[0][1].X.value, 0.6)
-        assert math.isclose(roots[0][1].omega.value, 14447.39075335)
-        assert math.isclose(roots[0][1].k.value, 0.0001954579422)
-        assert math.isclose(roots[0][1].k_par.value, -0.0001676038027)
-        assert math.isclose(roots[0][1].k_perp.value, 0.0001005622816)
-
-        # Another test with very large X
-        X = [1e30] << u.dimensionless_unscaled
-        roots = cpdr.solve_resonant(X)
-
-        assert len(roots) == 1
-        assert len(roots[0]) == 2
-
-        assert math.isclose(roots[0][0].X.value, 1e30)
-        assert math.isclose(roots[0][0].omega.value, 20213.427803)
-        assert math.isclose(roots[0][0].k.value, 1.589966e09, rel_tol=1e-06)
-        assert math.isclose(roots[0][0].k_par.value, 9.7357355e-08, rel_tol=1e-08)
-        assert math.isclose(roots[0][0].k_perp.value, 1.589966e09, rel_tol=1e-06)
-
-        assert math.isclose(roots[0][1].X.value, 1e30)
-        assert math.isclose(roots[0][1].omega.value, 20206.733655)
-        assert math.isclose(roots[0][1].k.value, 1.589637e09, rel_tol=1e-06)
-        assert math.isclose(roots[0][1].k_par.value, -9.7337249e-08, rel_tol=1e-08)
-        assert math.isclose(roots[0][1].k_perp.value, 1.589637e09, rel_tol=1e-06)
+        assert math.isclose(roots[0][1].omega.value, 33719.09383836)
+        assert math.isclose(roots[0][1].k.value, 0.0004581964569)
+        assert math.isclose(roots[0][1].k_par.value, 0.0003929002204)
+        assert math.isclose(roots[0][1].k_perp.value, 0.0002357401322)
 
     def test_find_resonant_wavenumber_1(self):
         mlat_deg = Angle(0 * u.deg)
@@ -274,15 +238,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 1.5
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 1.0 << u.MeV
         alpha = Angle(89.5, u.deg)
         resonance = -1
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,
@@ -308,15 +268,11 @@ class TestCpdr:
         plasma_over_gyro_ratio = 0.2
         plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
 
-        n_particles = len(particles)
-        cpdr_sym = CpdrSymbolic(n_particles)
-
         energy = 0.1 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = -3
         freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
         cpdr = Cpdr(
-            cpdr_sym,
             plasma_point,
             energy,
             alpha,

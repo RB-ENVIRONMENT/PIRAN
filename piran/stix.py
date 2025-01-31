@@ -2,6 +2,8 @@
 Defines the Stix class.
 """
 
+import functools
+
 from astropy import constants as const
 from astropy import units as u
 
@@ -14,6 +16,7 @@ class Stix:
         self.__omega_p = omega_p
         self.__omega_c = omega_c
 
+    @functools.lru_cache
     @u.quantity_input
     def R(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
@@ -26,6 +29,7 @@ class Stix:
 
         return R
 
+    @functools.lru_cache
     @u.quantity_input
     def L(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
@@ -38,6 +42,7 @@ class Stix:
 
         return L
 
+    @functools.lru_cache
     @u.quantity_input
     def P(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         if not omega.isscalar:
@@ -50,14 +55,17 @@ class Stix:
 
         return P
 
+    @functools.lru_cache
     @u.quantity_input
     def S(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.R(omega) + self.L(omega)) / 2
 
+    @functools.lru_cache
     @u.quantity_input
     def D(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         return (self.R(omega) - self.L(omega)) / 2
 
+    @functools.lru_cache
     @u.quantity_input
     def dR(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
@@ -72,6 +80,7 @@ class Stix:
 
         return R
 
+    @functools.lru_cache
     @u.quantity_input
     def dL(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
@@ -86,6 +95,7 @@ class Stix:
 
         return L
 
+    @functools.lru_cache
     @u.quantity_input
     def dP(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         if not omega.isscalar:
@@ -98,10 +108,12 @@ class Stix:
 
         return P
 
+    @functools.lru_cache
     @u.quantity_input
     def dS(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         return (self.dR(omega) + self.dL(omega)) / 2
 
+    @functools.lru_cache
     @u.quantity_input
     def dD(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.s / u.rad]:
         return (self.dR(omega) - self.dL(omega)) / 2
