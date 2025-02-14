@@ -1,5 +1,7 @@
 # README
 
+[![CI Status](https://github.com/RB-ENVIRONMENT/PIRAN/actions/workflows/ci.yml/badge.svg)](https://github.com/RB-ENVIRONMENT/PIRAN/actions)
+
 To get started with development of code in this repo, run the following from a bash shell:
 
 - Create a virtual python environment via either `python -m venv env` or `conda create -n NAME python=VERSION` using a supported Python version (>=3.10).
