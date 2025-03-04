@@ -38,5 +38,5 @@ python_maximum_signature_line_length = 88
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "classic"
+html_theme = "furo"
 html_static_path = []
