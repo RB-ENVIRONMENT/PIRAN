@@ -56,7 +56,6 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup
       with:
         persist-credentials: false
     - name: Build HTML

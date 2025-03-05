@@ -20,4 +20,4 @@ runs:
       shell: bash
       run: |
         pip install --upgrade pip
-        pip install .[dev-extra,test,docs]
+        pip install .[dev-extra,test]
