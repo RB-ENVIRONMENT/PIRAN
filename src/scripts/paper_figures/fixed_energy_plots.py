@@ -32,11 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy import units as u
 from matplotlib.ticker import LogFormatterMathtext, MultipleLocator
-
-from misc import (
-    lists_are_identical,
-    load_and_post_process,
-)
+from misc import lists_are_identical, load_and_post_process
 
 
 def plot_figure(
@@ -95,7 +91,9 @@ def format_figure(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    ax.text(ratio1_loc[0], ratio1_loc[1], r"$\omega_{\text{pe}}/\omega_{\text{ce}}=1.5$")
+    ax.text(
+        ratio1_loc[0], ratio1_loc[1], r"$\omega_{\text{pe}}/\omega_{\text{ce}}=1.5$"
+    )
     ax.text(ratio2_loc[0], ratio2_loc[1], r"$\omega_{\text{pe}}/\omega_{\text{ce}}=10$")
 
     ax.legend(loc=legend_loc)
@@ -109,7 +107,7 @@ def format_figure(
 
 
 def main():
-    bounce =  # True or False
+    bounce = False  # True or False
 
     # Paths to results
     path_to_glauert1 = ""  # Glauert norm factor, 1.5 ratio
@@ -118,17 +116,17 @@ def main():
     path_to_cunningham2 = ""  # Cunningham norm factor, 10 ratio
 
     # Load all data
-    xx_g1, yy_aa_g1, yy_aE_g1, yy_EE_g1, method_g1, ratio_g1, X_max_g1, energy_g1 = load_and_post_process(
-        path_to_glauert1, bounce, True
+    xx_g1, yy_aa_g1, yy_aE_g1, yy_EE_g1, method_g1, ratio_g1, X_max_g1, energy_g1 = (
+        load_and_post_process(path_to_glauert1, bounce, True)
     )
-    xx_g2, yy_aa_g2, yy_aE_g2, yy_EE_g2, method_g2, ratio_g2, X_max_g2, energy_g2 = load_and_post_process(
-        path_to_glauert2, bounce, True
+    xx_g2, yy_aa_g2, yy_aE_g2, yy_EE_g2, method_g2, ratio_g2, X_max_g2, energy_g2 = (
+        load_and_post_process(path_to_glauert2, bounce, True)
     )
-    xx_c1, yy_aa_c1, yy_aE_c1, yy_EE_c1, method_c1, ratio_c1, X_max_c1, energy_c1 = load_and_post_process(
-        path_to_cunningham1, bounce, True
+    xx_c1, yy_aa_c1, yy_aE_c1, yy_EE_c1, method_c1, ratio_c1, X_max_c1, energy_c1 = (
+        load_and_post_process(path_to_cunningham1, bounce, True)
     )
-    xx_c2, yy_aa_c2, yy_aE_c2, yy_EE_c2, method_c2, ratio_c2, X_max_c2, energy_c2 = load_and_post_process(
-        path_to_cunningham2, bounce, True
+    xx_c2, yy_aa_c2, yy_aE_c2, yy_EE_c2, method_c2, ratio_c2, X_max_c2, energy_c2 = (
+        load_and_post_process(path_to_cunningham2, bounce, True)
     )
 
     # Check that the parameters are correct
@@ -204,13 +202,13 @@ def main():
             legend_loc_aE = "upper left"
             legend_loc_EE = "upper left"
 
-            ratio1_loc_aa = (32, 4 * 10 ** -7)
-            ratio1_loc_aE = (32, 4 * 10 ** -7)
-            ratio1_loc_EE = (32, 3 * 10 ** -7)
+            ratio1_loc_aa = (32, 4 * 10**-7)
+            ratio1_loc_aE = (32, 4 * 10**-7)
+            ratio1_loc_EE = (32, 3 * 10**-7)
 
-            ratio2_loc_aa = (64, 8 * 10 ** -6)
-            ratio2_loc_aE = (64, 1 * 10 ** -6)
-            ratio2_loc_EE = (64, 1 * 10 ** -6)
+            ratio2_loc_aa = (64, 8 * 10**-6)
+            ratio2_loc_aE = (64, 1 * 10**-6)
+            ratio2_loc_EE = (64, 1 * 10**-6)
     else:
         if energy.to(u.keV).value == 10:
             y_exp_limits_aa = (-7, 0)
@@ -221,13 +219,13 @@ def main():
             legend_loc_aE = "upper left"
             legend_loc_EE = "upper left"
 
-            ratio1_loc_aa = (32, 2 * 10 ** -6)
-            ratio1_loc_aE = (32, 1 * 10 ** -6)
-            ratio1_loc_EE = (32, 3 * 10 ** -7)
+            ratio1_loc_aa = (32, 2 * 10**-6)
+            ratio1_loc_aE = (32, 1 * 10**-6)
+            ratio1_loc_EE = (32, 3 * 10**-7)
 
-            ratio2_loc_aa = (64, 8 * 10 ** -6)
-            ratio2_loc_aE = (64, 1 * 10 ** -6)
-            ratio2_loc_EE = (64, 3 * 10 ** -7)
+            ratio2_loc_aa = (64, 8 * 10**-6)
+            ratio2_loc_aE = (64, 1 * 10**-6)
+            ratio2_loc_EE = (64, 3 * 10**-7)
         elif energy.to(u.keV).value == 100:
             y_exp_limits_aa = (-7, 0)
             y_exp_limits_aE = (-7, 0)
@@ -237,13 +235,13 @@ def main():
             legend_loc_aE = "upper left"
             legend_loc_EE = "upper left"
 
-            ratio1_loc_aa = (13, 4 * 10 ** -3)
-            ratio1_loc_aE = (10, 5 * 10 ** -4)
-            ratio1_loc_EE = (18, 2 * 10 ** -4)
+            ratio1_loc_aa = (13, 4 * 10**-3)
+            ratio1_loc_aE = (10, 5 * 10**-4)
+            ratio1_loc_EE = (18, 2 * 10**-4)
 
-            ratio2_loc_aa = (35, 5 * 10 ** -6)
-            ratio2_loc_aE = (40, 1 * 10 ** -6)
-            ratio2_loc_EE = (44, 3 * 10 ** -7)
+            ratio2_loc_aa = (35, 5 * 10**-6)
+            ratio2_loc_aE = (40, 1 * 10**-6)
+            ratio2_loc_EE = (44, 3 * 10**-7)
         elif energy.to(u.keV).value == 500:
             y_exp_limits_aa = (-7, 0)
             y_exp_limits_aE = (-7, 0)
@@ -253,13 +251,13 @@ def main():
             legend_loc_aE = "upper left"
             legend_loc_EE = "upper left"
 
-            ratio1_loc_aa = (13, 1 * 10 ** -4)
-            ratio1_loc_aE = (13, 2 * 10 ** -5)
-            ratio1_loc_EE = (17, 9 * 10 ** -6)
+            ratio1_loc_aa = (13, 1 * 10**-4)
+            ratio1_loc_aE = (13, 2 * 10**-5)
+            ratio1_loc_EE = (17, 9 * 10**-6)
 
-            ratio2_loc_aa = (54, 4 * 10 ** -6)
-            ratio2_loc_aE = (46, 1 * 10 ** -6)
-            ratio2_loc_EE = (43, 3 * 10 ** -7)
+            ratio2_loc_aa = (54, 4 * 10**-6)
+            ratio2_loc_aE = (46, 1 * 10**-6)
+            ratio2_loc_EE = (43, 3 * 10**-7)
         elif energy.to(u.keV).value == 1000:
             y_exp_limits_aa = (-7, 0)
             y_exp_limits_aE = (-7, 0)
@@ -269,17 +267,44 @@ def main():
             legend_loc_aE = "upper left"
             legend_loc_EE = "upper left"
 
-            ratio1_loc_aa = (20, 3 * 10 ** -5)
-            ratio1_loc_aE = (18, 3 * 10 ** -6)
-            ratio1_loc_EE = (21, 2 * 10 ** -6)
+            ratio1_loc_aa = (20, 3 * 10**-5)
+            ratio1_loc_aE = (18, 3 * 10**-6)
+            ratio1_loc_EE = (21, 2 * 10**-6)
 
-            ratio2_loc_aa = (47, 4 * 10 ** -6)
-            ratio2_loc_aE = (55, 1 * 10 ** -6)
-            ratio2_loc_EE = (59, 3 * 10 ** -7)
+            ratio2_loc_aa = (47, 4 * 10**-6)
+            ratio2_loc_aE = (55, 1 * 10**-6)
+            ratio2_loc_EE = (59, 3 * 10**-7)
 
-    format_figure(ax_aa, energy, xlabel, ylabel_aa, y_exp_limits_aa, legend_loc_aa, ratio1_loc_aa, ratio2_loc_aa)
-    format_figure(ax_aE, energy, xlabel, ylabel_aE, y_exp_limits_aE, legend_loc_aE, ratio1_loc_aE, ratio2_loc_aE)
-    format_figure(ax_EE, energy, xlabel, ylabel_EE, y_exp_limits_EE, legend_loc_EE, ratio1_loc_EE, ratio2_loc_EE)
+    format_figure(
+        ax_aa,
+        energy,
+        xlabel,
+        ylabel_aa,
+        y_exp_limits_aa,
+        legend_loc_aa,
+        ratio1_loc_aa,
+        ratio2_loc_aa,
+    )
+    format_figure(
+        ax_aE,
+        energy,
+        xlabel,
+        ylabel_aE,
+        y_exp_limits_aE,
+        legend_loc_aE,
+        ratio1_loc_aE,
+        ratio2_loc_aE,
+    )
+    format_figure(
+        ax_EE,
+        energy,
+        xlabel,
+        ylabel_EE,
+        y_exp_limits_EE,
+        legend_loc_EE,
+        ratio1_loc_EE,
+        ratio2_loc_EE,
+    )
 
     fig_aa.tight_layout()
     fig_aE.tight_layout()

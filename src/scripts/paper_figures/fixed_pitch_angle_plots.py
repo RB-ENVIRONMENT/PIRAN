@@ -23,13 +23,8 @@ Usage:
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy import units as u
 from matplotlib.ticker import FuncFormatter, LogFormatterMathtext
-
-from misc import (
-    lists_are_identical,
-    load_and_post_process,
-)
+from misc import lists_are_identical, load_and_post_process
 
 
 def plot_figure(
@@ -103,16 +98,18 @@ def main():
     bounce = False
 
     # Load all data
-    xx_g, yy_aa_g, yy_aE_g, yy_EE_g, method_g, ratio_g, X_max_g, pitch_angle_g = load_and_post_process(
-        path_to_glau, bounce, False
+    xx_g, yy_aa_g, yy_aE_g, yy_EE_g, method_g, ratio_g, X_max_g, pitch_angle_g = (
+        load_and_post_process(path_to_glau, bounce, False)
     )
-    xx_c, yy_aa_c, yy_aE_c, yy_EE_c, method_c, ratio_c, X_max_c, pitch_angle_c = load_and_post_process(
-        path_to_cunn, bounce, False
+    xx_c, yy_aa_c, yy_aE_c, yy_EE_c, method_c, ratio_c, X_max_c, pitch_angle_c = (
+        load_and_post_process(path_to_cunn, bounce, False)
     )
 
     # Check that the parameters are correct
     if not (ratio_g == ratio_c and ratio_g in [0.75, 1.5, 10.0]):
-        raise ValueError("Check plasma-to-gyro ratios. Must be same and one of 0.75, 1.5 or 10.0")
+        raise ValueError(
+            "Check plasma-to-gyro ratios. Must be same and one of 0.75, 1.5 or 10.0"
+        )
     if not (pitch_angle_g == pitch_angle_c == 0.125):
         raise ValueError("Check pitch angles. Must be 0.125.")
     if not (method_g == 0 and method_c == 1):
@@ -175,9 +172,36 @@ def main():
         legend_loc_aE = "upper right"
         legend_loc_EE = "upper right"
 
-    format_figure(ax_aa, ratio, pitch_angle, X_max, xlabel, ylabel_aa, y_exp_limits_aa, legend_loc_aa)
-    format_figure(ax_aE, ratio, pitch_angle, X_max, xlabel, ylabel_aE, y_exp_limits_aE, legend_loc_aE)
-    format_figure(ax_EE, ratio, pitch_angle, X_max, xlabel, ylabel_EE, y_exp_limits_EE, legend_loc_EE)
+    format_figure(
+        ax_aa,
+        ratio,
+        pitch_angle,
+        X_max,
+        xlabel,
+        ylabel_aa,
+        y_exp_limits_aa,
+        legend_loc_aa,
+    )
+    format_figure(
+        ax_aE,
+        ratio,
+        pitch_angle,
+        X_max,
+        xlabel,
+        ylabel_aE,
+        y_exp_limits_aE,
+        legend_loc_aE,
+    )
+    format_figure(
+        ax_EE,
+        ratio,
+        pitch_angle,
+        X_max,
+        xlabel,
+        ylabel_EE,
+        y_exp_limits_EE,
+        legend_loc_EE,
+    )
 
     fig_aa.tight_layout()
     fig_aE.tight_layout()

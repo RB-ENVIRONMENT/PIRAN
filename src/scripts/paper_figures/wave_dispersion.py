@@ -35,6 +35,7 @@ class NullFilter(WaveFilter):
     """
     A filter that accepts all inputs.
     """
+
     @u.quantity_input
     def filter(
         self,
@@ -184,7 +185,12 @@ def main():
     energy = 1.0 << u.MeV
     alpha = Angle(45, u.deg)
     resonance = -1
-    freq_cutoff_params = (0.5, 0.5, -1 + 1e-10, 1e5)  # force omega_lc to be zero and omega_uc a very large value
+    freq_cutoff_params = (
+        0.5,
+        0.5,
+        -1 + 1e-10,
+        1e5,
+    )  # force omega_lc to be zero and omega_uc a very large value
 
     X_min = 0.0
     X_max = 20.0
@@ -200,12 +206,20 @@ def main():
         mag_point = MagPoint(mlat_deg, l_shell)
         plasma_point = PlasmaPoint(mag_point, particles, ratio)
         wave_filter = NullFilter()
-        cpdr = Cpdr(plasma_point, energy, alpha, resonance, freq_cutoff_params, wave_filter)
+        cpdr = Cpdr(
+            plasma_point, energy, alpha, resonance, freq_cutoff_params, wave_filter
+        )
 
         # Geometric sequence between lower and upper cutoffs
-        omega_range = u.Quantity(np.geomspace(
-            cpdr.omega_lc.value, cpdr.omega_uc.value, num=omega_npoints, endpoint=True
-        ), unit=cpdr.omega_lc.unit)
+        omega_range = u.Quantity(
+            np.geomspace(
+                cpdr.omega_lc.value,
+                cpdr.omega_uc.value,
+                num=omega_npoints,
+                endpoint=True,
+            ),
+            unit=cpdr.omega_lc.unit,
+        )
 
         print(f"Plasma: {particles}")
         print(f"Energy: {energy}")
@@ -226,7 +240,9 @@ def main():
         print("Lower hybrid frequency from Artemyev 2016")
         omega_lh = np.sqrt(
             np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]
-        ) / np.sqrt(1 + (cpdr.plasma.gyro_freq[0] ** 2 / cpdr.plasma.plasma_freq[0] ** 2))
+        ) / np.sqrt(
+            1 + (cpdr.plasma.gyro_freq[0] ** 2 / cpdr.plasma.plasma_freq[0] ** 2)
+        )
         print(f"omega_lh: {omega_lh:.1f}")
         print(
             f"approximate omega_lh: {np.sqrt(np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]):.1f}"
@@ -234,7 +250,9 @@ def main():
         print()
 
         print("Upper hybrid frequency from Kurth 2015")
-        omega_uh = np.sqrt(cpdr.plasma.gyro_freq[0] ** 2 + cpdr.plasma.plasma_freq[0] ** 2)
+        omega_uh = np.sqrt(
+            cpdr.plasma.gyro_freq[0] ** 2 + cpdr.plasma.plasma_freq[0] ** 2
+        )
         print(f"omega_uh: {omega_uh:.1f}")
         print(f"\n{'=' * 80}\n")
 

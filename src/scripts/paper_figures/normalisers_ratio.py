@@ -89,7 +89,9 @@ def main():
 
     for ii, X_max in enumerate(X_max_l):
         X_npoints = X_npoints_l[ii]
-        X_range = u.Quantity(np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled)
+        X_range = u.Quantity(
+            np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
+        )
         wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
 
         for jj, plasma_over_gyro_ratio in enumerate(plasma_over_gyro_ratio_l):
@@ -108,7 +110,9 @@ def main():
             fig, ax = plt.subplots()
 
             for kk, omega_ratio in enumerate(omega_ratios_l):
-                omega = (np.abs(cpdr.plasma.gyro_freq[0]) * omega_ratio)  # Electron gyrofrequency * ratio
+                omega = (
+                    np.abs(cpdr.plasma.gyro_freq[0]) * omega_ratio
+                )  # Electron gyrofrequency * ratio
 
                 # Glauert's norm factor
                 # For Glauert's norm factor use a uniform distribution
@@ -116,15 +120,24 @@ def main():
                 # We use Simpson's rule for the integration.
                 resonance_cone_angle = -cpdr.stix.P(omega) / cpdr.stix.S(omega)
                 X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
-                print(f"{plasma_over_gyro_ratio=}, {omega_ratio=}, X_max={X_max.value}, epsilon * sqrt(res_cone_angle)={epsilon * np.sqrt(resonance_cone_angle).value}, X_upper={X_upper.value}")
+                print(
+                    f"{plasma_over_gyro_ratio=}, {omega_ratio=}, X_max={X_max.value}, epsilon * sqrt(res_cone_angle)={epsilon * np.sqrt(resonance_cone_angle).value}, X_upper={X_upper.value}"
+                )
                 X_range_glauert = X_range[X_range <= X_upper]
-                norm_factor_glauert = compute_glauert_norm_factor(cpdr, omega, X_range_glauert, wave_norm_angle_dist, method="simpson")
+                norm_factor_glauert = compute_glauert_norm_factor(
+                    cpdr, omega, X_range_glauert, wave_norm_angle_dist, method="simpson"
+                )
 
                 xaxis_max = epsilon * np.sqrt(resonance_cone_angle)
-                xaxis_discretisation = u.Quantity(np.linspace(xaxis_min[kk], xaxis_max, xaxis_npoints), unit=u.dimensionless_unscaled)
+                xaxis_discretisation = u.Quantity(
+                    np.linspace(xaxis_min[kk], xaxis_max, xaxis_npoints),
+                    unit=u.dimensionless_unscaled,
+                )
 
                 # Cunningham's norm factors
-                norm_factors_cunningham = compute_cunningham_norm_factor(cpdr, omega, xaxis_discretisation)
+                norm_factors_cunningham = compute_cunningham_norm_factor(
+                    cpdr, omega, xaxis_discretisation
+                )
 
                 # Calculate integral of g(X) to normalise it, using Simpson's rule.
                 eval_gx = wave_norm_angle_dist.eval(X_range)
@@ -142,8 +155,16 @@ def main():
                 comments_dat_file += f"Column {column_id_ratio + 1} is the ratio of equation 4 to equation 5 from Cunningham 2023 using the X in column {column_id_xaxis + 1} when Xmax={X_max}, the ratio of the plasma frequency to the unsigned electron gyrofrequency is {plasma_over_gyro_ratio} and the ratio of the wave frequency to the unsigned electron gyrofrequency is {omega_ratio}\n"
 
                 # Plot
-                ax.loglog(xaxis_discretisation, ratio, color=colours[kk], linestyle=linestyles[kk], label=rf"$\omega$/$\omega_{{ce}}$={omega_ratio}")
-                format_figure(ax, xticks[ii], yticks[ii], plasma_over_gyro_ratio, "lower left")
+                ax.loglog(
+                    xaxis_discretisation,
+                    ratio,
+                    color=colours[kk],
+                    linestyle=linestyles[kk],
+                    label=rf"$\omega$/$\omega_{{ce}}$={omega_ratio}",
+                )
+                format_figure(
+                    ax, xticks[ii], yticks[ii], plasma_over_gyro_ratio, "lower left"
+                )
                 fig.tight_layout()
 
                 fig.savefig(f"{filename}.png", dpi=300)

@@ -129,7 +129,12 @@ def format_figure(
     ax.xaxis.set_minor_locator(MultipleLocator(1))
 
     yticks = [0.1, lower_cutoff, upper_cutoff, 1.0]
-    yticks_labels = [str(yticks[0]), r"$\frac{\omega_{\text{LC}}}{| \Omega_e |}$", r"$\frac{\omega_{\text{UC}}}{| \Omega_e |}$", str(yticks[-1])]
+    yticks_labels = [
+        str(yticks[0]),
+        r"$\frac{\omega_{\text{LC}}}{| \Omega_e |}$",
+        r"$\frac{\omega_{\text{UC}}}{| \Omega_e |}$",
+        str(yticks[-1]),
+    ]
     ax.set_yticks(yticks, labels=yticks_labels)
     ax.set_yticks(np.arange(0.2, 1.0, 0.1), labels=[], minor=True)
 
@@ -142,7 +147,9 @@ def format_figure(
     ax.set_xlabel(r"$k \frac{c}{| \Omega_e |}$")
     ax.set_ylabel(r"$\frac{\omega}{| \Omega_e |}$")
 
-    ax.set_title(rf"E={energy_name}, $\alpha={cpdr.alpha.deg}^\circ, \psi={psi.to(u.deg).value:.2f}^\circ$")
+    ax.set_title(
+        rf"E={energy_name}, $\alpha={cpdr.alpha.deg}^\circ, \psi={psi.to(u.deg).value:.2f}^\circ$"
+    )
 
     ax.legend(bbox_to_anchor=(1.02, 0.5), loc="center left", prop={"size": 8})
 
@@ -193,7 +200,9 @@ def main():
                 print(f"Energy: {energy}")
                 print(f"Pitch angle: {alpha}")
                 print(f"Electron plasma-to-gyro ratio: {plasma_over_gyro_ratio}")
-                print(f"Electron gyrofrequency (modulus): {np.abs(cpdr.plasma.gyro_freq[0]):.1f}")
+                print(
+                    f"Electron gyrofrequency (modulus): {np.abs(cpdr.plasma.gyro_freq[0]):.1f}"
+                )
                 print(f"Electron plasma frequency: {cpdr.plasma.plasma_freq[0]:.1f}")
                 print(f"Proton gyrofrequency: {cpdr.plasma.gyro_freq[1]:.1f}")
                 print(f"Proton plasma frequency: {cpdr.plasma.plasma_freq[1]:.1f}")
@@ -207,7 +216,10 @@ def main():
                 print("Lower hybrid frequency from Artemyev 2016")
                 omega_lh = np.sqrt(
                     np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]
-                ) / np.sqrt(1 + (cpdr.plasma.gyro_freq[0] ** 2 / cpdr.plasma.plasma_freq[0] ** 2))
+                ) / np.sqrt(
+                    1
+                    + (cpdr.plasma.gyro_freq[0] ** 2 / cpdr.plasma.plasma_freq[0] ** 2)
+                )
                 print(f"omega_lh: {omega_lh:.1f}")
                 print(
                     f"approximate omega_lh: {np.sqrt(np.abs(cpdr.plasma.gyro_freq[0]) * cpdr.plasma.gyro_freq[1]):.1f}"
@@ -221,8 +233,19 @@ def main():
             resonance_condition_kpar_neg = get_resonance_condition(
                 cpdr, X, y_list, "negative"
             )
-            plot_data(ax, resonance_condition_kpar_pos, colors[j], "-", "", 0.85, rf"Resonance condition n={resonance}", 2)
-            plot_data(ax, resonance_condition_kpar_neg, colors[j], "--", "", 0.85, "", 2)
+            plot_data(
+                ax,
+                resonance_condition_kpar_pos,
+                colors[j],
+                "-",
+                "",
+                0.85,
+                rf"Resonance condition n={resonance}",
+                2,
+            )
+            plot_data(
+                ax, resonance_condition_kpar_neg, colors[j], "--", "", 0.85, "", 2
+            )
 
             # Plot resonant roots
             for root in cpdr.solve_resonant(X)[0]:
@@ -243,8 +266,28 @@ def main():
         lower_upper_x = [0, 20] << u.dimensionless_unscaled
         lower_y = [cpdr.omega_lc / electron_gyro_abs for val in lower_upper_x]
         upper_y = [cpdr.omega_uc / electron_gyro_abs for val in lower_upper_x]
-        plot_data(ax, [(x, y) for x, y in zip(lower_upper_x, lower_y)], "k", ":", "", 0.6, "", 0, 1.0)
-        plot_data(ax, [(x, y) for x, y in zip(lower_upper_x, upper_y)], "k", ":", "", 0.6, "", 0, 1.0)
+        plot_data(
+            ax,
+            [(x, y) for x, y in zip(lower_upper_x, lower_y)],
+            "k",
+            ":",
+            "",
+            0.6,
+            "",
+            0,
+            1.0,
+        )
+        plot_data(
+            ax,
+            [(x, y) for x, y in zip(lower_upper_x, upper_y)],
+            "k",
+            ":",
+            "",
+            0.6,
+            "",
+            0,
+            1.0,
+        )
 
         format_figure(ax, cpdr, X)
         fig.tight_layout()
