@@ -75,7 +75,7 @@ def load_and_post_process(pathname, bounce=False, fixed_energy=True):
         DaE_over_E_squared_abs.append(abs(DaE.value) / rel_kin_energy_J.value**2)
         DEE_over_E_squared.append(DEE.value / rel_kin_energy_J.value**2)
 
-    # Sort by pitch angle
+    # Sort the data, using the x_values (pitch angle or energy) as the sorting key
     sorted_vals = sorted(
         zip(x_values, Daa_over_p_squared, DaE_over_E_squared_abs, DEE_over_E_squared),
         key=lambda z: z[0],
