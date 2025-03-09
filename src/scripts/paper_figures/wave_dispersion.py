@@ -1,3 +1,22 @@
+"""
+wave_dispersion.py
+
+Generates and saves three figures depicting wave dispersion relations
+for different plasma-to-gyro ratios.
+
+This script calculates and visualises wave dispersion relations for
+plasma-to-gyro ratios of 0.75, 1.5, and 7.0.
+The resulting figures, 'wave_dispersion_1.png', 'wave_dispersion_2.png',
+and 'wave_dispersion_3.png', are saved to the current working directory.
+
+Parameters can be adjusted within the 'Parameters' section of the main
+function, but the script's functionality is only guaranteed for the
+currently specified values.
+
+Usage:
+    python path/to/wave_dispersion.py
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy import constants as const
@@ -14,7 +33,7 @@ from piran.wavefilter import WaveFilter
 
 class NullFilter(WaveFilter):
     """
-    Keep all solutions.
+    A filter that accepts all inputs.
     """
     @u.quantity_input
     def filter(
@@ -29,34 +48,34 @@ class NullFilter(WaveFilter):
 
 
 def draw_vertical_lines(ax, cpdr, omega_lh, omega_uh):
-    # Draw omega_c and omega_p lines (electron)
-    omega_c_abs = np.abs(cpdr.plasma.gyro_freq[0]).value
-    omega_p = cpdr.plasma.plasma_freq[0].value
-    ax.axvline(x=omega_p, color="k", linestyle="--", linewidth=0.8)
-    ax.axvline(x=omega_c_abs, color="k", linestyle="--", linewidth=0.8)
+    # Draw omega_ce and omega_pe lines (electron)
+    omega_ce_abs = np.abs(cpdr.plasma.gyro_freq[0]).value
+    omega_pe = cpdr.plasma.plasma_freq[0].value
+    ax.axvline(x=omega_pe, color="k", linestyle="--", linewidth=0.6)
+    ax.axvline(x=omega_ce_abs, color="k", linestyle="--", linewidth=0.6)
 
     # Draw omega_L=0 and omega_R=0 lines
-    omega_L0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) - omega_c_abs) / 2
-    omega_R0 = (np.sqrt(omega_c_abs**2 + 4 * omega_p**2) + omega_c_abs) / 2
-    ax.axvline(x=omega_L0, color="k", linestyle=":", linewidth=0.8)
-    ax.axvline(x=omega_R0, color="k", linestyle=":", linewidth=0.8)
+    omega_L0 = (np.sqrt(omega_ce_abs**2 + 4 * omega_pe**2) - omega_ce_abs) / 2
+    omega_R0 = (np.sqrt(omega_ce_abs**2 + 4 * omega_pe**2) + omega_ce_abs) / 2
+    ax.axvline(x=omega_L0, color="k", linestyle=":", linewidth=0.6)
+    ax.axvline(x=omega_R0, color="k", linestyle=":", linewidth=0.6)
 
     # Draw proton gyrofrequency
     omega_pp = cpdr.plasma.gyro_freq[1].value
-    ax.axvline(x=omega_pp, color="k", linestyle="-.", linewidth=0.8)
+    ax.axvline(x=omega_pp, color="k", linestyle="-.", linewidth=0.6)
 
     # Draw lower and upper hybrid lines
-    ax.axvline(x=omega_lh, color="k", linestyle="-.", linewidth=0.8)
-    ax.axvline(x=omega_uh, color="k", linestyle="-.", linewidth=0.8)
+    ax.axvline(x=omega_lh, color="k", linestyle="-.", linewidth=0.6)
+    ax.axvline(x=omega_uh, color="k", linestyle="-.", linewidth=0.6)
 
     # Annotate
-    ax.text(omega_c_abs, 6.0 * 10**4, r"$\omega_{ce}$")
-    ax.text(omega_p, 1.0 * 10**4, r"$\omega_{pe}$")
-    ax.text(omega_L0, 2.5 * 10**3, r"$\omega_{L=0}$")
-    ax.text(omega_R0, 2.5 * 10**3, r"$\omega_{R=0}$")
-    ax.text(omega_pp, 2.5 * 10**3, r"$\omega_{pp}$")
-    ax.text(omega_lh, 2.5 * 10**3, r"$\omega_{LH}$")
-    ax.text(omega_uh, 2.0 * 10**5, r"$\omega_{UH}$")
+    ax.text(omega_ce_abs, 3.0 * 10**5, r"$\omega_{ce}$")
+    ax.text(omega_pe, 1.0 * 10**5, r"$\omega_{pe}$")
+    ax.text(omega_L0, 1.0 * 10**4, r"$\omega_{L=0}$")
+    ax.text(omega_R0, 3.0 * 10**4, r"$\omega_{R=0}$")
+    ax.text(omega_pp, 1.0 * 10**6, r"$\omega_{pp}$")
+    ax.text(omega_lh, 1.0 * 10**6, r"$\omega_{LH}$")
+    ax.text(omega_uh, 1.0 * 10**6, r"$\omega_{UH}$")
 
 
 def plot_cpdr_roots(fig, ax, cpdr, X_range, omega_range):
@@ -78,7 +97,7 @@ def plot_cpdr_roots(fig, ax, cpdr, X_range, omega_range):
         xaxis_values,
         yaxis_values,
         marker=".",
-        s=6,
+        s=4,
         c=color_values,
         cmap="viridis",
         vmin=X_range[0].value,
@@ -113,14 +132,24 @@ def plot_resonant_roots(ax, cpdr, X_range):
 
 
 def format_figure(ax, energy, alpha, res, ratio):
-    xticks = [10**i for i in range(1, 6)]
-    yticks = [10**i for i in range(-2, 9)]
+    if ratio in [0.75, 1.5]:
+        xticks = [10**i for i in range(1, 6)]
+        yticks = [10**i for i in range(-2, 9)]
 
-    xlim_min = xticks[0]
-    xlim_max = xticks[-1]
+        xlim_min = xticks[0]
+        xlim_max = 3 * xticks[-1]
 
-    ylim_min = yticks[0]
-    ylim_max = yticks[-1]
+        ylim_min = yticks[0]
+        ylim_max = yticks[-1]
+    elif ratio == 7.0:
+        xticks = [10**i for i in range(1, 7)]
+        yticks = [10**i for i in range(-2, 9)]
+
+        xlim_min = xticks[0]
+        xlim_max = 2 * xticks[-1]
+
+        ylim_min = yticks[0]
+        ylim_max = yticks[-1]
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -140,7 +169,7 @@ def format_figure(ax, energy, alpha, res, ratio):
     ax.set_xlabel(r"$\omega$")
     ax.set_ylabel(r"$\mu^2$")
 
-    title = rf"E={energy:.1f}, $\alpha={alpha:.2f}$, n={res}, $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
+    title = rf"E={energy:.1f}, $\alpha={alpha.value:.2f}^{{\circ}}$, n={res}, $\omega_{{\text{{pe}}}}/\omega_{{\text{{ce}}}}={ratio}$"
     ax.set_title(title)
 
 
@@ -150,7 +179,7 @@ def main():
     l_shell = 4.5
 
     particles = ("e", "p+")
-    plasma_over_gyro_ratios = [0.75]  # [0.75, 7.0]
+    plasma_over_gyro_ratios = [0.75, 1.5, 7.0]
 
     energy = 1.0 << u.MeV
     alpha = Angle(45, u.deg)
@@ -159,12 +188,12 @@ def main():
 
     X_min = 0.0
     X_max = 20.0
-    X_npoints = 200
+    X_npoints = 400
     X_range = u.Quantity(
         np.linspace(X_min, X_max, X_npoints), unit=u.dimensionless_unscaled
     )
 
-    omega_npoints = 800
+    omega_npoints = 2000
     # =================================================
 
     for i, ratio in enumerate(plasma_over_gyro_ratios):
@@ -218,7 +247,7 @@ def main():
         format_figure(ax, energy, alpha, resonance, ratio)
 
         fig.tight_layout()
-        fig.savefig(f"cma_diagram_{i + 1}.png", dpi=300)
+        fig.savefig(f"wave_dispersion_{i + 1}.png", dpi=300)
         plt.close()
 
 
