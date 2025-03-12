@@ -1,46 +1,67 @@
-# Create an `input.json` file with the following:
-# | Name                     | Data type        | Example                 | Unit | Info                                |
-# |--------------------------|------------------|-------------------------|------|-------------------------------------|
-# | "particles"              | Array of Strings | ["e", "p+"]             |      |                                     |
-# | "energy"                 | Number           | 1.0                     | MeV  | Relativistic kinetic energy         |
-# | "equatorial_pitch_angle" | Number           | 60.0                    | deg  |                                     |
-# | "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                     |
-# | "mlat_npoints"           | Number           | 30                      |      |                                     |
-# | "l_shell"                | Number           | 4.5                     |      |                                     |
-# | "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                     |
-# | "X_min"                  | Number           | 0.0                     |      |                                     |
-# | "X_max"                  | Number           | 1.0                     |      |                                     |
-# | "X_npoints"              | Number           | 1000                    |      |                                     |
-# | "X_m"                    | Number           | 0.0                     |      | Peak                                |
-# | "X_w"                    | Number           | 0.577                   |      | Angular width                       |
-# | "freq_cutoff_params"     | Array of Numbers | [0.35, 0.15, -1.5, 1.5] |      | See par.30 Glauert and Horne 2005   |
-# | "wave_amplitude"         | Number           | 1e-10                   | T    |                                     |
-# | "method"                 | Number           | 0                       |      | 0 for Glauert, 1 for Cunningham     |
+# Copyright (C) 2025 The University of Birmingham, United Kingdom /
+#   Dr Oliver Allanson, ORCiD: 0000-0003-2353-8586, School Of Engineering, University of Birmingham /
+#   Dr Thomas Kappas, ORCiD: 0009-0003-5888-2093, Advanced Research Computing, University of Birmingham /
+#   Dr James Tyrrell, ORCiD: 0000-0002-2344-737X, Advanced Research Computing, University of Birmingham /
+#   Dr Adrian Garcia, ORCiD: 0009-0007-4450-324X, Advanced Research Computing, University of Birmingham
 #
-# for example:
-# {
-#     "particles": ["e", "p+"],
-#     "energy": 1.0,
-#     "equatorial_pitch_angle": 60.0,
-#     "plasma_over_gyro_ratio": 1.5,
-#     "mlat_npoints": 30,
-#     "l_shell": 4.5,
-#     "resonances": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
-#     "X_min": 0.0,
-#     "X_max": 1.0,
-#     "X_npoints": 600,
-#     "X_m": 0.0,
-#     "X_w": 0.577,
-#     "freq_cutoff_params": [0.35, 0.15, -1.5, 1.5],
-#     "wave_amplitude": 1e-10,
-#     "method": 0
-# }
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
 #
-# and run the script as: `python path/to/bounce_averaged_diffusion_coefficients.py -i path/to/input.json`
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
-# The script will create a file `results_[ANGLE]deg_[ENERGY]MeV.json` in the
-# current working directory, where [ANGLE] is the equatorial pitch angle in degrees
-# and [ENERGY] the relativistic kinetic energy in MeV for this run.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Create an `input.json` file with the following:
+| Name                     | Data type        | Example                 | Unit | Info                                |
+|--------------------------|------------------|-------------------------|------|-------------------------------------|
+| "particles"              | Array of Strings | ["e", "p+"]             |      |                                     |
+| "energy"                 | Number           | 1.0                     | MeV  | Relativistic kinetic energy         |
+| "equatorial_pitch_angle" | Number           | 60.0                    | deg  |                                     |
+| "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                     |
+| "mlat_npoints"           | Number           | 30                      |      |                                     |
+| "l_shell"                | Number           | 4.5                     |      |                                     |
+| "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                     |
+| "X_min"                  | Number           | 0.0                     |      |                                     |
+| "X_max"                  | Number           | 1.0                     |      |                                     |
+| "X_npoints"              | Number           | 1000                    |      |                                     |
+| "X_m"                    | Number           | 0.0                     |      | Peak                                |
+| "X_w"                    | Number           | 0.577                   |      | Angular width                       |
+| "freq_cutoff_params"     | Array of Numbers | [0.35, 0.15, -1.5, 1.5] |      | See par.30 Glauert and Horne 2005   |
+| "wave_amplitude"         | Number           | 1e-10                   | T    |                                     |
+| "method"                 | Number           | 0                       |      | 0 for Glauert, 1 for Cunningham     |
+
+for example:
+{
+    "particles": ["e", "p+"],
+    "energy": 1.0,
+    "equatorial_pitch_angle": 60.0,
+    "plasma_over_gyro_ratio": 1.5,
+    "mlat_npoints": 30,
+    "l_shell": 4.5,
+    "resonances": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
+    "X_min": 0.0,
+    "X_max": 1.0,
+    "X_npoints": 600,
+    "X_m": 0.0,
+    "X_w": 0.577,
+    "freq_cutoff_params": [0.35, 0.15, -1.5, 1.5],
+    "wave_amplitude": 1e-10,
+    "method": 0
+}
+
+and run the script as: `python path/to/bounce_averaged_diffusion_coefficients.py -i path/to/input.json`
+
+The script will create a file `results_[ANGLE]deg_[ENERGY]MeV.json` in the
+current working directory, where [ANGLE] is the equatorial pitch angle in degrees
+and [ENERGY] the relativistic kinetic energy in MeV for this run.
+"""
+
 import argparse
 import json
 import pathlib
