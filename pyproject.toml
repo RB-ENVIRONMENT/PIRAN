@@ -35,6 +35,7 @@ test = [
 docs = [
     "numpydoc",
     "sphinx",
+    "furo",
 ]
 
 [tool.setuptools.packages.find]

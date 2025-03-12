@@ -48,3 +48,30 @@ jobs:
       - run: |
           coverage run --branch -m pytest --pyargs piran
           coverage report -m
+
+  # adapted from https://www.sphinx-doc.org/en/master/tutorial/deploying.html#id5
+  sphinx:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout the branch
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: Setup env
+      uses: ./.github/actions/setup
+    - name: Build the documentation with Sphinx
+      run: |
+        sphinx-build -b html docs/source docs/build/html
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-docs
+        path: docs/build/html/
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html
