@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy import units as u
 from matplotlib.ticker import LogFormatterMathtext, MultipleLocator
-from misc import lists_are_identical, load_and_post_process
+from misc import load_and_post_process
 
 
 def plot_figure(
@@ -140,7 +140,7 @@ def main():
         raise ValueError("Check normalisation methods")
     if not (X_max_g1 == X_max_g2 == X_max_c1 == X_max_c2):
         raise ValueError("Check X_max. Must be the same")
-    if not lists_are_identical(xx_g1, xx_g2, xx_c1, xx_c2):
+    if not (xx_g1 == xx_g2 == xx_c1 == xx_c2):
         raise ValueError("Check pitch angle discretisation")
 
     # At this point all pitch angle discretisations

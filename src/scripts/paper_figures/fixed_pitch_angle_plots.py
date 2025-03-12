@@ -24,7 +24,7 @@ Usage:
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FuncFormatter, LogFormatterMathtext
-from misc import lists_are_identical, load_and_post_process
+from misc import load_and_post_process
 
 
 def plot_figure(
@@ -116,7 +116,7 @@ def main():
         raise ValueError("Check normalisation methods")
     if not (X_max_g == X_max_c):
         raise ValueError("Check X_max. Must be the same")
-    if not lists_are_identical(xx_g, xx_g, xx_c, xx_c):
+    if not (xx_g == xx_c):
         raise ValueError("Check energy discretisation")
 
     # At this point all pitch angles, ratios,

@@ -86,21 +86,3 @@ def load_and_post_process(pathname, bounce=False, fixed_energy=True):
     yy_EE = [z[3] for z in sorted_vals]
 
     return xx, yy_aa, yy_aE, yy_EE, method, ratio, X_max, fixed_quantity_value
-
-
-def lists_are_identical(list1, list2, list3, list4):
-    """
-    Checks if four lists are identical (same elements in the same order).
-
-    Returns:
-        True if all four lists are identical, False otherwise.
-    """
-
-    if len(list1) != len(list2) or len(list1) != len(list3) or len(list1) != len(list4):
-        return False  # Lists must have the same length
-
-    for i in range(len(list1)):
-        if list1[i] != list2[i] or list1[i] != list3[i] or list1[i] != list4[i]:
-            return False  # Elements at the same index must be equal
-
-    return True  # All checks passed, lists are identical
