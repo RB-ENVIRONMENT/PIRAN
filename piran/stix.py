@@ -37,7 +37,7 @@ class Stix:
 
     We cache values of the plasma and cyclotron frequencies to avoid needing to
     provide them as arguments to every method.
-    
+
     Parameters
     ----------
     omega_p : Quantity[u.rad / u.s]
@@ -45,6 +45,7 @@ class Stix:
     omega_c : Quantity[u.rad / u.s]
         Cyclotron frequency.
     """
+
     @u.quantity_input
     def __init__(
         self, omega_p: u.Quantity[u.rad / u.s], omega_c: u.Quantity[u.rad / u.s]
@@ -57,17 +58,17 @@ class Stix:
     def R(self, omega: u.Quantity[u.rad / u.s]) -> u.Quantity[u.dimensionless_unscaled]:
         """
         Calculate the R parameter.
-        
+
         Parameters
         ----------
         omega : u.Quantity[u.rad / u.s]
             The wave frequency, which should be a scalar quantity with units of radians per second.
-            
+
         Returns
         -------
         u.Quantity[u.dimensionless_unscaled]
             The calculated dimensionless quantity R.
-                
+
         Raises
         ------
         ValueError
@@ -93,18 +94,18 @@ class Stix:
         ----------
         omega : u.Quantity[u.rad / u.s]
             The wave frequency, which should be a scalar quantity with units of radians per second.
-        
+
         Returns
         -------
         u.Quantity[u.dimensionless_unscaled]
             The calculated dimensionless quantity L.
-        
+
         Raises
         ------
         ValueError
             If the wave frequency omega is not a scalar.
         """
-        
+
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
 
@@ -125,18 +126,18 @@ class Stix:
         ----------
         omega : u.Quantity[u.rad / u.s]
             The wave frequency, which should be a scalar quantity with units of radians per second.
-        
+
         Returns
         -------
         u.Quantity[u.dimensionless_unscaled]
             The calculated dimensionless quantity P.
-        
+
         Raises
         ------
         ValueError
             If the wave frequency omega is not a scalar.
         """
-        
+
         if not omega.isscalar:
             raise ValueError("Frequency omega should be a scalar")
 
@@ -157,7 +158,7 @@ class Stix:
         ----------
         omega : u.Quantity[u.rad / u.s]
             The wave frequency, which should be a scalar quantity with units of radians per second.
-        
+
         Returns
         -------
         u.Quantity[u.dimensionless_unscaled]
@@ -175,7 +176,7 @@ class Stix:
         ----------
         omega : u.Quantity[u.rad / u.s]
             The wave frequency, which should be a scalar quantity with units of radians per second.
-        
+
         Returns
         -------
         u.Quantity[u.dimensionless_unscaled]
