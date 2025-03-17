@@ -35,8 +35,11 @@ class Stix:
     respect to :math:`k` and :math:`\omega`, as well as the jacobian
     :math:`J\\left(\\frac{k_\perp, k_\parallel}{\omega, X}\\right)`.
 
-    We cache values of the plasma and cyclotron frequencies to avoid needing to
-    provide them as arguments to every method.
+    The plasma and cyclotron frequencies are stored as instance attributes
+    to avoid needing to provide them as arguments to every method.
+    
+    Results of the Stix parameter calculations are also cached using
+    `functools.lru_cache` for efficiency.
 
     Parameters
     ----------
