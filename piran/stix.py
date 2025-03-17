@@ -37,7 +37,7 @@ class Stix:
 
     The plasma and cyclotron frequencies are stored as instance attributes
     to avoid needing to provide them as arguments to every method.
-    
+
     Results of the Stix parameter calculations are also cached using
     `functools.lru_cache` for efficiency.
 
