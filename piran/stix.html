@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -243,7 +243,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -251,7 +251,318 @@
         <article role="main" id="furo-main-content">
           <section id="module-piran.stix">
 <span id="stix"></span><h1>stix<a class="headerlink" href="#module-piran.stix" title="Link to this heading">¶</a></h1>
-<p>Defines the Stix class.</p>
+<p>The <cite>stix</cite> module provides the <cite>Stix</cite> class for quickly calculating the Stix
+parameters (and a few other things).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="piran.stix.Stix">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">piran.stix.</span></span><span class="sig-name descname"><span class="pre">Stix</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#piran.stix.Stix" title="Link to this definition">¶</a></dt>
+<dd><p>Provides methods for calculating the Stix parameters R, L, P, D, and S.
+This also includes methods for calculating the derivative of the CPDR with
+respect to <span class="math notranslate nohighlight">\(k\)</span> and <span class="math notranslate nohighlight">\(\omega\)</span>, as well as the jacobian
+<span class="math notranslate nohighlight">\(J\left(\frac{k_\perp, k_\parallel}{\omega, X}\right)\)</span>.</p>
+<p>The plasma and cyclotron frequencies are stored as instance attributes
+to avoid needing to provide them as arguments to every method.</p>
+<p>Results of the Stix parameter calculations are also cached using
+<cite>functools.lru_cache</cite> for efficiency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega_p</strong><span class="classifier">Quantity[u.rad / u.s]</span></dt><dd><p>Plasma frequency.</p>
+</dd>
+<dt><strong>omega_c</strong><span class="classifier">Quantity[u.rad / u.s]</span></dt><dd><p>Cyclotron frequency.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#piran.stix.Stix.D" title="piran.stix.Stix.D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">D</span></code></a>(omega)</p></td>
+<td><p>Calculate the D parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#piran.stix.Stix.L" title="piran.stix.Stix.L"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L</span></code></a>(omega)</p></td>
+<td><p>Calculate the L parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#piran.stix.Stix.P" title="piran.stix.Stix.P"><code class="xref py py-obj docutils literal notranslate"><span class="pre">P</span></code></a>(omega)</p></td>
+<td><p>Calculate the P parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#piran.stix.Stix.R" title="piran.stix.Stix.R"><code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code></a>(omega)</p></td>
+<td><p>Calculate the R parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#piran.stix.Stix.S" title="piran.stix.Stix.S"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S</span></code></a>(omega)</p></td>
+<td><p>Calculate the S parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#piran.stix.Stix.dD_dk" title="piran.stix.Stix.dD_dk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dD_dk</span></code></a>(omega, X, k)</p></td>
+<td><p>Calculate the value of the derivative of the CPDR with respect to the wavenumber <span class="math notranslate nohighlight">\(k\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#piran.stix.Stix.dD_dw" title="piran.stix.Stix.dD_dw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dD_dw</span></code></a>(omega, X, k)</p></td>
+<td><p>Calculate the value of the derivative of the CPDR with respect to the wave frequency <span class="math notranslate nohighlight">\(\omega\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#piran.stix.Stix.jacobian" title="piran.stix.Stix.jacobian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jacobian</span></code></a>(omega, X, k)</p></td>
+<td><p>Calculate the value of the Jacobian <span class="math notranslate nohighlight">\(J\left(\frac{k_\perp, k_\parallel}{\omega, X}\right)\)</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.D">
+<span class="sig-name descname"><span class="pre">D</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.D" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the D parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>The wave frequency, which should be a scalar quantity with units of radians per second.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.dimensionless_unscaled]</dt><dd><p>The calculated dimensionless quantity D.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.L">
+<span class="sig-name descname"><span class="pre">L</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.L" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the L parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>The wave frequency, which should be a scalar quantity with units of radians per second.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.dimensionless_unscaled]</dt><dd><p>The calculated dimensionless quantity L.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the wave frequency omega is not a scalar.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.P">
+<span class="sig-name descname"><span class="pre">P</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.P" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the P parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>The wave frequency, which should be a scalar quantity with units of radians per second.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.dimensionless_unscaled]</dt><dd><p>The calculated dimensionless quantity P.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the wave frequency omega is not a scalar.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.R">
+<span class="sig-name descname"><span class="pre">R</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.R" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the R parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>The wave frequency, which should be a scalar quantity with units of radians per second.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.dimensionless_unscaled]</dt><dd><p>The calculated dimensionless quantity R.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the wave frequency omega is not a scalar.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.S">
+<span class="sig-name descname"><span class="pre">S</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.S" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the S parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>The wave frequency, which should be a scalar quantity with units of radians per second.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.dimensionless_unscaled]</dt><dd><p>The calculated dimensionless quantity S.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.dD_dk">
+<span class="sig-name descname"><span class="pre">dD_dk</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'m</span> <span class="pre">/</span> <span class="pre">rad'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.dD_dk" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the value of the derivative of the CPDR with respect to the
+wavenumber <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>Wave frequency.</p>
+</dd>
+<dt><strong>X</strong><span class="classifier">u.Quantity[u.dimensionless_unscaled]</span></dt><dd><p>Wave normal angles.</p>
+</dd>
+<dt><strong>k</strong><span class="classifier">u.Quantity[u.rad / u.m]</span></dt><dd><p>Wavenumber.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.m / u.rad]</dt><dd><p>The value of the derivative of the CPDR with respect to the wavenumber
+<span class="math notranslate nohighlight">\(k\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.dD_dw">
+<span class="sig-name descname"><span class="pre">dD_dw</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'s</span> <span class="pre">/</span> <span class="pre">rad'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.dD_dw" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the value of the derivative of the CPDR with respect to the wave
+frequency <span class="math notranslate nohighlight">\(\omega\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>Wave frequency.</p>
+</dd>
+<dt><strong>X</strong><span class="classifier">u.Quantity[u.dimensionless_unscaled]</span></dt><dd><p>Wave normal angles.</p>
+</dd>
+<dt><strong>k</strong><span class="classifier">u.Quantity[u.rad / u.m]</span></dt><dd><p>Wavenumber.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.s / u.rad]</dt><dd><p>The value of the derivative of the CPDR with respect to the wave
+frequency <span class="math notranslate nohighlight">\(\omega\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="piran.stix.Stix.jacobian">
+<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">s</span> <span class="pre">/</span> <span class="pre">m2'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#piran.stix.Stix.jacobian" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the value of the Jacobian
+<span class="math notranslate nohighlight">\(J\left(\frac{k_\perp, k_\parallel}{\omega, X}\right)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>omega</strong><span class="classifier">u.Quantity[u.rad / u.s]</span></dt><dd><p>Wave frequency.</p>
+</dd>
+<dt><strong>X</strong><span class="classifier">u.Quantity[u.dimensionless_unscaled]</span></dt><dd><p>Wave normal angles.</p>
+</dd>
+<dt><strong>k</strong><span class="classifier">u.Quantity[u.rad / u.m]</span></dt><dd><p>Wavenumber.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>u.Quantity[u.rad * u.s / u.m**2]</dt><dd><p>The calculated Jacobian value.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
         </article>
@@ -297,8 +608,37 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">stix</a><ul>
+<li><a class="reference internal" href="#piran.stix.Stix"><code class="docutils literal notranslate"><span class="pre">Stix</span></code></a><ul>
+<li><a class="reference internal" href="#piran.stix.Stix.D"><code class="docutils literal notranslate"><span class="pre">Stix.D()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.L"><code class="docutils literal notranslate"><span class="pre">Stix.L()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.P"><code class="docutils literal notranslate"><span class="pre">Stix.P()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.R"><code class="docutils literal notranslate"><span class="pre">Stix.R()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.S"><code class="docutils literal notranslate"><span class="pre">Stix.S()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.dD_dk"><code class="docutils literal notranslate"><span class="pre">Stix.dD_dk()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.dD_dw"><code class="docutils literal notranslate"><span class="pre">Stix.dD_dw()</span></code></a></li>
+<li><a class="reference internal" href="#piran.stix.Stix.jacobian"><code class="docutils literal notranslate"><span class="pre">Stix.jacobian()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -307,5 +647,6 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
