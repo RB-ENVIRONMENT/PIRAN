@@ -282,9 +282,9 @@ def main():
 
     for ii, mlat in enumerate(lambda_range):
 
-        li_cutoff = 15.0* np.pi / 180.0 << u.rad#oliver
+        li_cutoff = 15.0* np.pi / 180.0 << u.rad
 
-        if mlat >= li_cutoff:                   #oliver
+        if mlat >= li_cutoff:
             continue
 
         
