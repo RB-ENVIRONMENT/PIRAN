@@ -285,9 +285,6 @@ def main():
         li_cutoff = 15.0* np.pi / 180.0 << u.rad#oliver
 
         if mlat >= li_cutoff:                   #oliver
-            baDaa_integrand[ii] = 0.0 << UNIT_DIFF#oliver
-            baDap_integrand[ii] = 0.0 << UNIT_DIFF#oliver
-            baDpp_integrand[ii] = 0.0 << UNIT_DIFF#oliver
             continue
 
         
