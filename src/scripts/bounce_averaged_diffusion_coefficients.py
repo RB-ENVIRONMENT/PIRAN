@@ -283,81 +283,83 @@ def main():
     for ii, mlat in enumerate(lambda_range):
 
         li_cutoff = 15.0* np.pi / 180.0 << u.rad#oliver
-        if mlat < li_cutoff:                    #oliver  
-        
-            pitch_angle = bounce.get_bounce_pitch_angle(mlat)
-            if (
-                np.isnan(pitch_angle)
-                or pitch_angle <= 0.0 << u.rad
-                or pitch_angle >= np.pi / 2 << u.rad
-            ):
-                continue
 
-            mag_point = MagPoint(mlat, l_shell)
-            plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-
-            Dnaa = []
-            Dnap = []
-            Dnpp = []
-            for resonance in resonances:
-                cpdr = Cpdr(
-                    plasma_point,
-                    energy,
-                    pitch_angle,
-                    resonance,
-                    freq_cutoff_params,
-                )
-
-                # Depends only on energy and mass. Will be the same for different
-                # resonances and latitudes.
-                container["momentum"] = cpdr.momentum.value
-                container["rest_mass_energy_Joule"] = (
-                    (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
-                )
-
-                # Calculate equations 11, 12 and 13 from
-                # Glauert & Horne 2005, for this resonance.
-                DnXaa_this_res, DnXap_this_res, DnXpp_this_res = get_DnX_per_X(
-                    cpdr,
-                    X_range,
-                    X_max,
-                    epsilon,
-                    wave_norm_angle_dist,
-                    integral_gx,
-                    wave_amplitude,
-                    method,
-                )
-
-                # Calculate the integrals from equations 8, 9 and 10 in
-                # Glauert & Horne 2005, only for this resonance.
-                Dnaa_this_res = get_diffusion_coefficients(
-                    X_range, DnXaa_this_res << UNIT_DIFF
-                )
-                Dnap_this_res = get_diffusion_coefficients(
-                    X_range, DnXap_this_res << UNIT_DIFF
-                )
-                Dnpp_this_res = get_diffusion_coefficients(
-                    X_range, DnXpp_this_res << UNIT_DIFF
-                )
-                Dnaa.append(Dnaa_this_res)
-                Dnap.append(Dnap_this_res)
-                Dnpp.append(Dnpp_this_res)
-
-            # Sum the diffusion coefficients for all the resonances.
-            # This is essentially what is calculated in equations 8, 9
-            # and 10 in Glauert & Horne 2005.
-            Daa = np.sum([v.value for v in Dnaa]) << UNIT_DIFF
-            Dap = np.sum([v.value for v in Dnap]) << UNIT_DIFF
-            Dpp = np.sum([v.value for v in Dnpp]) << UNIT_DIFF
-
-            baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
-            baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
-            baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
-
-        elif mlat >= li_cutoff:                   #oliver
+        if mlat >= li_cutoff:                   #oliver
             baDaa_integrand[ii] = 0.0 << UNIT_DIFF#oliver
             baDap_integrand[ii] = 0.0 << UNIT_DIFF#oliver
             baDpp_integrand[ii] = 0.0 << UNIT_DIFF#oliver
+            continue
+
+        
+        pitch_angle = bounce.get_bounce_pitch_angle(mlat)
+        if (
+            np.isnan(pitch_angle)
+            or pitch_angle <= 0.0 << u.rad
+            or pitch_angle >= np.pi / 2 << u.rad
+        ):
+            continue
+
+        mag_point = MagPoint(mlat, l_shell)
+        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+
+        Dnaa = []
+        Dnap = []
+        Dnpp = []
+        for resonance in resonances:
+            cpdr = Cpdr(
+                plasma_point,
+                energy,
+                pitch_angle,
+                resonance,
+                freq_cutoff_params,
+            )
+
+            # Depends only on energy and mass. Will be the same for different
+            # resonances and latitudes.
+            container["momentum"] = cpdr.momentum.value
+            container["rest_mass_energy_Joule"] = (
+                (cpdr.plasma.particles[0].mass.to(u.kg) * const.c**2).to(u.J).value
+            )
+
+            # Calculate equations 11, 12 and 13 from
+            # Glauert & Horne 2005, for this resonance.
+            DnXaa_this_res, DnXap_this_res, DnXpp_this_res = get_DnX_per_X(
+                cpdr,
+                X_range,
+                X_max,
+                epsilon,
+                wave_norm_angle_dist,
+                integral_gx,
+                wave_amplitude,
+                method,
+            )
+
+            # Calculate the integrals from equations 8, 9 and 10 in
+            # Glauert & Horne 2005, only for this resonance.
+            Dnaa_this_res = get_diffusion_coefficients(
+                X_range, DnXaa_this_res << UNIT_DIFF
+            )
+            Dnap_this_res = get_diffusion_coefficients(
+                X_range, DnXap_this_res << UNIT_DIFF
+            )
+            Dnpp_this_res = get_diffusion_coefficients(
+                X_range, DnXpp_this_res << UNIT_DIFF
+            )
+            Dnaa.append(Dnaa_this_res)
+            Dnap.append(Dnap_this_res)
+            Dnpp.append(Dnpp_this_res)
+
+        # Sum the diffusion coefficients for all the resonances.
+        # This is essentially what is calculated in equations 8, 9
+        # and 10 in Glauert & Horne 2005.
+        Daa = np.sum([v.value for v in Dnaa]) << UNIT_DIFF
+        Dap = np.sum([v.value for v in Dnap]) << UNIT_DIFF
+        Dpp = np.sum([v.value for v in Dnpp]) << UNIT_DIFF
+
+        baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
+        baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
+        baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
+
 
     # Scipy's simpson strips the units so we might want to re-add them here manually
     # If we don't, the unit will be "dimensionless_unscaled" which is incorrect.
