@@ -25,6 +25,7 @@ Create an `input.json` file with the following:
 | "equatorial_pitch_angle" | Number           | 60.0                    | deg  |                                     |
 | "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                     |
 | "mlat_npoints"           | Number           | 30                      |      |                                     |
+| "mlat_cutoff"            | Number           | 15.0                    | deg  | Magnetic latitude cutoff            |
 | "l_shell"                | Number           | 4.5                     |      |                                     |
 | "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                     |
 | "X_min"                  | Number           | 0.0                     |      |                                     |
@@ -43,6 +44,7 @@ for example:
     "equatorial_pitch_angle": 60.0,
     "plasma_over_gyro_ratio": 1.5,
     "mlat_npoints": 30,
+    "mlat_cutoff": 15.0,
     "l_shell": 4.5,
     "resonances": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
     "X_min": 0.0,
@@ -208,6 +210,7 @@ def main():
     equatorial_pitch_angle = Angle(parameters["equatorial_pitch_angle"], u.deg)
     plasma_over_gyro_ratio = float(parameters["plasma_over_gyro_ratio"])
     mlat_npoints = int(parameters["mlat_npoints"])
+    mlat_cutoff = Angle(parameters["mlat_cutoff"], u.deg)
     l_shell = float(parameters["l_shell"])
     resonances = list(parameters["resonances"])
     X_min = float(parameters["X_min"]) << u.dimensionless_unscaled
@@ -228,6 +231,7 @@ def main():
     container["equatorial_pitch_angle"] = equatorial_pitch_angle.deg
     container["plasma_over_gyro_ratio"] = plasma_over_gyro_ratio
     container["mlat_npoints"] = mlat_npoints
+    container["mlat_cutoff"] = mlat_cutoff.deg
     container["l_shell"] = l_shell
     container["resonances"] = resonances
     container["X_min"] = X_min.value
@@ -282,9 +286,7 @@ def main():
 
     for ii, mlat in enumerate(lambda_range):
 
-        li_cutoff = 15.0* np.pi / 180.0 << u.rad
-
-        if mlat >= li_cutoff:
+        if mlat >= mlat_cutoff:
             continue
 
         
