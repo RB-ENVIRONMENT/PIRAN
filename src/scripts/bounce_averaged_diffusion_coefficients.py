@@ -353,13 +353,11 @@ def main():
             baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
             baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
             baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
-            #print(mlat, baDaa_integrand[ii])      #oliver
 
         elif mlat >= li_cutoff:                   #oliver
             baDaa_integrand[ii] = 0.0 << UNIT_DIFF#oliver
             baDap_integrand[ii] = 0.0 << UNIT_DIFF#oliver
             baDpp_integrand[ii] = 0.0 << UNIT_DIFF#oliver
-            #print(mlat, baDaa_integrand[ii])      #oliver
 
     # Scipy's simpson strips the units so we might want to re-add them here manually
     # If we don't, the unit will be "dimensionless_unscaled" which is incorrect.
