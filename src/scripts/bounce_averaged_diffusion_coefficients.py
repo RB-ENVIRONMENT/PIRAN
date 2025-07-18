@@ -117,12 +117,10 @@ def get_DnX_per_X(
 
     resonant_roots = cpdr.solve_resonant(X_range)
     for roots_this_x in resonant_roots:
-
         DnXaa_this_X = 0.0
         DnXap_this_X = 0.0
         DnXpp_this_X = 0.0
         for root in roots_this_x:
-
             if np.isnan(root.omega) or np.isnan(root.k):
                 continue
 
@@ -285,11 +283,9 @@ def main():
     baDpp_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
 
     for ii, mlat in enumerate(lambda_range):
-
         if mlat >= mlat_cutoff:
             continue
 
-        
         pitch_angle = bounce.get_bounce_pitch_angle(mlat)
         if (
             np.isnan(pitch_angle)
@@ -358,7 +354,6 @@ def main():
         baDaa_integrand[ii] = Daa * bounce.get_pitch_angle_factor(mlat)
         baDap_integrand[ii] = Dap * bounce.get_mixed_factor(mlat)
         baDpp_integrand[ii] = Dpp * bounce.get_momentum_factor(mlat)
-
 
     # Scipy's simpson strips the units so we might want to re-add them here manually
     # If we don't, the unit will be "dimensionless_unscaled" which is incorrect.
