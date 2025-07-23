@@ -205,10 +205,10 @@ def main():
 
     particles = tuple(parameters["particles"])
     energy = float(parameters["energy"]) << u.MeV
-    equatorial_pitch_angle = Angle(parameters["equatorial_pitch_angle"], u.deg)
+    equatorial_pitch_angle = Angle(float(parameters["equatorial_pitch_angle"]), u.deg)
     plasma_over_gyro_ratio = float(parameters["plasma_over_gyro_ratio"])
     mlat_npoints = int(parameters["mlat_npoints"])
-    mlat_cutoff = Angle(parameters["mlat_cutoff"], u.deg)
+    mlat_cutoff = Angle(float(parameters["mlat_cutoff"]), u.deg)
     l_shell = float(parameters["l_shell"])
     resonances = list(parameters["resonances"])
     X_min = float(parameters["X_min"]) << u.dimensionless_unscaled
