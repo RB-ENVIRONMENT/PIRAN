@@ -269,7 +269,7 @@ def main():
 
     # Create integration range for equations 24, 25 and 26 in Glauert 2005
     lambda_min = 0.0 << u.rad
-    lambda_max = bounce.mirror_latitude << u.rad
+    lambda_max = 0.9999 * bounce.mirror_latitude << u.rad # Cap this at 0.9999 to avoid (integrable) singularity
     lambda_range = Angle(np.linspace(lambda_min, lambda_max, mlat_npoints), unit=u.rad)
     container["mlat_range"] = lambda_range.value.tolist()
 
