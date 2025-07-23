@@ -32,9 +32,7 @@ Other Changes and Additions
 src/scripts/bounce_averaged_diffusion_coefficients.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Added a warning message that is printed when the resonance cone angle is negative. This warning
-  is printed only once, alongside the NumPy RuntimeWarning that is raised when a negative number
-  is passed to `np.sqrt`.
+- Added a warning message that is printed when the resonance cone angle is negative.
 
 Version 1.0.0
 =============
