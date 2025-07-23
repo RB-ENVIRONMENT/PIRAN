@@ -107,6 +107,7 @@ def get_DnX_per_X(
     integral_gx,
     wave_amplitude,
     method,
+    caught_warning,
 ):
     """
     Given a cpdr object (which means that resonance is fixed) calculate
@@ -119,6 +120,7 @@ def get_DnX_per_X(
     DnXpp_this_res = []
 
     resonant_roots = cpdr.solve_resonant(X_range)
+
     for roots_this_x in resonant_roots:
         DnXaa_this_X = 0.0
         DnXap_this_X = 0.0
@@ -129,6 +131,14 @@ def get_DnX_per_X(
 
             # See par.23 in Glauert & Horne 2005
             resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(root.omega)
+
+            if resonance_cone_angle < 0:
+                print(f"Warning: resonance cone angle < 0 for omega={root.omega}")
+
+                if not caught_warning[0]:
+                    print("NumPy will raise a RuntimeWarning shortly (but only once!)")
+                    caught_warning[0] = True
+
             X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
             if root.X.value > X_upper.value:
                 continue
@@ -285,6 +295,12 @@ def main():
     baDap_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
     baDpp_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
 
+    # Sometimes we get a RuntimeWarning from NumPy when we feed a sqrt a negative number.
+    # We catch this and print a message to explain what is happening. We only want this
+    # to happen once, so we need a bool to track if we have already caught it. The bool
+    # also needs to be mutable after being passed to a function, so we use a list.
+    caught_warning = [False]
+
     for ii, mlat in enumerate(lambda_range):
         if mlat >= mlat_cutoff:
             continue
@@ -330,6 +346,7 @@ def main():
                 integral_gx,
                 wave_amplitude,
                 method,
+                caught_warning,
             )
 
             # Calculate the integrals from equations 8, 9 and 10 in
