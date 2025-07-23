@@ -136,7 +136,7 @@ def get_DnX_per_X(
 
             X_upper = (
                 min(X_max, epsilon * np.sqrt(resonance_cone_angle))
-                if resonance_cone_angle > 0
+                if resonance_cone_angle >= 0
                 else X_max
             )
             if root.X.value > X_upper.value:
