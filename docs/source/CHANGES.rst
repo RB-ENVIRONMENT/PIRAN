@@ -32,7 +32,7 @@ Other Changes and Additions
 src/scripts/bounce_averaged_diffusion_coefficients.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Added a warning message that is printed when the resonance cone angle is negative.
+- Added a warning message that is printed when the resonance cone angle is imaginary.
 
 Version 1.0.0
 =============
