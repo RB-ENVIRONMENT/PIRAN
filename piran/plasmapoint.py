@@ -28,7 +28,7 @@ import numpy as np
 from astropy import constants as const
 from astropy import units as u
 from astropy.units import Quantity
-from plasmapy.formulary.frequencies import wc_, wp_
+from plasmapy.formulary.frequencies import wc_, wlh_, wp_
 from plasmapy.particles import ParticleList, ParticleListLike
 
 from piran.magpoint import MagPoint
@@ -74,6 +74,12 @@ class PlasmaPoint:
         An array containing the plasma frequency for each species. The order
         of the frequencies corresponds to the order of the particles in the
         `particles` list.
+    lower_hybrid_freq: astropy.units.Quantity[u.rad / u.s]
+        An array containing the lower hybrid frequency for each species. The
+        order of the frequencies corresponds to the order of the particles in
+        the `particles` list. This can be useful for classifying waves (e.g. the
+        proton lower_hybrid_frequency is used as a lower bound for the frequency
+        of whistler-mode chorus waves in WhistlerFilter).
 
     Raises
     ------
@@ -135,6 +141,9 @@ class PlasmaPoint:
             [nd * p.charge_number for nd, p in zip(self.number_density, self.particles)]
         )
 
+        # NB. lower hybrid freqs need to be computed after number densities
+        self.__lower_hybrid_freq = self.__compute_lower_hybrid_freq()  # rad/s
+
     @property
     def magpoint(self):
         return self.__magpoint
@@ -158,6 +167,10 @@ class PlasmaPoint:
     @property
     def plasma_freq(self):
         return self.__plasma_freq
+
+    @property
+    def lower_hybrid_freq(self):
+        return self.__lower_hybrid_freq
 
     @property
     def plasma_charge(self):
@@ -201,3 +214,12 @@ class PlasmaPoint:
             return Quantity(pf)
         else:
             raise ValueError("Not valid combination of input arguments")
+
+    @u.quantity_input
+    def __compute_lower_hybrid_freq(self) -> Quantity[u.rad / u.s]:
+        lhf = []
+
+        for nd, p in zip(self.number_density, self.particles):
+            lhf.append(wlh_(self.magpoint.flux_density, nd, p))
+
+        return Quantity(lhf)
