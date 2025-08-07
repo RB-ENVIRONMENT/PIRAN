@@ -49,6 +49,8 @@ class TestPlasmaPoint:
         assert math.isclose(plasma_point.gyro_freq[1].value, 32.5464, rel_tol=1e-5)
         assert math.isclose(plasma_point.plasma_freq[0].value, 89640.33, rel_tol=1e-6)
         assert math.isclose(plasma_point.plasma_freq[1].value, 2091.93, rel_tol=1e-5)
+        assert math.isclose(plasma_point.lower_hybrid_freq[0].value, 49723.50956478517)
+        assert math.isclose(plasma_point.lower_hybrid_freq[1].value, 1160.399090097096)
 
     def test_plasmapoint_2(self):
         mlat_deg = Angle(0 * u.deg)
@@ -72,6 +74,8 @@ class TestPlasmaPoint:
         assert math.isclose(plasma_point.gyro_freq[1].value, 32.5407, rel_tol=1e-5)
         assert math.isclose(plasma_point.plasma_freq[0].value, 89640.33, rel_tol=1e-6)
         assert math.isclose(plasma_point.plasma_freq[1].value, 2091.75, rel_tol=1e-5)
+        assert math.isclose(plasma_point.lower_hybrid_freq[0].value, 49723.50956478517)
+        assert math.isclose(plasma_point.lower_hybrid_freq[1].value, 1160.2983285821322)
 
     def test_plasmapoint_3(self):
         """
@@ -110,6 +114,9 @@ class TestPlasmaPoint:
 
         assert math.isclose(plasma_point.plasma_freq[0].value, 89640.33, rel_tol=1e-6)
         assert math.isclose(plasma_point.plasma_freq[1].value, 2091.93, rel_tol=1e-5)
+
+        assert math.isclose(plasma_point.lower_hybrid_freq[0].value, 49723.50956392233)
+        assert math.isclose(plasma_point.lower_hybrid_freq[1].value, 1160.3990900769597)
 
         assert math.isclose(plasma_point.number_density[0].value, 2524781.78)
         assert math.isclose(plasma_point.number_density[1].value, 2524781.78)

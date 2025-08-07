@@ -4,6 +4,13 @@ Version 1.0.1
 New Features
 ------------
 
+piran/plasmapoint.py
+^^^^^^^^^^^^^^^^^^^^
+
+- Added a `lower_hybrid_freq` property to enable users to conveniently obtain the lower
+  hybrid frequency for each particle in a plasma without the need to (re-)calculate this
+  separately.
+
 src/scripts/bounce_averaged_diffusion_coefficients.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -12,6 +19,15 @@ src/scripts/bounce_averaged_diffusion_coefficients.py
 
 Bug Fixes
 ---------
+
+piran/wavefilter.py
+^^^^^^^^^^^^^^^^^^^
+
+- Used the newly added `PlasmaPoint.lower_hybrid_freq` property to set a lower bound
+  (the lower hybrid frequency for protons) on the acceptable frequency range in `WhistlerFilter`.
+  There is an implicit assumption in here that we are only looking at electron-proton plasmas,
+  which will need to be addressed when we improve the support for more complicated plasma
+  compositions in the future.
 
 src/scripts/bounce_averaged_diffusion_coefficients.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
