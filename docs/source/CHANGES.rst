@@ -26,6 +26,14 @@ src/scripts/bounce_averaged_diffusion_coefficients.py
   robust long-term solution might be to re-examine the behaviour of `Bounce.get_bounce_pitch_angle`
   and look for a way to more accurately evaluate the integrand at the mirror point.
 
+Other Changes and Additions
+---------------------------
+
+src/scripts/bounce_averaged_diffusion_coefficients.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Added a warning message that is printed when the resonance cone angle is imaginary.
+
 Version 1.0.0
 =============
 

@@ -119,6 +119,7 @@ def get_DnX_per_X(
     DnXpp_this_res = []
 
     resonant_roots = cpdr.solve_resonant(X_range)
+
     for roots_this_x in resonant_roots:
         DnXaa_this_X = 0.0
         DnXap_this_X = 0.0
@@ -127,9 +128,18 @@ def get_DnX_per_X(
             if np.isnan(root.omega) or np.isnan(root.k):
                 continue
 
+            # Cap the value of X according to the resonance cone angle
             # See par.23 in Glauert & Horne 2005
-            resonance_cone_angle = -cpdr.stix.P(root.omega) / cpdr.stix.S(root.omega)
-            X_upper = min(X_max, epsilon * np.sqrt(resonance_cone_angle))
+            rca_squared = -cpdr.stix.P(root.omega) / cpdr.stix.S(root.omega)
+
+            if rca_squared < 0:
+                print(f"Warning: imaginary resonance cone angle for omega={root.omega}")
+
+            X_upper = (
+                min(X_max, epsilon * np.sqrt(rca_squared))
+                if rca_squared >= 0
+                else X_max
+            )
             if root.X.value > X_upper.value:
                 continue
 
