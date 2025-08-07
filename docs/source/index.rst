@@ -6,6 +6,9 @@
 Welcome to PIRAN's documentation!
 =================================
 
+All the modules in PIRAN are listed below. See the :doc:`CHANGES <CHANGES>` file
+for a full list of the latest updates to PIRAN.
+
 .. toctree::
    :maxdepth: 2
    :caption: Modules:
@@ -19,6 +22,13 @@ Welcome to PIRAN's documentation!
    piran/plasmapoint
    piran/stix
    piran/wavefilter
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Latest Changes:
+   :hidden:
+
+   CHANGES
 
 Indices and tables
 ==================

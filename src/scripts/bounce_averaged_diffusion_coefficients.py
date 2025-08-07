@@ -18,23 +18,24 @@
 
 """
 Create an `input.json` file with the following:
-| Name                     | Data type        | Example                 | Unit | Info                                |
-|--------------------------|------------------|-------------------------|------|-------------------------------------|
-| "particles"              | Array of Strings | ["e", "p+"]             |      |                                     |
-| "energy"                 | Number           | 1.0                     | MeV  | Relativistic kinetic energy         |
-| "equatorial_pitch_angle" | Number           | 60.0                    | deg  |                                     |
-| "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                     |
-| "mlat_npoints"           | Number           | 30                      |      |                                     |
-| "l_shell"                | Number           | 4.5                     |      |                                     |
-| "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                     |
-| "X_min"                  | Number           | 0.0                     |      |                                     |
-| "X_max"                  | Number           | 1.0                     |      |                                     |
-| "X_npoints"              | Number           | 1000                    |      |                                     |
-| "X_m"                    | Number           | 0.0                     |      | Peak                                |
-| "X_w"                    | Number           | 0.577                   |      | Angular width                       |
-| "freq_cutoff_params"     | Array of Numbers | [0.35, 0.15, -1.5, 1.5] |      | See par.30 Glauert and Horne 2005   |
-| "wave_amplitude"         | Number           | 1e-10                   | T    |                                     |
-| "method"                 | Number           | 0                       |      | 0 for Glauert, 1 for Cunningham     |
+| Name                     | Data type        | Example                 | Unit | Info                                                |
+|--------------------------|------------------|-------------------------|------|-----------------------------------------------------|
+| "particles"              | Array of Strings | ["e", "p+"]             |      |                                                     |
+| "energy"                 | Number           | 1.0                     | MeV  | Relativistic kinetic energy                         |
+| "equatorial_pitch_angle" | Number           | 60.0                    | deg  |                                                     |
+| "plasma_over_gyro_ratio" | Number           | 1.5                     |      |                                                     |
+| "mlat_npoints"           | Number           | 30                      |      |                                                     |
+| "mlat_cutoff"            | Number           | 15.0                    | deg  | Magnetic latitude cutoff (use "inf" if not desired) |
+| "l_shell"                | Number           | 4.5                     |      |                                                     |
+| "resonances"             | Array of Numbers | [-2, -1, 0, 1]          |      |                                                     |
+| "X_min"                  | Number           | 0.0                     |      |                                                     |
+| "X_max"                  | Number           | 1.0                     |      |                                                     |
+| "X_npoints"              | Number           | 1000                    |      |                                                     |
+| "X_m"                    | Number           | 0.0                     |      | Peak                                                |
+| "X_w"                    | Number           | 0.577                   |      | Angular width                                       |
+| "freq_cutoff_params"     | Array of Numbers | [0.35, 0.15, -1.5, 1.5] |      | See par.30 Glauert and Horne 2005                   |
+| "wave_amplitude"         | Number           | 1e-10                   | T    |                                                     |
+| "method"                 | Number           | 0                       |      | 0 for Glauert, 1 for Cunningham                     |
 
 for example:
 {
@@ -43,6 +44,7 @@ for example:
     "equatorial_pitch_angle": 60.0,
     "plasma_over_gyro_ratio": 1.5,
     "mlat_npoints": 30,
+    "mlat_cutoff": 15.0,
     "l_shell": 4.5,
     "resonances": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
     "X_min": 0.0,
@@ -56,6 +58,9 @@ for example:
 }
 
 and run the script as: `python path/to/bounce_averaged_diffusion_coefficients.py -i path/to/input.json`
+
+The mlat_cutoff setting is used to impose a maximum magnetic latitude at which waves are present
+(disregarding any solutions beyond this point). If this is not desired, set it to "inf".
 
 The script will create a file `results_[ANGLE]deg_[ENERGY]MeV.json` in the
 current working directory, where [ANGLE] is the equatorial pitch angle in degrees
@@ -115,12 +120,10 @@ def get_DnX_per_X(
 
     resonant_roots = cpdr.solve_resonant(X_range)
     for roots_this_x in resonant_roots:
-
         DnXaa_this_X = 0.0
         DnXap_this_X = 0.0
         DnXpp_this_X = 0.0
         for root in roots_this_x:
-
             if np.isnan(root.omega) or np.isnan(root.k):
                 continue
 
@@ -205,9 +208,10 @@ def main():
 
     particles = tuple(parameters["particles"])
     energy = float(parameters["energy"]) << u.MeV
-    equatorial_pitch_angle = Angle(parameters["equatorial_pitch_angle"], u.deg)
+    equatorial_pitch_angle = Angle(float(parameters["equatorial_pitch_angle"]), u.deg)
     plasma_over_gyro_ratio = float(parameters["plasma_over_gyro_ratio"])
     mlat_npoints = int(parameters["mlat_npoints"])
+    mlat_cutoff = Angle(float(parameters["mlat_cutoff"]), u.deg)
     l_shell = float(parameters["l_shell"])
     resonances = list(parameters["resonances"])
     X_min = float(parameters["X_min"]) << u.dimensionless_unscaled
@@ -228,6 +232,7 @@ def main():
     container["equatorial_pitch_angle"] = equatorial_pitch_angle.deg
     container["plasma_over_gyro_ratio"] = plasma_over_gyro_ratio
     container["mlat_npoints"] = mlat_npoints
+    container["mlat_cutoff"] = mlat_cutoff.deg
     container["l_shell"] = l_shell
     container["resonances"] = resonances
     container["X_min"] = X_min.value
@@ -265,9 +270,7 @@ def main():
     # Create integration range for equations 24, 25 and 26 in Glauert 2005
     lambda_min = 0.0 << u.rad
     lambda_max = bounce.mirror_latitude << u.rad
-    lambda_range = u.Quantity(
-        np.linspace(lambda_min, lambda_max, mlat_npoints), unit=u.rad
-    )
+    lambda_range = Angle(np.linspace(lambda_min, lambda_max, mlat_npoints), unit=u.rad)
     container["mlat_range"] = lambda_range.value.tolist()
 
     # Start the main loop over the magnetic latitudes.
@@ -281,6 +284,8 @@ def main():
     baDpp_integrand = u.Quantity(np.zeros(mlat_npoints, dtype=np.float64), UNIT_DIFF)
 
     for ii, mlat in enumerate(lambda_range):
+        if mlat >= mlat_cutoff:
+            continue
 
         pitch_angle = bounce.get_bounce_pitch_angle(mlat)
         if (
