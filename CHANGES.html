@@ -257,6 +257,14 @@
 <h1>Version 1.0.1<a class="headerlink" href="#version-1-0-1" title="Link to this heading">¶</a></h1>
 <section id="new-features">
 <h2>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h2>
+<section id="piran-plasmapoint-py">
+<h3>piran/plasmapoint.py<a class="headerlink" href="#piran-plasmapoint-py" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added a <cite>lower_hybrid_freq</cite> property to enable users to conveniently obtain the lower
+hybrid frequency for each particle in a plasma without the need to (re-)calculate this
+separately.</p></li>
+</ul>
+</section>
 <section id="src-scripts-bounce-averaged-diffusion-coefficients-py">
 <h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#src-scripts-bounce-averaged-diffusion-coefficients-py" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -267,6 +275,16 @@ magnetic latitude beyond which it is assumed that no waves are present.</p></li>
 </section>
 <section id="bug-fixes">
 <h2>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h2>
+<section id="piran-wavefilter-py">
+<h3>piran/wavefilter.py<a class="headerlink" href="#piran-wavefilter-py" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Used the newly added <cite>PlasmaPoint.lower_hybrid_freq</cite> property to set a lower bound
+(the lower hybrid frequency for protons) on the acceptable frequency range in <cite>WhistlerFilter</cite>.
+There is an implicit assumption in here that we are only looking at electron-proton plasmas,
+which will need to be addressed when we improve the support for more complicated plasma
+compositions in the future.</p></li>
+</ul>
+</section>
 <section id="id1">
 <h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -348,10 +366,12 @@ and look for a way to more accurately evaluate the integrand at the mirror point
             <ul>
 <li><a class="reference internal" href="#">Version 1.0.1</a><ul>
 <li><a class="reference internal" href="#new-features">New Features</a><ul>
+<li><a class="reference internal" href="#piran-plasmapoint-py">piran/plasmapoint.py</a></li>
 <li><a class="reference internal" href="#src-scripts-bounce-averaged-diffusion-coefficients-py">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#bug-fixes">Bug Fixes</a><ul>
+<li><a class="reference internal" href="#piran-wavefilter-py">piran/wavefilter.py</a></li>
 <li><a class="reference internal" href="#id1">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
 </ul>
 </li>
