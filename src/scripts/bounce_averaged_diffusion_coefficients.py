@@ -313,9 +313,7 @@ def main():
             number_density_at_equator = plasma_point.number_density
         else: 
             plasma_point = PlasmaPoint(
-                mag_point,
-                particles,
-                number_density=number_density_at_equator
+                mag_point, particles, number_density=number_density_at_equator
             )
 
         Dnaa = []
