@@ -22,6 +22,7 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import Angle
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
@@ -40,7 +41,9 @@ class TestCpdr:
         energy = 1.0 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = 2
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         self.cpdr = Cpdr(
             plasma_point,
             energy,
@@ -147,7 +150,9 @@ class TestCpdr:
         energy = 1.0 * u.MeV
         alpha = Angle(71, u.deg)
         resonance = 0
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma_point,
             energy,
@@ -187,7 +192,9 @@ class TestCpdr:
         energy = 1.0 * u.MeV
         alpha = Angle(70, u.deg)
         resonance = 0
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma_point,
             energy,
@@ -219,7 +226,9 @@ class TestCpdr:
         energy = 1.0 * u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma_point,
             energy,
@@ -259,7 +268,9 @@ class TestCpdr:
         energy = 1.0 << u.MeV
         alpha = Angle(89.5, u.deg)
         resonance = -1
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma_point,
             energy,
@@ -289,7 +300,9 @@ class TestCpdr:
         energy = 0.1 * u.MeV
         alpha = Angle(5, u.deg)
         resonance = -3
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma_point,
             energy,

@@ -68,7 +68,7 @@ class Cpdr:
         energy: Quantity[u.Joule] | None = None,
         pitch_angle: Quantity[u.rad] | None = None,
         resonance: int | None = None,
-        freq_cutoff_params: Sequence[float] | None = None,
+        freq_cutoff_params: Gaussian | None = None,
         wave_filter: WaveFilter = WhistlerFilter(),
     ) -> None:
         self.__plasma = plasma
@@ -101,17 +101,9 @@ class Cpdr:
             self.__p_par = self.__momentum * np.cos(self.__pitch_angle)
             self.__p_perp = self.__momentum * np.sin(self.__pitch_angle)
 
-            omega_mean_cutoff = freq_cutoff_params[0] * abs(self.__plasma.gyro_freq[0])
-            omega_delta_cutoff = freq_cutoff_params[1] * abs(self.__plasma.gyro_freq[0])
-            self.__omega_lc = (
-                omega_mean_cutoff + freq_cutoff_params[2] * omega_delta_cutoff
-            )
-            self.__omega_uc = (
-                omega_mean_cutoff + freq_cutoff_params[3] * omega_delta_cutoff
-            )
-            self.__wave_freqs = Gaussian(
-                self.__omega_lc, self.__omega_uc, omega_mean_cutoff, omega_delta_cutoff
-            )
+            self.__omega_lc = freq_cutoff_params._lower
+            self.__omega_uc = freq_cutoff_params._upper
+            self.__wave_freqs = freq_cutoff_params
 
         # Cached polynomial components
         self.__Ax, self.__Bx, self.__Cx, self.__Ac, self.__Bc, self.__Cc = (

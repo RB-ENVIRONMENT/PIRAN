@@ -78,6 +78,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
+from piran import gauss
 from piran.bounce import Bounce
 from piran.cpdr import Cpdr
 from piran.diffusion import (
@@ -325,7 +326,9 @@ def main():
                 energy,
                 pitch_angle,
                 resonance,
-                freq_cutoff_params,
+                gauss.from_gyrofrequency_params(
+                    plasma_point.gyro_freq[0], *freq_cutoff_params
+                ),
             )
 
             # Depends only on energy and mass. Will be the same for different

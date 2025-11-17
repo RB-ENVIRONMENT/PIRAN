@@ -43,6 +43,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from matplotlib.ticker import MultipleLocator
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
@@ -207,7 +208,15 @@ def main():
         fig, ax = plt.subplots(figsize=(9.2, 4.8))
 
         for j, resonance in enumerate(resonances):
-            cpdr = Cpdr(plasma_point, energy, alpha, resonance, freq_cutoff_params)
+            cpdr = Cpdr(
+                plasma_point,
+                energy,
+                alpha,
+                resonance,
+                gauss.from_gyrofrequency_params(
+                    plasma_point.gyro_freq[0], **freq_cutoff_params
+                ),
+            )
             electron_gyro_abs = np.abs(cpdr.plasma.gyro_freq[0])
 
             # The values that we print here are the same for every X,

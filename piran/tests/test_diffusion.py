@@ -24,6 +24,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.diffusion import (
     UNIT_BKN,
@@ -48,20 +49,22 @@ class TestDiffusion:
         self.l_shell = 4.5
         self.mag_point = MagPoint(self.mlat_deg, self.l_shell)
         self.particles = ("e", "p+")
-        self.freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        self.plasma_over_gyro_ratio = 1.5
+        self.plasma_point = PlasmaPoint(
+            self.mag_point, self.particles, self.plasma_over_gyro_ratio
+        )
+        self.freq_cutoff_params = gauss.from_gyrofrequency_params(
+            self.plasma_point.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
 
     def test_get_power_spectral_density_1(self):
-        plasma_over_gyro_ratio = 1.5
-        plasma_point = PlasmaPoint(
-            self.mag_point, self.particles, plasma_over_gyro_ratio
-        )
         energy = 1.0 << u.MeV
         alpha = Angle(70, u.deg)
         resonance = -1
         wave_amplitude = (100 << u.pT).to(u.T)
 
         cpdr = Cpdr(
-            plasma_point,
+            self.plasma_point,
             energy,
             alpha,
             resonance,
@@ -94,16 +97,12 @@ class TestDiffusion:
         assert math.isclose(integral, wave_amplitude.value**2, rel_tol=1e-7)
 
     def test_get_phi_squared_1(self):
-        plasma_over_gyro_ratio = 1.5
-        plasma_point = PlasmaPoint(
-            self.mag_point, self.particles, plasma_over_gyro_ratio
-        )
         energy = 1.0 << u.MeV
         alpha = Angle(70, u.deg)
         resonance = -1
 
         cpdr = Cpdr(
-            plasma_point,
+            self.plasma_point,
             energy,
             alpha,
             resonance,
@@ -122,16 +121,12 @@ class TestDiffusion:
         assert math.isclose(phi_squared_3, 0.283105, rel_tol=1e-6)
 
     def test_get_phi_squared_2(self):
-        plasma_over_gyro_ratio = 1.5
-        plasma_point = PlasmaPoint(
-            self.mag_point, self.particles, plasma_over_gyro_ratio
-        )
         energy = 1.0 << u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
 
         cpdr = Cpdr(
-            plasma_point,
+            self.plasma_point,
             energy,
             alpha,
             resonance,
@@ -148,16 +143,12 @@ class TestDiffusion:
         assert math.isclose(phi_squared_12, 0.489358, rel_tol=1e-6)
 
     def test_get_singular_term_1(self):
-        plasma_over_gyro_ratio = 1.5
-        plasma_point = PlasmaPoint(
-            self.mag_point, self.particles, plasma_over_gyro_ratio
-        )
         energy = 1.0 << u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
 
         cpdr = Cpdr(
-            plasma_point,
+            self.plasma_point,
             energy,
             alpha,
             resonance,
@@ -188,16 +179,12 @@ class TestDiffusion:
         assert math.isclose(normalised_intensity.value, 8.339484e-09, rel_tol=1e-7)
 
     def test_get_DnX_single_root(self):
-        plasma_over_gyro_ratio = 1.5
-        plasma_point = PlasmaPoint(
-            self.mag_point, self.particles, plasma_over_gyro_ratio
-        )
         energy = 1.0 << u.MeV
         alpha = Angle(83, u.deg)
         resonance = -1
 
         cpdr = Cpdr(
-            plasma_point,
+            self.plasma_point,
             energy,
             alpha,
             resonance,
