@@ -120,6 +120,13 @@ class WhistlerFilter(WaveFilter):
         ):
             return False
 
+        # Whistler waves should not exist if the resonance cone angle is imaginary
+        # See par.23 in Glauert & Horne 2005
+        rca_squared = -stix.P(omega) / stix.S(omega)
+
+        if rca_squared < 0:
+            return False
+
         # The square of the index of refraction is:
         # - bounded by R below
         # - unbounded above
