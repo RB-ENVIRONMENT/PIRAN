@@ -108,10 +108,13 @@ class WhistlerFilter(WaveFilter):
         plasma: PlasmaPoint,
         stix: Stix,
     ) -> bool:
-        # Frequency for Whistlers is bounded below by the lower hybrid frequency for protons
-        # and bounded above by the electron plasma- or gyro-frequency (whichever is smaller)
+        # Frequency for Whistlers is bounded:
+        # - below by the proton lower hybrid frequency or gyrofrequency
+        #   (whichever is larger)
+        # - above by the electron plasma- or gyro-frequency
+        #   (whichever is smaller)
         if (
-            not plasma.lower_hybrid_freq[1]
+            not max(plasma.lower_hybrid_freq[1], abs(plasma.gyro_freq[1]))
             <= omega
             <= min(abs(plasma.gyro_freq[0]), abs(plasma.plasma_freq[0]))
         ):
