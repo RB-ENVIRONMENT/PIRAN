@@ -23,6 +23,7 @@ import pytest
 from astropy import units as u
 from astropy.coordinates import Angle
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
@@ -180,7 +181,9 @@ class TestWaveFilter:
         energy = 1.0507018 * u.MeV
         alpha = Angle(0.125, u.deg)
         resonance = -5
-        freq_cutoff_params = (0.35, 0.15, -1.5, 1.5)
+        freq_cutoff_params = gauss.from_gyrofrequency_params(
+            plasma.gyro_freq[0], 0.35, 0.15, -1.5, 1.5
+        )
         cpdr = Cpdr(
             plasma,
             energy,

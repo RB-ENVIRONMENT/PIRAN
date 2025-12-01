@@ -78,6 +78,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
+from piran import gauss
 from piran.bounce import Bounce
 from piran.cpdr import Cpdr
 from piran.diffusion import (
@@ -311,6 +312,9 @@ def main():
         if mlat == lambda_min:
             plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
             number_density_at_equator = plasma_point.number_density
+            freq_cutoffs_at_equator = gauss.from_gyrofrequency_params(
+                plasma_point.gyro_freq[0], *freq_cutoff_params
+            )
         else:
             plasma_point = PlasmaPoint(
                 mag_point, particles, number_density=number_density_at_equator
@@ -325,7 +329,7 @@ def main():
                 energy,
                 pitch_angle,
                 resonance,
-                freq_cutoff_params,
+                freq_cutoffs_at_equator,
             )
 
             # Depends only on energy and mass. Will be the same for different

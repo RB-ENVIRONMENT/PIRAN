@@ -101,3 +101,39 @@ class Gaussian:
             * (X <= self._upper)
             * np.exp(-1.0 * ((X - self._peak) / self._width) ** 2)
         )
+
+
+def from_gyrofrequency_params(gyrofreq, mean, delta, lower, upper) -> Gaussian:
+    """
+    Create a Gaussian distribution using gyrofrequency-based parameters.
+
+    This function computes the lower and upper cutoffs, mean, and width for a truncated
+    Gaussian distribution based on the supplied [electron] gyrofrequency and scaling
+    parameters.
+
+    Parameters
+    ----------
+    gyrofreq : float
+        The gyrofrequency in rad/s.
+    mean : float
+        The scaling factor for the mean (center) of the distribution, as a multiple of |gyrofreq|.
+    delta : float
+        The scaling factor for the width (standard deviation) of the distribution, as a multiple of |gyrofreq|.
+    lower : float
+        The lower cutoff, as a multiple of the width away from the mean.
+    upper : float
+        The upper cutoff, as a multiple of the width away from the mean.
+
+    Returns
+    -------
+    Gaussian
+        A Gaussian object with the computed lower cutoff, upper cutoff, mean, and width.
+
+    """
+    omega_mean_cutoff = mean * abs(gyrofreq)
+    omega_delta_cutoff = delta * abs(gyrofreq)
+
+    omega_lc = omega_mean_cutoff + lower * omega_delta_cutoff
+    omega_uc = omega_mean_cutoff + upper * omega_delta_cutoff
+
+    return Gaussian(omega_lc, omega_uc, omega_mean_cutoff, omega_delta_cutoff)

@@ -73,6 +73,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from scipy.integrate import simpson
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.diffusion import (
     UNIT_DIFF,
@@ -83,7 +84,6 @@ from piran.diffusion import (
     get_power_spectral_density,
     get_singular_term,
 )
-from piran.gauss import Gaussian
 from piran.magpoint import MagPoint
 from piran.normalisation import (
     compute_cunningham_norm_factor,
@@ -143,7 +143,7 @@ def main():
 
     mag_point = MagPoint(mlat_deg, l_shell)
     plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
-    wave_norm_angle_dist = Gaussian(X_min, X_max, X_m, X_w)
+    wave_norm_angle_dist = gauss.Gaussian(X_min, X_max, X_m, X_w)
 
     # Calculate integral of g(X) to normalise it.
     # Cunningham used left endpoint integration rule in his paper.
@@ -180,7 +180,15 @@ def main():
         DnXap_this_res = []
         DnXpp_this_res = []
 
-        cpdr = Cpdr(plasma_point, energy, alpha, resonance, freq_cutoff_params)
+        cpdr = Cpdr(
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            gauss.from_gyrofrequency_params(
+                plasma_point.gyro_freq[0], *freq_cutoff_params
+            ),
+        )
 
         # Depends only on energy and mass. Will be the same for different resonances.
         container["momentum"] = cpdr.momentum.value

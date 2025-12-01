@@ -42,6 +42,7 @@ from astropy import units as u
 from astropy.coordinates import Angle
 from matplotlib.ticker import LogFormatterMathtext
 
+from piran import gauss
 from piran.cpdr import Cpdr
 from piran.magpoint import MagPoint
 from piran.plasmapoint import PlasmaPoint
@@ -225,7 +226,14 @@ def main():
         plasma_point = PlasmaPoint(mag_point, particles, ratio)
         wave_filter = NullFilter()
         cpdr = Cpdr(
-            plasma_point, energy, alpha, resonance, freq_cutoff_params, wave_filter
+            plasma_point,
+            energy,
+            alpha,
+            resonance,
+            gauss.from_gyrofrequency_params(
+                plasma_point.gyro_freq[0], **freq_cutoff_params
+            ),
+            wave_filter,
         )
 
         # Geometric sequence between lower and upper cutoffs
