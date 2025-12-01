@@ -308,7 +308,13 @@ def main():
             continue
 
         mag_point = MagPoint(mlat, l_shell)
-        plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+        if mlat == lambda_min:
+            plasma_point = PlasmaPoint(mag_point, particles, plasma_over_gyro_ratio)
+            number_density_at_equator = plasma_point.number_density
+        else:
+            plasma_point = PlasmaPoint(
+                mag_point, particles, number_density=number_density_at_equator
+            )
 
         Dnaa = []
         Dnap = []
