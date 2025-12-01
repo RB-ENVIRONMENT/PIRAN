@@ -331,6 +331,37 @@ Returns 0 if the input X is outside of the range [lower, upper].</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="piran.gauss.from_gyrofrequency_params">
+<span class="sig-prename descclassname"><span class="pre">piran.gauss.</span></span><span class="sig-name descname"><span class="pre">from_gyrofrequency_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gyrofreq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#piran.gauss.Gaussian" title="piran.gauss.Gaussian"><span class="pre">Gaussian</span></a></span></span><a class="headerlink" href="#piran.gauss.from_gyrofrequency_params" title="Link to this definition">¶</a></dt>
+<dd><p>Create a Gaussian distribution using gyrofrequency-based parameters.</p>
+<p>This function computes the lower and upper cutoffs, mean, and width for a truncated
+Gaussian distribution based on the supplied [electron] gyrofrequency and scaling
+parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>gyrofreq</strong><span class="classifier">float</span></dt><dd><p>The gyrofrequency in rad/s.</p>
+</dd>
+<dt><strong>mean</strong><span class="classifier">float</span></dt><dd><p>The scaling factor for the mean (center) of the distribution, as a multiple of <a href="#id1"><span class="problematic" id="id2">|gyrofreq|</span></a>.</p>
+</dd>
+<dt><strong>delta</strong><span class="classifier">float</span></dt><dd><p>The scaling factor for the width (standard deviation) of the distribution, as a multiple of <a href="#id3"><span class="problematic" id="id4">|gyrofreq|</span></a>.</p>
+</dd>
+<dt><strong>lower</strong><span class="classifier">float</span></dt><dd><p>The lower cutoff, as a multiple of the width away from the mean.</p>
+</dd>
+<dt><strong>upper</strong><span class="classifier">float</span></dt><dd><p>The upper cutoff, as a multiple of the width away from the mean.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Gaussian</dt><dd><p>A Gaussian object with the computed lower cutoff, upper cutoff, mean, and width.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>
@@ -393,6 +424,7 @@ Returns 0 if the input X is outside of the range [lower, upper].</p>
 <li><a class="reference internal" href="#piran.gauss.Gaussian.eval"><code class="docutils literal notranslate"><span class="pre">Gaussian.eval()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#piran.gauss.from_gyrofrequency_params"><code class="docutils literal notranslate"><span class="pre">from_gyrofrequency_params()</span></code></a></li>
 </ul>
 </li>
 </ul>
