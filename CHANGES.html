@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="wavefilter" href="piran/wavefilter.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>Version 1.0.1 - PIRAN 1.0.1 documentation</title>
+        <title>Version 1.1.0 - PIRAN 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">PIRAN 1.0.1 documentation</div></a>
+      <a href="index.html"><div class="brand">PIRAN 1.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">PIRAN 1.0.1 documentation</span>
+  <span class="sidebar-brand-text">PIRAN 1.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -204,7 +204,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Latest Changes:</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Version 1.0.1</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Version 1.1.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#version-1-0-1">Version 1.0.1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#version-1-0-0">Version 1.0.0</a></li>
 </ul>
 
@@ -244,7 +245,33 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="version-1-0-1">
+          <section id="version-1-1-0">
+<h1>Version 1.1.0<a class="headerlink" href="#version-1-1-0" title="Link to this heading">¶</a></h1>
+<section id="api-changes">
+<h2>API Changes<a class="headerlink" href="#api-changes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The <cite>freq_cutoff_params</cite> parameter for the <cite>Cpdr</cite> class has been changed from a <cite>list</cite>
+to a <cite>Gaussian</cite> object. A convenience method, <cite>gauss.from_gyrofrequency_params</cite>, has
+been added to help preserve the old functionality. This change has been motivated by the
+need to fix the wave frequency spectrum parameters (with respect to latitude) when computing
+bounce-averaged diffusion coefficients in bounce_averaged_diffusion_coefficients.py.</p></li>
+</ul>
+</section>
+<section id="bug-fixes">
+<h2>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>For bounce averaged calculations the wave frequency spectrum parameters are now fixed with
+respect to latitude (and are defined in terms of equatorial gyrofrequency in the input file).</p></li>
+<li><p>The lower bound for the <cite>WhistlerFilter</cite> class in wavefilter.py is now defined as
+the maximum of the lower hyrbid frequency and the proton gyrofrequency. In addition there is
+a new constraint that the wave resonance cone angle is a real number.</p></li>
+<li><p>For bounce averaged calculations the number density is now fixed with respect to latitude in
+bounce_averaged_diffusion_coefficients.py (and is defined via the ratio of the equatorial
+plasma frequency to the equatorial gyrofrequency in the input file).</p></li>
+</ul>
+</section>
+</section>
+<section id="version-1-0-1">
 <h1>Version 1.0.1<a class="headerlink" href="#version-1-0-1" title="Link to this heading">¶</a></h1>
 <section id="new-features">
 <h2>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h2>
@@ -259,13 +286,13 @@ separately.</p></li>
 <section id="src-scripts-bounce-averaged-diffusion-coefficients-py">
 <h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#src-scripts-bounce-averaged-diffusion-coefficients-py" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p>Added the <cite>mlat_cutoff</cite> parameter to the input specification, allowins users to set a maximum
+<li><p>Added the <cite>mlat_cutoff</cite> parameter to the input specification, allowing users to set a maximum
 magnetic latitude beyond which it is assumed that no waves are present.</p></li>
 </ul>
 </section>
 </section>
-<section id="bug-fixes">
-<h2>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h2>
+<section id="id1">
+<h2>Bug Fixes<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <section id="piran-wavefilter-py">
 <h3>piran/wavefilter.py<a class="headerlink" href="#piran-wavefilter-py" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -276,8 +303,8 @@ which will need to be addressed when we improve the support for more complicated
 compositions in the future.</p></li>
 </ul>
 </section>
-<section id="id1">
-<h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="id2">
+<h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Cap the upper limit on the range of integration over the magnetic latitude to 0.9999 times
 the mirror point, to ensure we use a consistent approach for the integrable singularity at the
@@ -293,8 +320,8 @@ and look for a way to more accurately evaluate the integrand at the mirror point
 </section>
 <section id="other-changes-and-additions">
 <h2>Other Changes and Additions<a class="headerlink" href="#other-changes-and-additions" title="Link to this heading">¶</a></h2>
-<section id="id2">
-<h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3>src/scripts/bounce_averaged_diffusion_coefficients.py<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Added a warning message that is printed when the resonance cone angle is imaginary.</p></li>
 </ul>
@@ -355,19 +382,24 @@ and look for a way to more accurately evaluate the integrand at the mirror point
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Version 1.0.1</a><ul>
+<li><a class="reference internal" href="#">Version 1.1.0</a><ul>
+<li><a class="reference internal" href="#api-changes">API Changes</a></li>
+<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-1-0-1">Version 1.0.1</a><ul>
 <li><a class="reference internal" href="#new-features">New Features</a><ul>
 <li><a class="reference internal" href="#piran-plasmapoint-py">piran/plasmapoint.py</a></li>
 <li><a class="reference internal" href="#src-scripts-bounce-averaged-diffusion-coefficients-py">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a><ul>
+<li><a class="reference internal" href="#id1">Bug Fixes</a><ul>
 <li><a class="reference internal" href="#piran-wavefilter-py">piran/wavefilter.py</a></li>
-<li><a class="reference internal" href="#id1">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
+<li><a class="reference internal" href="#id2">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#other-changes-and-additions">Other Changes and Additions</a><ul>
-<li><a class="reference internal" href="#id2">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
+<li><a class="reference internal" href="#id3">src/scripts/bounce_averaged_diffusion_coefficients.py</a></li>
 </ul>
 </li>
 </ul>
@@ -382,7 +414,7 @@ and look for a way to more accurately evaluate the integrand at the mirror point
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=292eb321"></script>
+</div><script src="_static/documentation_options.js?v=fc837d61"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
