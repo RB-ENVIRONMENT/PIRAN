@@ -214,7 +214,7 @@ def main():
                 alpha,
                 resonance,
                 gauss.from_gyrofrequency_params(
-                    plasma_point.gyro_freq[0], **freq_cutoff_params
+                    plasma_point.gyro_freq[0], *freq_cutoff_params
                 ),
             )
             electron_gyro_abs = np.abs(cpdr.plasma.gyro_freq[0])
