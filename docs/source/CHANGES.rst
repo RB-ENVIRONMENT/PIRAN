@@ -1,3 +1,19 @@
+Version 1.1.0
+=============
+
+API Changes
+-----------
+The `freq_cutoff_params` parameter for the `Cpdr` class has been changed from a `list`
+to a `Gaussian` object. A convenience method, `gauss.from_gyrofrequency_params`, has
+been added to help preserve the old functionality. This change has been motivated by the
+need to fix the wave frequency spectrum parameters (with respect to latitude) when computing
+bounce-averaged diffusion coefficients in bounce_averaged_diffusion_coefficients.py.
+
+
+Bug Fixes
+---------
+TODO
+
 Version 1.0.1
 =============
 
@@ -14,7 +30,7 @@ piran/plasmapoint.py
 src/scripts/bounce_averaged_diffusion_coefficients.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Added the `mlat_cutoff` parameter to the input specification, allowins users to set a maximum
+- Added the `mlat_cutoff` parameter to the input specification, allowing users to set a maximum
   magnetic latitude beyond which it is assumed that no waves are present.
 
 Bug Fixes
