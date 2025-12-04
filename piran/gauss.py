@@ -116,9 +116,9 @@ def from_gyrofrequency_params(gyrofreq, mean, delta, lower, upper) -> Gaussian:
     gyrofreq : float
         The gyrofrequency in rad/s.
     mean : float
-        The scaling factor for the mean (center) of the distribution, as a multiple of |gyrofreq|.
+        The scaling factor for the mean (center) of the distribution, as a multiple of `gyrofreq`.
     delta : float
-        The scaling factor for the width (standard deviation) of the distribution, as a multiple of |gyrofreq|.
+        The scaling factor for the width (standard deviation) of the distribution, as a multiple of `gyrofreq`.
     lower : float
         The lower cutoff, as a multiple of the width away from the mean.
     upper : float
