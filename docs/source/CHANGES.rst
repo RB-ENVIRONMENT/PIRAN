@@ -3,16 +3,23 @@ Version 1.1.0
 
 API Changes
 -----------
-The `freq_cutoff_params` parameter for the `Cpdr` class has been changed from a `list`
-to a `Gaussian` object. A convenience method, `gauss.from_gyrofrequency_params`, has
-been added to help preserve the old functionality. This change has been motivated by the
-need to fix the wave frequency spectrum parameters (with respect to latitude) when computing
-bounce-averaged diffusion coefficients in bounce_averaged_diffusion_coefficients.py.
+-  The `freq_cutoff_params` parameter for the `Cpdr` class has been changed from a `list`
+   to a `Gaussian` object. A convenience method, `gauss.from_gyrofrequency_params`, has
+   been added to help preserve the old functionality. This change has been motivated by the
+   need to fix the wave frequency spectrum parameters (with respect to latitude) when computing
+   bounce-averaged diffusion coefficients in bounce_averaged_diffusion_coefficients.py.
 
 
 Bug Fixes
 ---------
-TODO
+-  For bounce averaged calculations the wave frequency spectrum parameters are now fixed with 
+   respect to latitude (and are defined in terms of equatorial gyrofrequency in the input file).
+-  The lower bound for the `WhistlerFilter` class in wavefilter.py is now defined as 
+   the maximum of the lower hyrbid frequency and the proton gyrofrequency. In addition there is 
+   a new constraint that the wave resonance cone angle is a real number.
+-  For bounce averaged calculations the number density is now fixed with respect to latitude in 
+   bounce_averaged_diffusion_coefficients.py (and is defined via the ratio of the equatorial 
+   plasma frequency to the equatorial gyrofrequency in the input file). 
 
 Version 1.0.1
 =============
