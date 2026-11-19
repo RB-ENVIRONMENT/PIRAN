@@ -13,7 +13,6 @@ dependencies = [
     "astropy",
     "numpy",
     "scipy",
-    "sympy",
     "matplotlib",
 ]
 
