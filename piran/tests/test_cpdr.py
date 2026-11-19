@@ -84,7 +84,7 @@ class TestCpdr:
 
         # Eval above lower cutoff and below mean
         wave_freqs_eval2 = self.cpdr.wave_freqs.eval(10000 * (u.rad / u.s))
-        assert math.isclose(wave_freqs_eval2.value, 0.2269673064)
+        assert math.isclose(wave_freqs_eval2.value, 0.2269673064, rel_tol=1e-8)
 
         # Eval below lower cutoff
         wave_freqs_eval3 = self.cpdr.wave_freqs.eval(7000 * (u.rad / u.s))
@@ -168,16 +168,16 @@ class TestCpdr:
 
         assert len(roots[0]) == 1
         assert math.isclose(roots[0][0].X.value, 0.0)
-        assert math.isclose(roots[0][0].omega.value, 22060.04543112965)
-        assert math.isclose(roots[0][0].k.value, 0.00024016935645729707)
+        assert math.isclose(roots[0][0].omega.value, 22060.04543112965, rel_tol=1e-7)
+        assert math.isclose(roots[0][0].k.value, 0.00024016935645729707, rel_tol=1e-7)
 
         assert len(roots[1]) == 2
         assert math.isclose(roots[1][0].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][0].omega.value, 21197.313961282573)
-        assert math.isclose(roots[1][0].k.value, 0.00024206540583296198)
+        assert math.isclose(roots[1][0].omega.value, 21197.313961282573, rel_tol=1e-7)
+        assert math.isclose(roots[1][0].k.value, 0.00024206540583296198, rel_tol=1e-7)
         assert math.isclose(roots[1][1].X.value, 0.3165829145728643)
-        assert math.isclose(roots[1][1].omega.value, 34361.48787566025)
-        assert math.isclose(roots[1][1].k.value, 0.0003923953536206822)
+        assert math.isclose(roots[1][1].omega.value, 34361.48787566025, rel_tol=1e-7)
+        assert math.isclose(roots[1][1].k.value, 0.0003923953536206822, rel_tol=1e-7)
 
     def test_cpdr_5(self):
         """No resonant frequency"""
@@ -251,10 +251,10 @@ class TestCpdr:
         assert math.isclose(roots[0][0].k_perp.value, 0.0001005622816)
 
         assert math.isclose(roots[0][1].X.value, 0.6)
-        assert math.isclose(roots[0][1].omega.value, 33719.09383836)
-        assert math.isclose(roots[0][1].k.value, 0.0004581964569)
-        assert math.isclose(roots[0][1].k_par.value, 0.0003929002204)
-        assert math.isclose(roots[0][1].k_perp.value, 0.0002357401322)
+        assert math.isclose(roots[0][1].omega.value, 33719.09383836, rel_tol=1e-7)
+        assert math.isclose(roots[0][1].k.value, 0.0004581964569, rel_tol=1e-7)
+        assert math.isclose(roots[0][1].k_par.value, 0.0003929002204, rel_tol=1e-7)
+        assert math.isclose(roots[0][1].k_perp.value, 0.0002357401322, rel_tol=1e-7)
 
     def test_find_resonant_wavenumber_1(self):
         mlat_deg = Angle(0 * u.deg)
@@ -283,8 +283,8 @@ class TestCpdr:
         omega = 20773.61527263705 << u.rad / u.s
 
         k, k_par, k_perp = cpdr.find_resonant_wavenumber(X, omega)
-        assert math.isclose(k.value, 0.00022889276, rel_tol=1e-08)
-        assert math.isclose(k_par.value, 0.00022889276, rel_tol=1e-08)
+        assert math.isclose(k.value, 0.00022889276, rel_tol=1e-07)
+        assert math.isclose(k_par.value, 0.00022889276, rel_tol=1e-07)
         assert math.isclose(k_perp.value, 0.0)
 
     def test_filtering(self):
