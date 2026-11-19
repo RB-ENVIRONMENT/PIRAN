@@ -23,13 +23,13 @@ dev = [
     "pre-commit"
 ]
 dev-extra = [
-    "ruff",
-    "black",
-    "isort",
+    "ruff>=0.15,<0.16",
+    "black>=25.1,<27",
+    "isort>=6,<10",
 ]
 test = [
-    "pytest",
-    "coverage",
+    "pytest>=8,<10",
+    "coverage>=7.10,<8",
 ]
 docs = [
     "numpydoc",

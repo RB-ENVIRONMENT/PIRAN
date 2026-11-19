@@ -21,6 +21,10 @@ Packaging / Dependency Changes
    bounce-averaged integrals over magnetic latitude.
 -  Removed `sympy` from the dependencies since it is no longer used anywhere
    in the codebase.
+-  Bounded the development/test tool dependencies (`ruff<0.16`, `black<27`,
+   `isort<10`, `pytest<10`, `coverage<8`): ruff 0.16.0 introduced new lint
+   rules that flag pre-existing code. The code will be cleaned up and these
+   bounds raised in a future PR.
 
 Tests
 -----
