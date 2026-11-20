@@ -1,3 +1,40 @@
+Version 1.1.1
+=============
+
+Packaging / Dependency Changes
+------------------------------
+-  Specified minimum and maximum version bounds for all dependencies and
+   restricted `requires-python` to `>=3.10,<3.13` so that piran works as
+   expected with the current ecosystem:
+
+   -  `plasmapy>=2024.10.0,<2027`
+   -  `astropy>=6.1,<9`
+   -  `numpy>=1.26,<2.6`
+   -  `scipy>=1.11,<1.18`
+   -  `matplotlib>=3.8,<3.12`
+
+   The critical upper bound is `scipy<1.18`: starting from scipy 1.18.0 the
+   `scipy.integrate.simpson` routine no longer strips units from astropy
+   `Quantity` inputs (previously it returned a plain float, while `trapezoid`
+   always returned a `Quantity`; both now preserve units). This broke the
+   Glauert normalisation factor computation in `normalisation.py` and the
+   bounce-averaged integrals over magnetic latitude.
+-  Removed `sympy` from the dependencies since it is no longer used anywhere
+   in the codebase.
+-  Bounded the development/test tool dependencies (`ruff<0.16`, `black<27`,
+   `isort<10`, `pytest<10`, `coverage<8`): ruff 0.16.0 introduced new lint
+   rules that flag pre-existing code. The code will be cleaned up and these
+   bounds raised in a future PR.
+
+Tests
+-----
+-  Loosened (only where necessary) the `math.isclose` tolerances of a few unit
+   tests. astropy 8.0 adopted the CODATA-2022 physical constants, which shifts
+   e.g. the electron mass by ~1.4e-9 relative; this made 12 tests, whose
+   `math.isclose` relative tolerances were tighter than this drift (the
+   default `rel_tol=1e-9` in most cases), fail with newer astropy, without any
+   change in the underlying physics.
+
 Version 1.1.0
 =============
 

@@ -66,7 +66,7 @@ class TestNormalisationFactors:
 
         expected = 8.53830973e-19
         assert math.isclose(
-            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+            norm_factor_glauert.value, expected, rel_tol=1e-08, abs_tol=1e-27
         )
 
     def test_glauert_normalisation_2(self):
@@ -87,7 +87,7 @@ class TestNormalisationFactors:
 
         expected = 8.53769363e-19
         assert math.isclose(
-            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+            norm_factor_glauert.value, expected, rel_tol=1e-08, abs_tol=1e-27
         )
 
     def test_glauert_normalisation_3(self):
@@ -108,7 +108,7 @@ class TestNormalisationFactors:
 
         expected = 8.87151913e-19
         assert math.isclose(
-            norm_factor_glauert.value, expected, rel_tol=1e-09, abs_tol=1e-27
+            norm_factor_glauert.value, expected, rel_tol=1e-08, abs_tol=1e-27
         )
 
     def test_cunningham_normalisation_1(self):

@@ -50,12 +50,12 @@ class TestStix:
 
         # Test dD/domega
         dD_dw = self.cpdr.stix.dD_dw(self.omega, X, k)
-        assert math.isclose(dD_dw.value, 25.43102517952277)
+        assert math.isclose(dD_dw.value, 25.43102517952277, rel_tol=1e-8)
 
         # Test dD/dk
         dD_dk = self.cpdr.stix.dD_dk(self.omega, X, k)
-        assert math.isclose(dD_dk.value, -2537950057.1427784)
+        assert math.isclose(dD_dk.value, -2537950057.1427784, rel_tol=1e-8)
 
         # Test jacobian
         jacobian = self.cpdr.stix.jacobian(self.omega, X, k)
-        assert math.isclose(jacobian.value, -9.7616573640402e-13)
+        assert math.isclose(jacobian.value, -9.7616573640402e-13, rel_tol=1e-8)

@@ -7,14 +7,13 @@ name = "piran"
 dynamic = ["version"]
 description = "piran code package"
 readme = "README.md"
-requires-python = ">=3"
+requires-python = ">=3.10,<3.13"
 dependencies = [
-    "plasmapy",
-    "astropy",
-    "numpy",
-    "scipy",
-    "sympy",
-    "matplotlib",
+    "plasmapy>=2024.10.0,<2027",
+    "astropy>=6.1,<9",
+    "numpy>=1.26,<2.6",
+    "scipy>=1.11,<1.18",
+    "matplotlib>=3.8,<3.12",
 ]
 
 [tool.setuptools_scm]
@@ -24,13 +23,13 @@ dev = [
     "pre-commit"
 ]
 dev-extra = [
-    "ruff",
-    "black",
-    "isort",
+    "ruff>=0.15,<0.16",
+    "black>=25.1,<27",
+    "isort>=6,<10",
 ]
 test = [
-    "pytest",
-    "coverage",
+    "pytest>=8,<10",
+    "coverage>=7.10,<8",
 ]
 docs = [
     "numpydoc",
