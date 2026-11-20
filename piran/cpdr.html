@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="diffusion" href="diffusion.html"><link rel="prev" title="Welcome to PIRAN’s documentation!" href="../index.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>cpdr - PIRAN 1.1.0 documentation</title>
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>cpdr - PIRAN 1.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">PIRAN 1.1.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">PIRAN 1.1.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">PIRAN 1.1.0 documentation</span>
+  <span class="sidebar-brand-text">PIRAN 1.1.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -204,7 +204,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Latest Changes:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html">Version 1.1.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html">Version 1.1.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-1-0">Version 1.1.0</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-0-1">Version 1.0.1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-0-0">Version 1.0.0</a></li>
 </ul>
@@ -249,17 +250,17 @@
 <span id="cpdr"></span><h1>cpdr<a class="headerlink" href="#module-piran.cpdr" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="piran.cpdr.Cpdr">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">piran.cpdr.</span></span><span class="sig-name descname"><span class="pre">Cpdr</span></span><span class="sig-paren">(</span>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">piran.cpdr.</span></span><span class="sig-name descname"><span class="pre">Cpdr</span></span><span class="sig-paren">(</span>
 
 <dl>
-<dd><em class="sig-param"><span class="n"><span class="pre">plasma:</span> <span class="pre">~piran.plasmapoint.PlasmaPoint</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">energy:</span> <span class="pre">~typing.Annotated[~astropy.units.quantity.Quantity</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">Unit(&quot;J&quot;)]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">pitch_angle:</span> <span class="pre">~typing.Annotated[~astropy.units.quantity.Quantity</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">Unit(&quot;rad&quot;)]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">resonance:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">freq_cutoff_params:</span> <span class="pre">~piran.gauss.Gaussian</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">wave_filter:</span> <span class="pre">~piran.wavefilter.WaveFilter</span> <span class="pre">=</span> <span class="pre">&lt;piran.wavefilter.WhistlerFilter</span> <span class="pre">object&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">plasma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="plasmapoint.html#piran.plasmapoint.PlasmaPoint" title="piran.plasmapoint.PlasmaPoint"><span class="pre">PlasmaPoint</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">Unit(&quot;J&quot;)]</span> <span class="pre">|</span> <span class="pre">None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">pitch_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">Unit(&quot;rad&quot;)]</span> <span class="pre">|</span> <span class="pre">None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">resonance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">freq_cutoff_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="gauss.html#piran.gauss.Gaussian" title="piran.gauss.Gaussian"><span class="pre">Gaussian</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">wave_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="wavefilter.html#piran.wavefilter.WaveFilter" title="piran.wavefilter.WaveFilter"><span class="pre">WaveFilter</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;piran.wavefilter.WhistlerFilter</span> <span class="pre">object&gt;</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="headerlink" href="#piran.cpdr.Cpdr" title="Link to this definition">¶</a></dt>
@@ -482,7 +483,7 @@ wave modes.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">piran.cpdr.</span></span><span class="sig-name descname"><span class="pre">ResonantRoot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_perp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#piran.cpdr.ResonantRoot" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">piran.cpdr.</span></span><span class="sig-name descname"><span class="pre">ResonantRoot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_perp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#piran.cpdr.ResonantRoot" title="Link to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -498,31 +499,31 @@ wave modes.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot.X">
-<span class="sig-name descname"><span class="pre">X</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#piran.cpdr.ResonantRoot.X" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">X</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#piran.cpdr.ResonantRoot.X" title="Link to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot.k">
-<span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#piran.cpdr.ResonantRoot.k" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">k</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#piran.cpdr.ResonantRoot.k" title="Link to this definition">¶</a></dt>
 <dd><p>Alias for field number 2</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot.k_par">
-<span class="sig-name descname"><span class="pre">k_par</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#piran.cpdr.ResonantRoot.k_par" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">k_par</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#piran.cpdr.ResonantRoot.k_par" title="Link to this definition">¶</a></dt>
 <dd><p>Alias for field number 3</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot.k_perp">
-<span class="sig-name descname"><span class="pre">k_perp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#piran.cpdr.ResonantRoot.k_perp" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">k_perp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">m'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#piran.cpdr.ResonantRoot.k_perp" title="Link to this definition">¶</a></dt>
 <dd><p>Alias for field number 4</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="piran.cpdr.ResonantRoot.omega">
-<span class="sig-name descname"><span class="pre">omega</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#piran.cpdr.ResonantRoot.omega" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">omega</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'rad</span> <span class="pre">/</span> <span class="pre">s'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#piran.cpdr.ResonantRoot.omega" title="Link to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
@@ -613,9 +614,9 @@ wave modes.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=fc837d61"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+</div><script src="../_static/documentation_options.js?v=58fbf978"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

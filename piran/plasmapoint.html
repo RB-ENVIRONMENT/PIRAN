@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="stix" href="stix.html"><link rel="prev" title="normalisation" href="normalisation.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>plasmapoint - PIRAN 1.1.0 documentation</title>
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>plasmapoint - PIRAN 1.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">PIRAN 1.1.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">PIRAN 1.1.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">PIRAN 1.1.0 documentation</span>
+  <span class="sidebar-brand-text">PIRAN 1.1.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -204,7 +204,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Latest Changes:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html">Version 1.1.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html">Version 1.1.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-1-0">Version 1.1.0</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-0-1">Version 1.0.1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../CHANGES.html#version-1-0-0">Version 1.0.0</a></li>
 </ul>
@@ -254,7 +255,7 @@ either the plasma-to-gyro ratio for electrons or number densities for each
 species.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="piran.plasmapoint.PlasmaPoint">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">piran.plasmapoint.</span></span><span class="sig-name descname"><span class="pre">PlasmaPoint</span></span><span class="sig-paren">(</span>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">piran.plasmapoint.</span></span><span class="sig-name descname"><span class="pre">PlasmaPoint</span></span><span class="sig-paren">(</span>
 
 <dl>
 <dd><em class="sig-param"><span class="n"><span class="pre">magpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="magpoint.html#piran.magpoint.MagPoint" title="piran.magpoint.MagPoint"><span class="pre">MagPoint</span></a></span></em>,</dd>
@@ -325,12 +326,12 @@ exactly electron and proton.</p></li>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mag_point</span> <span class="o">=</span> <span class="n">MagPoint</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="mf">4.5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">particles</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;H+&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">particles</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"e"</span><span class="p">,</span> <span class="s2">"H+"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma_point</span> <span class="o">=</span> <span class="n">PlasmaPoint</span><span class="p">(</span><span class="n">mag_point</span><span class="p">,</span> <span class="n">particles</span><span class="p">,</span> <span class="n">plasma_over_gyro_ratio</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mag_point</span> <span class="o">=</span> <span class="n">MagPoint</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="mf">4.5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">particles</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;p+&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">particles</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"e"</span><span class="p">,</span> <span class="s2">"p+"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">num_density</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2524781.78</span><span class="p">,</span> <span class="mf">2524781.78</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma_point</span> <span class="o">=</span> <span class="n">PlasmaPoint</span><span class="p">(</span><span class="n">mag_point</span><span class="p">,</span> <span class="n">particles</span><span class="p">,</span> <span class="n">number_density</span><span class="o">=</span><span class="n">num_density</span><span class="p">)</span>
 </pre></div>
@@ -407,9 +408,9 @@ exactly electron and proton.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=fc837d61"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+</div><script src="../_static/documentation_options.js?v=58fbf978"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>
